@@ -560,6 +560,14 @@
     const CHECKLIST_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
     const GET_LOGS_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/41d16fdee72843db94d61e4ec314841a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_qpB6B3yesT9KNhGtnsB6oRu4TFovZPbjrKnykFpXck";
 
+    function getPropValue(obj, keys, defaultValue = 'N/A') {
+      if (!obj) return defaultValue;
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
+      }
+      return defaultValue;
+    }
+
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
       if (activeSession) {
@@ -727,10 +735,42 @@
       setActiveMode('number');
     }
 
+    // Helper: Parse Excel date strings safely into JS Date object
+    function parseExcelDate(dateStr) {
+      if (!dateStr || dateStr === '-') return null;
+      
+      let d = new Date(dateStr);
+      if (!isNaN(d.getTime())) return d;
+
+      try {
+        const parts = String(dateStr).trim().split(' ');
+        const dateParts = parts[0].split(/[\/-]/);
+        const timeParts = parts[1] ? parts[1].split(':') : [0, 0, 0];
+
+        if (dateParts.length === 3) {
+          let month = parseInt(dateParts[0], 10) - 1;
+          let day = parseInt(dateParts[1], 10);
+          let year = parseInt(dateParts[2], 10);
+
+          if (year < 100) year += 2000;
+
+          let hours = parseInt(timeParts[0] || 0, 10);
+          let mins = parseInt(timeParts[1] || 0, 10);
+          let secs = parseInt(timeParts[2] || 0, 10);
+
+          d = new Date(year, month, day, hours, mins, secs);
+          if (!isNaN(d.getTime())) return d;
+        }
+      } catch (e) {}
+
+      return null;
+    }
+
     async function loadUser12HourLogs() {
       const tbody = document.getElementById('declarationLogsBody');
       tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">Loading logs...</td></tr>`;
-      const userIdVal = String(getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218')).trim().toUpperCase();
+      
+      const userIdVal = String(getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218')).trim().toLowerCase();
 
       try {
         const response = await fetch(GET_LOGS_FLOW_URL, {
@@ -740,23 +780,26 @@
         });
 
         if (response.ok) {
-          const rawLogs = await response.json();
-          if (!Array.isArray(rawLogs)) {
+          let rawLogs = await response.json();
+          
+          if (!Array.isArray(rawLogs) && rawLogs.value && Array.isArray(rawLogs.value)) {
+            rawLogs = rawLogs.value;
+          }
+
+          if (!Array.isArray(rawLogs) || rawLogs.length === 0) {
             tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
             return;
           }
 
-          // Client-side 12-hour timestamp cutoff
           const twelveHoursAgo = new Date(Date.now() - (12 * 60 * 60 * 1000));
 
-          // Filter for current user AND logged within last 12 hours
           const user12HourLogs = rawLogs.filter(row => {
-            const rowUser = String(row.COMPANY_ID || row.company_id || row.ID || row.id || '').trim().toUpperCase();
-            const dateStr = row.DATE || row.date || row.Date || '';
-            const rowDate = new Date(dateStr);
+            const rowUser = String(getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '')).trim().toLowerCase();
+            const rawDate = getPropValue(row, ['DATE', 'date', 'Date'], '');
+            const parsedDate = parseExcelDate(rawDate);
 
             const isUserMatch = rowUser === userIdVal;
-            const isRecentMatch = !isNaN(rowDate.getTime()) ? rowDate >= twelveHoursAgo : true;
+            const isRecentMatch = parsedDate ? (parsedDate >= twelveHoursAgo) : true;
 
             return isUserMatch && isRecentMatch;
           });
@@ -773,17 +816,15 @@
     function formatLogDate(rawDateStr) {
       if (!rawDateStr || rawDateStr === '-') return '-';
       const str = String(rawDateStr).trim();
-      try {
-        const d = new Date(str);
-        if (!isNaN(d.getTime())) {
-          const dd = String(d.getDate()).padStart(2, '0');
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const yyyy = d.getFullYear();
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
-          return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-        }
-      } catch(e) {}
+      const d = parseExcelDate(str);
+      if (d) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const yyyy = d.getFullYear();
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+      }
       return rawDateStr;
     }
 
@@ -798,24 +839,16 @@
 
       logs.forEach(row => {
         const tr = document.createElement('tr');
-        const formattedDate = formatLogDate(row.DATE || row.date || row.Date || '-');
+        const formattedDate = formatLogDate(getPropValue(row, ['DATE', 'date', 'Date'], '-'));
         
         tr.innerHTML = `
           <td>${formattedDate}</td>
-          <td><strong>${row.EQUIPNUM || row.equipnum || '-'}</strong></td>
-          <td>${row.AREA || row.area || '-'}</td>
-          <td><strong>${row.COMPANY_ID || row.ID || row.id || '-'}</strong></td>
+          <td><strong>${getPropValue(row, ['EQUIPNUM', 'equipnum', 'EquipNum'], '-')}</strong></td>
+          <td>${getPropValue(row, ['AREA', 'area', 'Area'], '-')}</td>
+          <td><strong>${getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '-')}</strong></td>
         `;
         tbody.appendChild(tr);
       });
-    }
-
-    function getPropValue(obj, keys, defaultValue = 'N/A') {
-      if (!obj) return defaultValue;
-      for (const k of keys) {
-        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
-      }
-      return defaultValue;
     }
 
     function showConfirmModal() {
@@ -835,7 +868,6 @@
       document.getElementById('modalIssue').innerText = issue;
       document.getElementById('modalFormattedDate').innerText = `On ${new Date().toLocaleDateString()}`;
 
-      // Clear any previously checked actions
       document.querySelectorAll('.action-chk').forEach(chk => chk.checked = false);
 
       document.getElementById('confirmModal').classList.remove('hidden');
@@ -852,7 +884,6 @@
       const shiftText = document.getElementById('shiftBanner').innerText;
       const confirmBtn = document.getElementById('confirmSubmitBtn');
 
-      // Get combined comma-separated string of selected checkboxes
       const selectedActions = Array.from(document.querySelectorAll('.action-chk:checked'))
                                   .map(c => c.value)
                                   .join(', ');
