@@ -114,34 +114,6 @@
       padding: 0 8px;
     }
 
-    /* Notification Banner Styling */
-    .toast-notification {
-      position: absolute;
-      top: 16px;
-      left: 16px;
-      right: 16px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 800;
-      text-align: center;
-      z-index: 200;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-      transition: all 0.3s ease-in-out;
-    }
-
-    .toast-success {
-      background-color: #10b981;
-      color: #ffffff;
-      border: 1.5px solid #059669;
-    }
-
-    .toast-error {
-      background-color: #ef4444;
-      color: #ffffff;
-      border: 1.5px solid #dc2626;
-    }
-
     .banner-bar {
       display: flex;
       width: 100%;
@@ -377,53 +349,53 @@
     }
 
     .modal-greeting-line, .modal-declaring-line { 
-      font-size: 16px; 
+      font-size: 18px; 
       font-weight: 500; 
       color: #0f172a; 
       margin-bottom: 2px; 
     }
 
     .modal-status-highlight { 
-      font-size: 17px; 
+      font-size: 19px; 
       font-weight: 800; 
       color: #000; 
-      margin-bottom: 14px; 
-    }
-
-    .modal-date-line { 
-      font-size: 15px; 
-      font-weight: 500; 
-      color: #0f172a; 
       margin-bottom: 16px; 
     }
 
+    .modal-date-line { 
+      font-size: 18px; 
+      font-weight: 500; 
+      color: #0f172a; 
+      margin-bottom: 20px; 
+    }
+
     .modal-action-title {
-      font-size: 16px;
-      font-weight: 600;
+      font-size: 18px;
+      font-weight: 500;
       color: #0f172a;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
     }
 
     .modal-checkbox-group {
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-bottom: 20px;
+      gap: 12px;
+      margin-bottom: 24px;
     }
 
     .modal-checkbox-item {
       display: flex;
       align-items: center;
-      gap: 10px;
-      font-size: 15px;
-      font-weight: 600;
+      gap: 12px;
+      font-size: 18px;
+      font-weight: 500;
       color: #0f172a;
       cursor: pointer;
     }
 
     .modal-checkbox-item input[type="checkbox"] {
-      width: 20px;
-      height: 20px;
+      width: 22px;
+      height: 22px;
       border: 2px solid #0f172a;
       border-radius: 4px;
       accent-color: #0078D4;
@@ -434,25 +406,25 @@
     
     .btn-popup-cancel { 
       flex: 1; 
-      height: 44px; 
+      height: 48px; 
       background-color: #cc0000; 
       color: white; 
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 800; 
       border: none; 
-      border-radius: 8px; 
+      border-radius: 10px; 
       cursor: pointer; 
     }
 
     .btn-popup-confirm { 
       flex: 1; 
-      height: 44px; 
+      height: 48px; 
       background-color: #1d68d8; 
       color: white; 
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 800; 
       border: none; 
-      border-radius: 8px; 
+      border-radius: 10px; 
       cursor: pointer; 
     }
   </style>
@@ -460,10 +432,6 @@
 <body>
 
   <div class="app-viewport">
-    
-    <!-- Toast Notification Banner -->
-    <div id="toastNotification" class="toast-notification hidden"></div>
-
     <div class="view-screen">
       
       <!-- Top Nav -->
@@ -557,20 +525,16 @@
 
         <div class="modal-date-line" id="modalFormattedDate">On --/--/----</div>
 
-        <div class="modal-action-title">Your action taken..</div>
+        <div class="modal-action-title">Your action will be</div>
 
         <div class="modal-checkbox-group">
-          <label class="modal-checkbox-item" id="optWorkshop">
+          <label class="modal-checkbox-item">
             <input type="checkbox" class="action-chk" value="Sent to Workshop">
             <span>Sent to Workshop</span>
           </label>
           <label class="modal-checkbox-item">
-            <input type="checkbox" class="action-chk" value="Call FEM for assistance">
-            <span>Call FEM for assistance</span>
-          </label>
-          <label class="modal-checkbox-item">
-            <input type="checkbox" class="action-chk" value="Continue operation with issue">
-            <span>Continue operation with issue</span>
+            <input type="checkbox" class="action-chk" value="Continue with Issue">
+            <span>Continue with Issue</span>
           </label>
           <label class="modal-checkbox-item">
             <input type="checkbox" class="action-chk" value="Change Equipment">
@@ -593,22 +557,8 @@
     let currentUser = null;
     let activePillboxMode = 'equipment';
 
-    // Equipment types that CANNOT be sent to the workshop
-    const NO_WORKSHOP_EQUIPMENT = ["SHIPLOADER", "RECLAIMER", "STACKER", "QC", "CONVEYOR"];
-
     const CHECKLIST_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
     const GET_LOGS_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/41d16fdee72843db94d61e4ec314841a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_qpB6B3yesT9KNhGtnsB6oRu4TFovZPbjrKnykFpXck";
-
-    function showToastNotification(message, isSuccess = true) {
-      const toast = document.getElementById('toastNotification');
-      toast.innerText = message;
-      toast.className = `toast-notification ${isSuccess ? 'toast-success' : 'toast-error'}`;
-      toast.classList.remove('hidden');
-
-      setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 3500);
-    }
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
@@ -780,17 +730,38 @@
     async function loadUser12HourLogs() {
       const tbody = document.getElementById('declarationLogsBody');
       tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">Loading logs...</td></tr>`;
-      const userIdVal = getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218');
+      const userIdVal = String(getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218')).trim().toUpperCase();
 
       try {
         const response = await fetch(GET_LOGS_FLOW_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ COMPANY_ID: String(userIdVal) })
+          body: JSON.stringify({ FETCH_ALL: true })
         });
+
         if (response.ok) {
-          const logs = await response.json();
-          renderLogsTable(logs);
+          const rawLogs = await response.json();
+          if (!Array.isArray(rawLogs)) {
+            tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
+            return;
+          }
+
+          // Client-side 12-hour timestamp cutoff
+          const twelveHoursAgo = new Date(Date.now() - (12 * 60 * 60 * 1000));
+
+          // Filter for current user AND logged within last 12 hours
+          const user12HourLogs = rawLogs.filter(row => {
+            const rowUser = String(row.COMPANY_ID || row.company_id || row.ID || row.id || '').trim().toUpperCase();
+            const dateStr = row.DATE || row.date || row.Date || '';
+            const rowDate = new Date(dateStr);
+
+            const isUserMatch = rowUser === userIdVal;
+            const isRecentMatch = !isNaN(rowDate.getTime()) ? rowDate >= twelveHoursAgo : true;
+
+            return isUserMatch && isRecentMatch;
+          });
+
+          renderLogsTable(user12HourLogs);
         } else {
           tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
         }
@@ -831,9 +802,9 @@
         
         tr.innerHTML = `
           <td>${formattedDate}</td>
-          <td><strong>${row.EQUIPNUM || '-'}</strong></td>
-          <td>${row.AREA || '-'}</td>
-          <td><strong>${row.ID || '-'}</strong></td>
+          <td><strong>${row.EQUIPNUM || row.equipnum || '-'}</strong></td>
+          <td>${row.AREA || row.area || '-'}</td>
+          <td><strong>${row.COMPANY_ID || row.ID || row.id || '-'}</strong></td>
         `;
         tbody.appendChild(tr);
       });
@@ -862,25 +833,9 @@
       document.getElementById('modalGreeting').innerText = `Dear ${firstName}`;
       document.getElementById('modalEquipNum').innerText = equipmentNo;
       document.getElementById('modalIssue').innerText = issue;
-      
-      const now = new Date();
-      const dd = String(now.getDate()).padStart(2, '0');
-      const mm = String(now.getMonth() + 1).padStart(2, '0');
-      const yyyy = now.getFullYear();
-      const hh = String(now.getHours()).padStart(2, '0');
-      const min = String(now.getMinutes()).padStart(2, '0');
+      document.getElementById('modalFormattedDate').innerText = `On ${new Date().toLocaleDateString()}`;
 
-      document.getElementById('modalFormattedDate').innerText = `On ${dd}/${mm}/${yyyy} ${hh}:${min}`;
-
-      // Check if selected equipment cannot go to workshop
-      const workshopOption = document.getElementById('optWorkshop');
-      if (NO_WORKSHOP_EQUIPMENT.includes(equipment.toUpperCase())) {
-        workshopOption.classList.add('hidden');
-      } else {
-        workshopOption.classList.remove('hidden');
-      }
-
-      // Clear all checked choices
+      // Clear any previously checked actions
       document.querySelectorAll('.action-chk').forEach(chk => chk.checked = false);
 
       document.getElementById('confirmModal').classList.remove('hidden');
@@ -897,7 +852,7 @@
       const shiftText = document.getElementById('shiftBanner').innerText;
       const confirmBtn = document.getElementById('confirmSubmitBtn');
 
-      // Get combined comma-separated string of checked items
+      // Get combined comma-separated string of selected checkboxes
       const selectedActions = Array.from(document.querySelectorAll('.action-chk:checked'))
                                   .map(c => c.value)
                                   .join(', ');
@@ -932,15 +887,14 @@
         if (response.ok) {
           document.getElementById('selectIssue').value = '';
           hideConfirmModal();
-          showToastNotification('Your Equipment Inspection has been successfully submitted!', true);
           loadUser12HourLogs();
         } else {
           hideConfirmModal();
-          showToastNotification('Failed to submit inspection log. Please try again.', false);
+          showError('Failed to submit inspection log.');
         }
       } catch (err) {
         hideConfirmModal();
-        showToastNotification('Network error during submission.', false);
+        showError('Network error.');
       } finally {
         confirmBtn.disabled = false;
         confirmBtn.innerText = 'CONFIRM';
