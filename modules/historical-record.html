@@ -334,10 +334,18 @@
     let filteredLogs = [];
     let activeFilterMode = 'equipment';
 
-    // List of equipment required to be Orange Filled
+    // Specified Orange Filled Equipment Types
     const ORANGE_EQUIPMENT = ["TIPPER", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "CONVEYOR"];
 
     const GET_LOGS_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/41d16fdee72843db94d61e4ec314841a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_qpB6B3yesT9KNhGtnsB6oRu4TFovZPbjrKnykFpXck";
+
+    function getPropValue(obj, keys, defaultValue = 'N/A') {
+      if (!obj) return defaultValue;
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
+      }
+      return defaultValue;
+    }
 
     function goHome() {
       window.location.href = '../index.html';
@@ -350,7 +358,6 @@
       }
     }
 
-    // Initialize current year as default
     function initDefaultYear() {
       const currentYear = new Date().getFullYear();
       document.getElementById('filterYear').value = currentYear;
@@ -368,8 +375,12 @@
         });
 
         if (response.ok) {
-          rawInspectionLogs = await response.json();
-          if (!Array.isArray(rawInspectionLogs)) rawInspectionLogs = [];
+          let resData = await response.json();
+          if (!Array.isArray(resData) && resData.value && Array.isArray(resData.value)) {
+            resData = resData.value;
+          }
+
+          rawInspectionLogs = Array.isArray(resData) ? resData : [];
           applyFilters();
         } else {
           tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Failed to load records.</td></tr>`;
@@ -384,7 +395,6 @@
       renderPillboxOptions();
     }
 
-    // Helper: Extract leading word before dash for Area of Issues
     function cleanAreaName(areaStr) {
       if (!areaStr) return '';
       const parts = String(areaStr).split('-');
@@ -408,8 +418,7 @@
         ).join('');
 
       } else if (activeFilterMode === 'equipment') {
-        // Unique equipment values from data + defaults
-        const dataEqs = rawInspectionLogs.map(item => String(item.EQUIPMENT || item.equipment || '').toUpperCase()).filter(Boolean);
+        const dataEqs = rawInspectionLogs.map(item => String(getPropValue(item, ['EQUIPMENT', 'equipment'], '')).toUpperCase()).filter(Boolean);
         const defaultEqs = ["PM", "QC", "RTG", "ECH", "CRS", "FORKLIFT", "TRAILER", "TIPPER", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "CONVEYOR"];
         const uniqueEqs = Array.from(new Set([...defaultEqs, ...dataEqs]));
 
@@ -422,7 +431,7 @@
         }).join('');
 
       } else if (activeFilterMode === 'number') {
-        const uniqueNums = Array.from(new Set(rawInspectionLogs.map(item => String(item.EQUIPNUM || item.equipnum || '').toUpperCase()).filter(Boolean))).sort();
+        const uniqueNums = Array.from(new Set(rawInspectionLogs.map(item => String(getPropValue(item, ['EQUIPNUM', 'equipnum'], '')).toUpperCase()).filter(Boolean))).sort();
         const selectedNum = document.getElementById('filterEquipNum').value.trim().toUpperCase();
 
         if (uniqueNums.length === 0) {
@@ -434,9 +443,8 @@
         }
 
       } else if (activeFilterMode === 'area') {
-        // Extract before dash
         const uniqueAreas = Array.from(new Set(
-          rawInspectionLogs.map(item => cleanAreaName(item.AREA || item.area)).filter(Boolean)
+          rawInspectionLogs.map(item => cleanAreaName(getPropValue(item, ['AREA', 'area'], ''))).filter(Boolean)
         )).sort();
 
         const selectedArea = document.getElementById('filterArea').value.trim().toUpperCase();
@@ -475,10 +483,10 @@
       const areaVal = document.getElementById('filterArea').value.trim().toLowerCase();
 
       filteredLogs = rawInspectionLogs.filter(row => {
-        const dateStr = String(row.DATE || row.date || '');
-        const eqStr = String(row.EQUIPMENT || row.equipment || '').toLowerCase();
-        const numStr = String(row.EQUIPNUM || row.equipnum || '').toLowerCase();
-        const areaStr = String(row.AREA || row.area || '').toLowerCase();
+        const dateStr = String(getPropValue(row, ['DATE', 'date', 'Date'], ''));
+        const eqStr = String(getPropValue(row, ['EQUIPMENT', 'equipment'], '')).toLowerCase();
+        const numStr = String(getPropValue(row, ['EQUIPNUM', 'equipnum'], '')).toLowerCase();
+        const areaStr = String(getPropValue(row, ['AREA', 'area'], '')).toLowerCase();
 
         const matchYr = !yrVal || dateStr.toLowerCase().includes(yrVal);
         const matchEq = !eqVal || eqStr.includes(eqVal);
@@ -504,15 +512,15 @@
       data.forEach(row => {
         const tr = document.createElement('tr');
         tr.innerHTML = `
-          <td>${row.DATE || row.date || '-'}</td>
-          <td>${row.COMPANY || row.company || 'SPTS'}</td>
-          <td><strong>${row.COMPANY_ID || row.ID || row.id || '-'}</strong></td>
-          <td>${row.GROUP || row.group || '-'}</td>
-          <td>${row.NAME || row.Title || row.name || '-'}</td>
-          <td><strong>${row.EQUIPMENT || row.equipment || '-'}</strong></td>
-          <td><strong>${row.EQUIPNUM || row.equipnum || '-'}</strong></td>
-          <td>${row.AREA || row.area || '-'}</td>
-          <td>${row.ACTION || row.action || row.declaration || '-'}</td>
+          <td>${getPropValue(row, ['DATE', 'date', 'Date'], '-')}</td>
+          <td>${getPropValue(row, ['COMPANY', 'company'], 'SPTS')}</td>
+          <td><strong>${getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '-')}</strong></td>
+          <td>${getPropValue(row, ['GROUP', 'group'], '-')}</td>
+          <td>${getPropValue(row, ['NAME', 'Title', 'title', 'name'], '-')}</td>
+          <td><strong>${getPropValue(row, ['EQUIPMENT', 'equipment'], '-')}</strong></td>
+          <td><strong>${getPropValue(row, ['EQUIPNUM', 'equipnum'], '-')}</strong></td>
+          <td>${getPropValue(row, ['AREA', 'area'], '-')}</td>
+          <td>${getPropValue(row, ['ACTION', 'action', 'declaration'], '-')}</td>
         `;
         tbody.appendChild(tr);
       });
