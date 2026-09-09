@@ -292,7 +292,7 @@
       </div>
 
       <!-- 4 Filter Input Boxes -->
-      <div class="filter-grid-4col">
+      <div id="filterGrid" class="filter-grid-4col">
         <div class="filter-group">
           <label class="filter-label">Year</label>
           <input type="text" id="filterYear" class="filter-input" placeholder="Year" onfocus="setFilterMode('year')" oninput="applyFilters()" />
@@ -350,7 +350,7 @@
   <script>
     let rawInspectionLogs = [];
     let filteredLogs = [];
-    let activeFilterMode = null; // Default null so pillbox stays hidden
+    let activeFilterMode = null;
 
     const ORANGE_EQUIPMENT = ["TIPPER", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "CONVEYOR"];
 
@@ -380,7 +380,6 @@
       document.getElementById('filterYear').value = currentYear;
     }
 
-    // Formatter: yyyy-mm-dd hhmm
     function formatHistoricalDate(rawDateStr) {
       if (!rawDateStr || rawDateStr === '-') return '-';
       const str = String(rawDateStr).trim();
@@ -388,7 +387,6 @@
       try {
         let d = new Date(str);
         
-        // Custom parser for M/D/YY HH:mm or D/M/YY HH:mm
         if (isNaN(d.getTime())) {
           const parts = str.split(' ');
           if (parts.length >= 1) {
@@ -615,6 +613,17 @@
         tbody.appendChild(tr);
       });
     }
+
+    // Dismiss Pillbox when tapping/clicking outside the filters or pillbox area
+    document.addEventListener('click', (e) => {
+      const filterGrid = document.getElementById('filterGrid');
+      const pillboxArea = document.getElementById('pillboxArea');
+
+      if (!filterGrid.contains(e.target) && !pillboxArea.contains(e.target)) {
+        activeFilterMode = null;
+        renderPillboxOptions();
+      }
+    });
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
