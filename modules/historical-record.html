@@ -165,10 +165,9 @@
       text-align: center;
     }
 
-    /* Dynamic Pillbox Grid Area */
+    /* Dynamic Pillbox Grid Area (Hidden by default) */
     .active-pillbox-area {
       margin-bottom: 10px;
-      min-height: 60px;
     }
 
     .pill-grid {
@@ -312,8 +311,8 @@
         </div>
       </div>
 
-      <!-- Dynamic Pillbox Selection Area -->
-      <div class="active-pillbox-area">
+      <!-- Dynamic Pillbox Selection Area (Initially Hidden) -->
+      <div id="pillboxArea" class="active-pillbox-area hidden">
         <div id="pillboxContainer" class="pill-grid"></div>
       </div>
 
@@ -322,6 +321,7 @@
         <table class="history-table">
           <thead>
             <tr>
+              <th>NO.</th>
               <th>DATE</th>
               <th>COMPANY</th>
               <th>ID</th>
@@ -334,7 +334,7 @@
             </tr>
           </thead>
           <tbody id="historyTableBody">
-            <tr><td colspan="9" class="table-empty">Loading historical records...</td></tr>
+            <tr><td colspan="10" class="table-empty">Loading historical records...</td></tr>
           </tbody>
         </table>
       </div>
@@ -350,7 +350,7 @@
   <script>
     let rawInspectionLogs = [];
     let filteredLogs = [];
-    let activeFilterMode = 'equipment';
+    let activeFilterMode = null; // Default null so pillbox stays hidden
 
     const ORANGE_EQUIPMENT = ["TIPPER", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "CONVEYOR"];
 
@@ -425,7 +425,7 @@
 
     async function fetchHistoricalLogs() {
       const tbody = document.getElementById('historyTableBody');
-      tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Fetching records...</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="10" class="table-empty">Fetching records...</td></tr>`;
 
       try {
         const response = await fetch(GET_LOGS_FLOW_URL, {
@@ -443,10 +443,10 @@
           rawInspectionLogs = Array.isArray(resData) ? resData : [];
           applyFilters();
         } else {
-          tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Failed to load records.</td></tr>`;
+          tbody.innerHTML = `<tr><td colspan="10" class="table-empty">Failed to load records.</td></tr>`;
         }
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="9" class="table-empty">Network error loading logs.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="table-empty">Network error loading logs.</td></tr>`;
       }
     }
 
@@ -462,7 +462,15 @@
     }
 
     function renderPillboxOptions() {
+      const areaContainer = document.getElementById('pillboxArea');
       const container = document.getElementById('pillboxContainer');
+
+      if (!activeFilterMode) {
+        areaContainer.classList.add('hidden');
+        return;
+      }
+
+      areaContainer.classList.remove('hidden');
       container.innerHTML = '';
 
       const selectedEq = document.getElementById('filterEquipment').value.trim().toUpperCase();
@@ -491,7 +499,6 @@
         }).join('');
 
       } else if (activeFilterMode === 'number') {
-        // Dynamic Filter: If equipment is selected, filter EQUIPNUM by selected EQUIPMENT
         let poolLogs = rawInspectionLogs;
         if (selectedEq) {
           poolLogs = rawInspectionLogs.filter(row => 
@@ -542,7 +549,6 @@
         const field = document.getElementById('filterEquipment');
         const prev = field.value;
         field.value = field.value === val ? '' : val;
-        // Reset equip num if equipment changed
         if (prev !== field.value) {
           document.getElementById('filterEquipNum').value = '';
         }
@@ -585,16 +591,17 @@
       tbody.innerHTML = '';
 
       if (!data || data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="9" class="table-empty">No matching inspection records found.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="10" class="table-empty">No matching inspection records found.</td></tr>`;
         return;
       }
 
-      data.forEach(row => {
+      data.forEach((row, index) => {
         const tr = document.createElement('tr');
         const rawDate = getPropValue(row, ['DATE', 'date', 'Date'], '-');
         const formattedDate = formatHistoricalDate(rawDate);
 
         tr.innerHTML = `
+          <td><strong>${index + 1}</strong></td>
           <td>${formattedDate}</td>
           <td>${getPropValue(row, ['COMPANY', 'company'], 'SPTS')}</td>
           <td><strong>${getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '-')}</strong></td>
