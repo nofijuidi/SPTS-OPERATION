@@ -13,22 +13,21 @@
   <meta name="mobile-web-app-capable" content="yes">
 
   <style>
-    /* 1. Global Callout & Text Selection Suppression */
+    /* Global Reset & Callout Suppression */
     * { 
       box-sizing: border-box; 
       margin: 0; 
       padding: 0; 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
       
-      -webkit-touch-callout: none !important; /* Disables iOS/Android callout popup menu */
-      -webkit-user-select: none !important;   /* Prevents text selection on long-press */
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
       -khtml-user-select: none !important;
       -moz-user-select: none !important;
       -ms-user-select: none !important;
       user-select: none !important;
     }
 
-    /* 2. Re-enable selection ONLY inside text input fields so users can still type/edit */
     input, textarea {
       -webkit-user-select: text !important;
       user-select: text !important;
@@ -44,7 +43,6 @@
       align-items: center; 
       color: #334155; 
 
-      /* Handle device safe area notches / status bars */
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
     }
@@ -72,7 +70,7 @@
       flex: 1; 
       display: flex; 
       flex-direction: column; 
-      padding: 20px; 
+      padding: 20px 18px; 
       overflow-y: auto; 
     }
 
@@ -80,21 +78,7 @@
       display: none !important; 
     }
 
-    .top-right-app-icon { 
-      width: 40px; 
-      height: 40px; 
-      border-radius: 10px; 
-      object-fit: cover; 
-      border: 1px solid #cbd5e1; 
-    }
-
-    .main-top-nav { 
-      display: flex; 
-      align-items: center; 
-      justify-content: space-between; 
-      margin-bottom: 16px; 
-    }
-
+    /* BRAND / LOGIN STYLES */
     .brand-section { 
       text-align: center; 
       margin-top: 20px; 
@@ -143,7 +127,7 @@
       outline: none; 
     }
 
-    .btn-primary { 
+    .btn-login-primary { 
       width: 100%; 
       height: 50px; 
       background-color: #0078D4; 
@@ -169,83 +153,112 @@
       text-align: center; 
     }
 
-    .user-card { 
-      background: #f1f5f9; 
-      border-radius: 16px; 
-      padding: 18px 20px; 
-      margin-bottom: 22px; 
+    /* TOP USER CARD HEADER (Matching Image 2) */
+    .user-header-card {
+      text-align: center;
+      margin-bottom: 24px;
+      padding-top: 8px;
     }
 
-    .user-name { 
-      font-size: 22px; 
-      font-weight: 800; 
-      color: #0f172a; 
+    .user-name-title {
+      font-size: 20px;
+      font-weight: 900;
+      color: #000000;
+      letter-spacing: 0.3px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
     }
 
-    .badge-group { 
-      display: flex; 
-      flex-wrap: wrap; 
-      gap: 8px; 
-      margin-top: 10px; 
+    .badge-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    .badge { 
-      font-size: 13px; 
-      font-weight: 700; 
-      padding: 4px 10px; 
-      border-radius: 14px; 
-      background-color: #e2e8f0; 
-      color: #334155; 
+    .pill-badge {
+      font-size: 13px;
+      font-weight: 800;
+      padding: 6px 14px;
+      border-radius: 20px;
+      border: 2px solid #0f172a;
+      background: #e2e8f0;
+      color: #0f172a;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
     }
 
-    .badge-highlight { 
-      background-color: #0078D4 !important; 
-      color: #ffffff !important; 
+    .pill-badge-teal {
+      background-color: #08506b !important;
+      color: #ffffff !important;
+      border-color: #08506b !important;
     }
 
-    .nav-card { 
-      background: #ffffff; 
-      border: 1.5px solid #e2e8f0; 
-      border-radius: 14px; 
-      padding: 20px; 
-      display: flex; 
-      align-items: center; 
-      gap: 16px; 
-      cursor: pointer; 
-      transition: all 0.2s ease; 
-      margin-bottom: 14px; 
+    /* NAV CARDS (Matching Image 2 Dark Teal Style) */
+    .modules-container {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
     }
 
-    .nav-card:hover { 
-      border-color: #0078D4; 
-      transform: translateY(-2px); 
+    .nav-card-teal {
+      background: #08506b;
+      border: 2px solid #063c50;
+      border-radius: 14px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      transition: transform 0.15s ease;
     }
 
-    .nav-card-icon { 
-      width: 48px; 
-      height: 48px; 
-      background: #eff6ff; 
-      color: #0078D4; 
-      border-radius: 12px; 
-      display: flex; 
-      align-items: center; 
-      justify-content: center; 
-      font-size: 22px; 
+    .nav-card-teal:active {
+      transform: scale(0.98);
     }
 
-    .nav-card-title { 
-      font-weight: 800; 
-      font-size: 17px; 
-      color: #0f172a; 
+    .nav-icon-box {
+      width: 44px;
+      height: 44px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
     }
 
-    .nav-card-sub { 
-      font-size: 13px; 
-      color: #64748b; 
-      margin-top: 3px; 
+    .nav-icon-box svg {
+      width: 36px;
+      height: 36px;
+      fill: none;
+      stroke: #ffffff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
-    /* Announcement Notice Card */
+    .nav-text-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .nav-card-title-white {
+      font-weight: 800;
+      font-size: 16px;
+      color: #ffffff;
+      line-height: 1.2;
+    }
+
+    .nav-card-sub-white {
+      font-size: 12px;
+      color: #e2e8f0;
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* ANNOUNCEMENT NOTICE CARD */
     .announcement-card {
       background: #eff6ff;
       border: 1.5px solid #bfdbfe;
@@ -281,6 +294,30 @@
       font-weight: 500;
       white-space: pre-line;
     }
+
+    /* SIGN OUT BUTTON (Matching Image 2) */
+    .btn-signout-pill {
+      width: 180px;
+      height: 46px;
+      background-color: #607085;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
+      border: 2px solid #1e293b;
+      border-radius: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: auto auto 12px auto;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+      transition: transform 0.15s ease;
+    }
+
+    .btn-signout-pill:active {
+      transform: scale(0.96);
+      background-color: #475569;
+    }
   </style>
 </head>
 <body>
@@ -308,7 +345,7 @@
           <input type="password" id="passwordInput" class="form-input" placeholder="Enter Password" required />
         </div>
 
-        <button type="submit" id="submitBtn" class="btn-primary" style="margin-top: 20px;">
+        <button type="submit" id="submitBtn" class="btn-login-primary" style="margin-top: 20px;">
           <span id="btnText">Sign In</span>
         </button>
       </form>
@@ -316,58 +353,64 @@
 
     <!-- MAIN HOME PAGE -->
     <div id="mainView" class="view-screen hidden">
-      <div class="main-top-nav">
-        <div style="font-size: 18px; font-weight: 800; color: #0f172a;">OPERATION PORTAL</div>
-        <img src="icon-192.png" alt="App Icon" class="top-right-app-icon" onerror="this.style.display='none'" />
-      </div>
-
-      <div class="user-card">
-        <div class="user-name" id="displayName">-</div>
-        <div class="badge-group">
-          <span class="badge" id="displayCompany">SPTS</span>
-          <span class="badge badge-highlight" id="displayUserId">ID: -</span>
-          <span class="badge" id="displayGroup">Group: -</span>
+      
+      <!-- Top User Name & Badges -->
+      <div class="user-header-card">
+        <div class="user-name-title" id="displayName">NOFIJUIDI BIN JUMRI</div>
+        <div class="badge-row">
+          <span class="pill-badge" id="displayCompany">SPTS</span>
+          <span class="pill-badge pill-badge-teal" id="displayUserId">ID : T5218</span>
+          <span class="pill-badge" id="displayGroup">Group : OFFICE</span>
         </div>
       </div>
 
-      <div style="font-size: 14px; font-weight: 700; color: #64748b; margin-bottom: 12px; text-transform: uppercase;">
-        Available Modules
-      </div>
-
-      <!-- Module 1: Equipment Checklist -->
-      <div class="nav-card" onclick="navigateTo('modules/equipment-checklist.html')">
-        <div class="nav-card-icon">📋</div>
-        <div>
-          <div class="nav-card-title">Equipment Checklist</div>
-          <div class="nav-card-sub">Perform daily equipment & PM inspection</div>
+      <!-- Modules List -->
+      <div class="modules-container">
+        
+        <!-- Module 1: Equipment Checklist -->
+        <div class="nav-card-teal" onclick="navigateTo('modules/equipment-checklist.html')">
+          <div class="nav-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          </div>
+          <div class="nav-text-group">
+            <div class="nav-card-title-white">Equipment Checklist</div>
+            <div class="nav-card-sub-white">Inspect and Update Issues</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Module 2: Manpower Booking -->
-      <div class="nav-card" onclick="navigateTo('modules/manpower-booking.html')">
-        <div class="nav-card-icon">👷</div>
-        <div>
-          <div class="nav-card-title">Manpower Booking</div>
-          <div class="nav-card-sub">View daily booking documents</div>
+        <!-- Module 2: Manpower Booking -->
+        <div class="nav-card-teal" onclick="navigateTo('modules/manpower-booking.html')">
+          <div class="nav-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          </div>
+          <div class="nav-text-group">
+            <div class="nav-card-title-white">Manpower Booking</div>
+            <div class="nav-card-sub-white">View Latest Booking</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Module 3: Walkie Talkie Declaration -->
-      <div class="nav-card" onclick="navigateTo('modules/walkie-talkie-declaration.html')">
-        <div class="nav-card-icon">📻</div>
-        <div>
-          <div class="nav-card-title">Walkie Talkie Declaration</div>
-          <div class="nav-card-sub">Submit daily walkie talkie status</div>
+        <!-- Module 3: Walkie Talkie Declaration -->
+        <div class="nav-card-teal" onclick="navigateTo('modules/walkie-talkie-declaration.html')">
+          <div class="nav-icon-box">
+            <svg viewBox="0 0 24 24"><rect x="5" y="9" width="14" height="12" rx="2"/><path d="M12 9V3"/><circle cx="12" cy="3" r="1"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="16" x2="13" y2="16"/></svg>
+          </div>
+          <div class="nav-text-group">
+            <div class="nav-card-title-white">Walkie Talkie Declaration</div>
+            <div class="nav-card-sub-white">Submit daily walkie-talkie usage</div>
+          </div>
         </div>
-      </div>
 
-      <!-- Module 4: Historical Record -->
-      <div class="nav-card" onclick="navigateTo('modules/historical-record.html')">
-        <div class="nav-card-icon">📜</div>
-        <div>
-          <div class="nav-card-title">Historical Record</div>
-          <div class="nav-card-sub">Search and view past inspection logs</div>
+        <!-- Module 4: Historical Record -->
+        <div class="nav-card-teal" onclick="navigateTo('modules/historical-record.html')">
+          <div class="nav-icon-box">
+            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/><line x1="7" y1="7" x2="17" y2="7"/><line x1="7" y1="11" x2="17" y2="11"/><line x1="7" y1="15" x2="13" y2="15"/></svg>
+          </div>
+          <div class="nav-text-group">
+            <div class="nav-card-title-white">Historical Record</div>
+            <div class="nav-card-sub-white">Search & View Past Inspection Logs</div>
+          </div>
         </div>
+
       </div>
 
       <!-- Dynamic Announcement Banner -->
@@ -379,9 +422,11 @@
         <div class="announcement-text" id="noticeMessage">--</div>
       </div>
 
-      <button onclick="handleLogout()" class="btn-primary" style="background-color: #64748b; margin-top: auto;">
+      <!-- Resized Centered Sign Out Button -->
+      <button onclick="handleLogout()" class="btn-signout-pill">
         Sign Out
       </button>
+
     </div>
 
   </div>
@@ -392,7 +437,6 @@
 
     async function loadAnnouncement() {
       try {
-        // Path resolved directly to data/announcement.json with cache buster
         const response = await fetch(`data/announcement.json?v=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
@@ -465,8 +509,8 @@
       if (currentUser) {
         document.getElementById('displayName').innerText = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'User');
         document.getElementById('displayCompany').innerText = getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS');
-        document.getElementById('displayUserId').innerText = `ID: ${getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username', 'username'], 'N/A')}`;
-        document.getElementById('displayGroup').innerText = `Group: ${getPropValue(currentUser, ['GROUP', 'Group', 'group'], 'N/A')}`;
+        document.getElementById('displayUserId').innerText = `ID : ${getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username', 'username'], 'N/A')}`;
+        document.getElementById('displayGroup').innerText = `Group : ${getPropValue(currentUser, ['GROUP', 'Group', 'group'], 'N/A')}`;
       }
 
       loadAnnouncement();
@@ -487,7 +531,6 @@
       errorBox.classList.remove('hidden');
     }
 
-    // Suppress native touch context menus
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     window.addEventListener('DOMContentLoaded', () => {
