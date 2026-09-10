@@ -37,8 +37,11 @@
       color: #334155;
       padding-top: env(safe-area-inset-top);
       padding-bottom: env(safe-area-inset-bottom);
+      padding-left: env(safe-area-inset-left);
+      padding-right: env(safe-area-inset-right);
     }
 
+    /* DEFAULT PORTRAIT VIEWPORT */
     .app-viewport {
       width: 100vw;
       height: 100vh;
@@ -50,9 +53,10 @@
       position: relative;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      transition: all 0.2s ease-in-out;
     }
 
-    @media (min-width: 480px) {
+    @media (min-width: 480px) and (orientation: portrait) {
       .app-viewport {
         border-radius: 28px;
         height: 844px;
@@ -67,7 +71,7 @@
       overflow: hidden;
     }
 
-    /* Top Navigation Header */
+    /* TOP NAVIGATION HEADER */
     .booking-top-nav {
       display: flex;
       align-items: center;
@@ -97,7 +101,7 @@
       font-weight: 800;
     }
 
-    /* Date Status Bar */
+    /* DATE STATUS BAR */
     .filter-info-bar {
       background-color: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -112,7 +116,7 @@
       justify-content: space-between;
     }
 
-    /* File Name Banner */
+    /* FILE NAME BANNER */
     .file-list-container {
       display: flex;
       flex-direction: column;
@@ -133,7 +137,7 @@
       justify-content: space-between;
     }
 
-    /* PDF Interactive Container */
+    /* PDF INTERACTIVE CONTAINER */
     .pdf-card-container {
       flex: 1;
       width: 100%;
@@ -147,7 +151,7 @@
       touch-action: none;
     }
 
-    /* Permanent Zoom Toolbar */
+    /* PERMANENT ZOOM TOOLBAR */
     .zoom-toolbar {
       position: absolute;
       bottom: 8px;
@@ -200,7 +204,7 @@
       transform: scale(0.95);
     }
 
-    /* Panzoom Target Container */
+    /* PANZOOM TARGET CONTAINER */
     .panzoom-wrapper {
       width: 100%;
       height: 100%;
@@ -210,7 +214,6 @@
       align-items: center;
       justify-content: center;
       touch-action: none;
-      /* CSS Transition removed to eliminate drag lag */
     }
 
     .panzoom-wrapper:active {
@@ -262,6 +265,49 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+    }
+
+    /* ========================================================= */
+    /* LANDSCAPE MODE ADJUSTMENTS - UNLOCK FULL PHYSICAL SCREEN */
+    /* ========================================================= */
+    @media (orientation: landscape) {
+      .app-viewport {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        width: 100vw !important;
+        height: 100vh !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+      }
+
+      .view-screen {
+        padding: 8px 12px !important;
+      }
+
+      /* Compact Top Navigation and Cards in Landscape */
+      .booking-top-nav {
+        margin-bottom: 6px;
+      }
+
+      .filter-info-bar, .file-list-container {
+        margin-bottom: 6px;
+        padding: 4px 10px;
+        font-size: 12px;
+      }
+
+      /* Maximize PDF Viewport Container */
+      .pdf-card-container {
+        border-radius: 8px;
+      }
+
+      /* Scale Canvas wider to utilize landscape aspect ratio */
+      canvas.pdf-page-canvas {
+        width: 100% !important;
+      }
+
+      .action-row {
+        display: none !important; /* Hide redundant bottom button in landscape to give space to PDF */
+      }
     }
   </style>
 </head>
@@ -479,6 +525,13 @@
       isLandscape = false;
       if (panzoomInstance) panzoomInstance.reset({ animate: true });
     }
+
+    // Auto-adjust Panzoom viewport reset on device orientation change
+    window.addEventListener('orientationchange', () => {
+      setTimeout(() => {
+        if (panzoomInstance) panzoomInstance.reset({ animate: false });
+      }, 200);
+    });
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
