@@ -1,10 +1,12 @@
 {
+  "id": "/",
   "name": "Operation Portal",
   "short_name": "Portal",
-  "start_url": "index.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "icon-192.png",
