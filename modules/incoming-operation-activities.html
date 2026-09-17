@@ -276,16 +276,16 @@
                 <td>V.190926</td>
                 <td>97</td>
                 <td>PORTSIDE</td>
-                <td>19/9/2026 1:01</td>
-                <td>20/9/2026 4:01</td>
+                <td>19/09 0101</td>
+                <td>20/09 0401</td>
               </tr>
               <tr>
                 <td>MV SULPHUR VESSEL 1</td>
                 <td>V.250926</td>
                 <td>93</td>
                 <td>PORTSIDE</td>
-                <td>25/9/2026 1:01</td>
-                <td>26/9/2026 4:01</td>
+                <td>25/09 0101</td>
+                <td>26/09 0401</td>
               </tr>
             </tbody>
           </table>
@@ -309,8 +309,8 @@
               <tr>
                 <td>MTT TIOMAN-26TI021E</td>
                 <td>68</td>
-                <td>17/9/2026 8:00</td>
-                <td>19/9/2026 0:30</td>
+                <td>17/09 0800</td>
+                <td>19/09 0030</td>
               </tr>
             </tbody>
           </table>
@@ -333,51 +333,51 @@
             </thead>
             <tbody>
               <tr>
-                <td>10/9/2026 8:00</td>
+                <td>10/09 0800</td>
                 <td>550</td>
-                <td>10/9/2026 15:00</td>
+                <td>10/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>11/9/2026 8:00</td>
+                <td>11/09 0800</td>
                 <td>550</td>
-                <td>11/9/2026 15:00</td>
+                <td>11/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>12/9/2026 8:00</td>
+                <td>12/09 0800</td>
                 <td>550</td>
-                <td>12/9/2026 15:00</td>
+                <td>12/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>13/9/2026 8:00</td>
+                <td>13/09 0800</td>
                 <td>550</td>
-                <td>13/9/2026 15:00</td>
+                <td>13/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>14/9/2026 8:00</td>
+                <td>14/09 0800</td>
                 <td>550</td>
-                <td>14/9/2026 15:00</td>
+                <td>14/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>15/9/2026 8:00</td>
+                <td>15/09 0800</td>
                 <td>550</td>
-                <td>15/9/2026 15:00</td>
+                <td>15/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
               <tr>
-                <td>16/9/2026 8:00</td>
+                <td>16/09 0800</td>
                 <td>550</td>
-                <td>16/9/2026 15:00</td>
+                <td>16/09 1500</td>
                 <td>350</td>
                 <td>5</td>
               </tr>
@@ -405,8 +405,8 @@
                 <td>2J</td>
                 <td>1I</td>
                 <td>20</td>
-                <td>17/9/2006 0:00</td>
-                <td>17/9/2006 20:00</td>
+                <td>17/09 0000</td>
+                <td>17/09 2000</td>
               </tr>
             </tbody>
           </table>
@@ -430,6 +430,48 @@
         if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
       }
       return defaultValue;
+    }
+
+    // Helper to format date strings into "dd/mm hhmm"
+    function formatDateTimeShort(dateStr) {
+      if (!dateStr || dateStr === '-') return '-';
+      const str = String(dateStr).trim();
+
+      try {
+        let d = new Date(str);
+
+        // Fallback custom parser for D/M/YYYY H:mm or similar
+        if (isNaN(d.getTime())) {
+          const parts = str.split(' ');
+          if (parts.length >= 1) {
+            const dateParts = parts[0].split(/[\/-]/);
+            const timeParts = parts[1] ? parts[1].split(':') : [0, 0];
+
+            if (dateParts.length === 3) {
+              let day = parseInt(dateParts[0], 10);
+              let month = parseInt(dateParts[1], 10) - 1;
+              let year = parseInt(dateParts[2], 10);
+              if (year < 100) year += 2000;
+
+              let hh = parseInt(timeParts[0] || 0, 10);
+              let mm = parseInt(timeParts[1] || 0, 10);
+
+              d = new Date(year, month, day, hh, mm);
+            }
+          }
+        }
+
+        if (!isNaN(d.getTime())) {
+          const dd = String(d.getDate()).padStart(2, '0');
+          const mm = String(d.getMonth() + 1).padStart(2, '0');
+          const hh = String(d.getHours()).padStart(2, '0');
+          const min = String(d.getMinutes()).padStart(2, '0');
+
+          return `${dd}/${mm} ${hh}${min}`;
+        }
+      } catch (e) {}
+
+      return dateStr;
     }
 
     function goHome() {
@@ -467,14 +509,17 @@
 
           tbody.innerHTML = '';
           rows.forEach(row => {
+            const rawEtb = getPropValue(row, ['ETB', 'Etb', 'etb']);
+            const rawEtc = getPropValue(row, ['ETC', 'Etc', 'etc']);
+
             const tr = document.createElement('tr');
             tr.innerHTML = `
               <td>${getPropValue(row, ['VESSEL NAME', 'VESSEL_NAME', 'VesselName', 'vessel_name', 'Title'])}</td>
               <td>${getPropValue(row, ['VOYAGE', 'Voyage', 'voyage'])}</td>
               <td>${getPropValue(row, ['LOA', 'Loa', 'loa'])}</td>
               <td>${getPropValue(row, ['Side Alongside', 'SIDE ALONGSIDE', 'SIDE_ALONGSIDE', 'SideAlongside'])}</td>
-              <td>${getPropValue(row, ['ETB', 'Etb', 'etb'])}</td>
-              <td>${getPropValue(row, ['ETC', 'Etc', 'etc'])}</td>
+              <td>${formatDateTimeShort(rawEtb)}</td>
+              <td>${formatDateTimeShort(rawEtc)}</td>
             `;
             tbody.appendChild(tr);
           });
