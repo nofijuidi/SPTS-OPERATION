@@ -181,6 +181,15 @@
       border-right: none;
     }
 
+    .table-empty {
+      text-align: center;
+      padding: 12px;
+      color: #64748b;
+      font-size: 11px;
+      font-style: italic;
+      font-weight: 700;
+    }
+
     /* Table Colors Header Specifics */
     .th-container { background-color: #3b62b0; }
     .th-sulphur { background-color: #f28038; }
@@ -239,39 +248,8 @@
                 <th>ETC</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>GU MELOR 1</td>
-                <td>6PJ03W</td>
-                <td>53</td>
-                <td>STARBOARD</td>
-                <td>13/9/2026 11:00</td>
-                <td>13/9/2026 14:00</td>
-              </tr>
-              <tr>
-                <td>MTT TIOMAN</td>
-                <td>26TI022E</td>
-                <td>70</td>
-                <td>STARBOARD</td>
-                <td>23/9/2026 9:00</td>
-                <td>23/9/2026 18:00</td>
-              </tr>
-              <tr>
-                <td>GU MELOR 1</td>
-                <td>6PJ04W</td>
-                <td>53</td>
-                <td>STARBOARD</td>
-                <td>14/9/2026 19:30</td>
-                <td>14/9/2026 22:30</td>
-              </tr>
-              <tr>
-                <td>GU MELOR 1</td>
-                <td>6PJ05W</td>
-                <td>53</td>
-                <td>STARBOARD</td>
-                <td>15/9/2026 11:00</td>
-                <td>15/9/2026 14:00</td>
-              </tr>
+            <tbody id="containerVesselBody">
+              <tr><td colspan="6" class="table-empty">Loading Container Vessels...</td></tr>
             </tbody>
           </table>
         </div>
@@ -427,8 +405,8 @@
                 <td>2J</td>
                 <td>1I</td>
                 <td>20</td>
-                <td>17/9/2026 0:00</td>
-                <td>17/9/2026 20:00</td>
+                <td>17/9/2006 0:00</td>
+                <td>17/9/2006 20:00</td>
               </tr>
             </tbody>
           </table>
@@ -444,6 +422,16 @@
   </div>
 
   <script>
+    const CONTAINER_VESSEL_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/03/workflows/b9402ed6963f4ffb9e8a0cc515524257/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dAeC5Re7BEQYm1twyCdaWCPGJTAtP79JaUqVY1sQGIk";
+
+    function getPropValue(obj, keys, defaultValue = '-') {
+      if (!obj) return defaultValue;
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
+      }
+      return defaultValue;
+    }
+
     function goHome() {
       window.location.href = '../index.html';
     }
@@ -455,10 +443,55 @@
       }
     }
 
+    async function fetchContainerVessels() {
+      const tbody = document.getElementById('containerVesselBody');
+      
+      try {
+        const response = await fetch(CONTAINER_VESSEL_FLOW_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ fetch: true })
+        });
+
+        if (response.ok) {
+          let rows = await response.json();
+          
+          if (!Array.isArray(rows) && rows.value && Array.isArray(rows.value)) {
+            rows = rows.value;
+          }
+
+          if (!Array.isArray(rows) || rows.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No container vessel records found.</td></tr>`;
+            return;
+          }
+
+          tbody.innerHTML = '';
+          rows.forEach(row => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${getPropValue(row, ['VESSEL NAME', 'VESSEL_NAME', 'VesselName', 'vessel_name', 'Title'])}</td>
+              <td>${getPropValue(row, ['VOYAGE', 'Voyage', 'voyage'])}</td>
+              <td>${getPropValue(row, ['LOA', 'Loa', 'loa'])}</td>
+              <td>${getPropValue(row, ['Side Alongside', 'SIDE ALONGSIDE', 'SIDE_ALONGSIDE', 'SideAlongside'])}</td>
+              <td>${getPropValue(row, ['ETB', 'Etb', 'etb'])}</td>
+              <td>${getPropValue(row, ['ETC', 'Etc', 'etc'])}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+        } else {
+          tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Failed to load container vessels.</td></tr>`;
+        }
+      } catch (err) {
+        console.error("Fetch Container Vessels Error:", err);
+        tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Network error loading container vessels.</td></tr>`;
+      }
+    }
+
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     window.addEventListener('DOMContentLoaded', () => {
       checkSession();
+      fetchContainerVessels();
     });
   </script>
 
