@@ -249,7 +249,7 @@
               </tr>
             </thead>
             <tbody id="containerVesselBody">
-              <tr><td colspan="6" class="table-empty">Loading Container Vessels...</td></tr>
+              <tr><td colspan="6" class="table-empty">Loading records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -270,23 +270,8 @@
                 <th>ETC</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>MV VS SUNSHINE</td>
-                <td>V.190926</td>
-                <td>97</td>
-                <td>PORTSIDE</td>
-                <td>19/09 0101</td>
-                <td>20/09 0401</td>
-              </tr>
-              <tr>
-                <td>MV SULPHUR VESSEL 1</td>
-                <td>V.250926</td>
-                <td>93</td>
-                <td>PORTSIDE</td>
-                <td>25/09 0101</td>
-                <td>26/09 0401</td>
-              </tr>
+            <tbody id="sulphurVesselBody">
+              <tr><td colspan="6" class="table-empty">Loading records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -305,13 +290,8 @@
                 <th>END</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>MTT TIOMAN-26TI021E</td>
-                <td>68</td>
-                <td>17/09 0800</td>
-                <td>19/09 0030</td>
-              </tr>
+            <tbody id="spwBody">
+              <tr><td colspan="4" class="table-empty">Loading records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -331,56 +311,8 @@
                 <th>TT</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>10/09 0800</td>
-                <td>550</td>
-                <td>10/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>11/09 0800</td>
-                <td>550</td>
-                <td>11/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>12/09 0800</td>
-                <td>550</td>
-                <td>12/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>13/09 0800</td>
-                <td>550</td>
-                <td>13/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>14/09 0800</td>
-                <td>550</td>
-                <td>14/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>15/09 0800</td>
-                <td>550</td>
-                <td>15/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
-              <tr>
-                <td>16/09 0800</td>
-                <td>550</td>
-                <td>16/09 1500</td>
-                <td>350</td>
-                <td>5</td>
-              </tr>
+            <tbody id="sulphurTransferBody">
+              <tr><td colspan="5" class="table-empty">Loading records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -400,14 +332,8 @@
                 <th>END</th>
               </tr>
             </thead>
-            <tbody>
-              <tr>
-                <td>2J</td>
-                <td>1I</td>
-                <td>20</td>
-                <td>17/09 0000</td>
-                <td>17/09 2000</td>
-              </tr>
+            <tbody id="housekeepingBody">
+              <tr><td colspan="5" class="table-empty">Loading records...</td></tr>
             </tbody>
           </table>
         </div>
@@ -422,7 +348,7 @@
   </div>
 
   <script>
-    const CONTAINER_VESSEL_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/03/workflows/b9402ed6963f4ffb9e8a0cc515524257/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dAeC5Re7BEQYm1twyCdaWCPGJTAtP79JaUqVY1sQGIk";
+    const ACTIVITIES_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/03/workflows/b9402ed6963f4ffb9e8a0cc515524257/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dAeC5Re7BEQYm1twyCdaWCPGJTAtP79JaUqVY1sQGIk";
 
     function getPropValue(obj, keys, defaultValue = '-') {
       if (!obj) return defaultValue;
@@ -432,46 +358,18 @@
       return defaultValue;
     }
 
-    // Helper to format date strings into "dd/mm hhmm"
-    function formatDateTimeShort(dateStr) {
-      if (!dateStr || dateStr === '-') return '-';
-      const str = String(dateStr).trim();
+    function formatDateTimeShort(dateVal) {
+      if (!dateVal || dateVal === '-') return '-';
+      let d = new Date(String(dateVal).trim());
 
-      try {
-        let d = new Date(str);
-
-        // Fallback custom parser for D/M/YYYY H:mm or similar
-        if (isNaN(d.getTime())) {
-          const parts = str.split(' ');
-          if (parts.length >= 1) {
-            const dateParts = parts[0].split(/[\/-]/);
-            const timeParts = parts[1] ? parts[1].split(':') : [0, 0];
-
-            if (dateParts.length === 3) {
-              let day = parseInt(dateParts[0], 10);
-              let month = parseInt(dateParts[1], 10) - 1;
-              let year = parseInt(dateParts[2], 10);
-              if (year < 100) year += 2000;
-
-              let hh = parseInt(timeParts[0] || 0, 10);
-              let mm = parseInt(timeParts[1] || 0, 10);
-
-              d = new Date(year, month, day, hh, mm);
-            }
-          }
-        }
-
-        if (!isNaN(d.getTime())) {
-          const dd = String(d.getDate()).padStart(2, '0');
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
-
-          return `${dd}/${mm} ${hh}${min}`;
-        }
-      } catch (e) {}
-
-      return dateStr;
+      if (d && !isNaN(d.getTime())) {
+        const dd = String(d.getDate()).padStart(2, '0');
+        const mm = String(d.getMonth() + 1).padStart(2, '0');
+        const hh = String(d.getHours()).padStart(2, '0');
+        const min = String(d.getMinutes()).padStart(2, '0');
+        return `${dd}/${mm} ${hh}${min}`;
+      }
+      return String(dateVal);
     }
 
     function goHome() {
@@ -485,58 +383,133 @@
       }
     }
 
-    async function fetchContainerVessels() {
-      const tbody = document.getElementById('containerVesselBody');
-      
+    async function fetchAllActivities() {
       try {
-        const response = await fetch(CONTAINER_VESSEL_FLOW_URL, {
+        const response = await fetch(ACTIVITIES_FLOW_URL, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ fetch: true })
         });
 
         if (response.ok) {
-          let rows = await response.json();
-          
-          if (!Array.isArray(rows) && rows.value && Array.isArray(rows.value)) {
-            rows = rows.value;
-          }
+          const data = await response.json();
 
-          if (!Array.isArray(rows) || rows.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="6" class="table-empty">No container vessel records found.</td></tr>`;
-            return;
-          }
+          // 1. Render Container Vessels
+          renderVesselTable('containerVesselBody', data.containerVessels, 6);
 
-          tbody.innerHTML = '';
-          rows.forEach(row => {
-            const rawEtb = getPropValue(row, ['ETB', 'Etb', 'etb']);
-            const rawEtc = getPropValue(row, ['ETC', 'Etc', 'etc']);
+          // 2. Render Sulphur Vessels
+          renderVesselTable('sulphurVesselBody', data.sulphurVessels, 6);
 
-            const tr = document.createElement('tr');
-            tr.innerHTML = `
-              <td>${getPropValue(row, ['VESSEL NAME', 'VESSEL_NAME', 'VesselName', 'vessel_name', 'Title'])}</td>
-              <td>${getPropValue(row, ['VOYAGE', 'Voyage', 'voyage'])}</td>
-              <td>${getPropValue(row, ['LOA', 'Loa', 'loa'])}</td>
-              <td>${getPropValue(row, ['Side Alongside', 'SIDE ALONGSIDE', 'SIDE_ALONGSIDE', 'SideAlongside'])}</td>
-              <td>${formatDateTimeShort(rawEtb)}</td>
-              <td>${formatDateTimeShort(rawEtc)}</td>
-            `;
-            tbody.appendChild(tr);
-          });
+          // 3. Render SPW
+          renderSPWTable('spwBody', data.spwActivities, 4);
+
+          // 4. Render Sulphur Transfer
+          renderTransferTable('sulphurTransferBody', data.sulphurTransfers, 5);
+
+          // 5. Render Housekeeping
+          renderHousekeepingTable('housekeepingBody', data.housekeeping, 5);
+
         } else {
-          tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Failed to load container vessels.</td></tr>`;
+          showErrorInAllTables("Failed to load records from server.");
         }
       } catch (err) {
-        console.error("Fetch Container Vessels Error:", err);
-        tbody.innerHTML = `<tr><td colspan="6" class="table-empty">Network error loading container vessels.</td></tr>`;
+        console.error("Fetch All Activities Error:", err);
+        showErrorInAllTables("Network error loading activities.");
       }
+    }
+
+    function renderVesselTable(tbodyId, rows, colSpan) {
+      const tbody = document.getElementById(tbodyId);
+      if (!rows || !Array.isArray(rows) || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="table-empty">No records found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${getPropValue(row, ['VESSEL NAME', 'VESSEL_NAME', 'VesselName', 'vessel_name', 'Title'])}</td>
+          <td>${getPropValue(row, ['VOYAGE', 'Voyage', 'voyage'])}</td>
+          <td>${getPropValue(row, ['LOA', 'Loa', 'loa'])}</td>
+          <td>${getPropValue(row, ['Side Alongside', 'SIDE ALONGSIDE', 'SIDE_ALONGSIDE', 'SideAlongside'])}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['ETB', 'Etb', 'etb']))}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['ETC', 'Etc', 'etc']))}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderSPWTable(tbodyId, rows, colSpan) {
+      const tbody = document.getElementById(tbodyId);
+      if (!rows || !Array.isArray(rows) || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="table-empty">No records found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${getPropValue(row, ['VESSEL NAME', 'VESSEL_NAME', 'VesselName', 'Title'])}</td>
+          <td>${getPropValue(row, ['TOTAL', 'Total', 'total'])}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['START', 'Start', 'start']))}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['END', 'End', 'end']))}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderTransferTable(tbodyId, rows, colSpan) {
+      const tbody = document.getElementById(tbodyId);
+      if (!rows || !Array.isArray(rows) || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="table-empty">No records found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${formatDateTimeShort(getPropValue(row, ['1ST PICKUP', 'FIRST_PICKUP', '1st Pickup', '1stPickup']))}</td>
+          <td>${getPropValue(row, ['TOTAL(1)', 'TOTAL 1', 'Total1', 'total1'])}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['2ND PICKUP', 'SECOND_PICKUP', '2nd Pickup', '2ndPickup']))}</td>
+          <td>${getPropValue(row, ['TOTAL(2)', 'TOTAL 2', 'Total2', 'total2'])}</td>
+          <td>${getPropValue(row, ['TT', 'Tt', 'tt'])}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function renderHousekeepingTable(tbodyId, rows, colSpan) {
+      const tbody = document.getElementById(tbodyId);
+      if (!rows || !Array.isArray(rows) || rows.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="${colSpan}" class="table-empty">No records found.</td></tr>`;
+        return;
+      }
+      tbody.innerHTML = '';
+      rows.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${getPropValue(row, ['FROM', 'From', 'from'])}</td>
+          <td>${getPropValue(row, ['TO', 'To', 'to'])}</td>
+          <td>${getPropValue(row, ['TOTAL', 'Total', 'total'])}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['START', 'Start', 'start']))}</td>
+          <td>${formatDateTimeShort(getPropValue(row, ['END', 'End', 'end']))}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function showErrorInAllTables(msg) {
+      ['containerVesselBody', 'sulphurVesselBody', 'spwBody', 'sulphurTransferBody', 'housekeepingBody'].forEach(id => {
+        const tbody = document.getElementById(id);
+        if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="table-empty">${msg}</td></tr>`;
+      });
     }
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     window.addEventListener('DOMContentLoaded', () => {
       checkSession();
-      fetchContainerVessels();
+      fetchAllActivities();
     });
   </script>
 
