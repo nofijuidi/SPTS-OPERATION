@@ -150,7 +150,7 @@
       padding: 8px 10px;
       display: flex;
       align-items: center;
-      justify-style: space-around;
+      justify-content: space-around;
       letter-spacing: 0.5px;
     }
 
@@ -292,25 +292,42 @@
     .bg-d { background-color: #dc2626; }
     .bg-l { background-color: #0284c7; }
 
-    /* Checklist Section Card */
+    /* Collapsible Section Cards */
+    .section-card {
+      border: 2px solid #1e293b;
+      border-radius: 10px;
+      overflow: hidden;
+      background-color: #ffffff;
+    }
+
     .section-header {
       background-color: #1e293b;
       color: #ffffff;
-      padding: 10px 12px;
+      padding: 12px;
       font-size: 13px;
       font-weight: 900;
-      border-radius: 8px 8px 0 0;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .accordion-icon {
+      font-size: 14px;
+      transition: transform 0.2s ease;
+    }
+
+    .section-card.collapsed .accordion-icon {
+      transform: rotate(-90deg);
+    }
+
+    .section-card.collapsed .section-body {
+      display: none;
     }
 
     .section-body {
-      border: 2px solid #1e293b;
-      border-top: none;
-      border-radius: 0 0 8px 8px;
       padding: 10px;
-      background-color: #ffffff;
       display: flex;
       flex-direction: column;
       gap: 12px;
@@ -567,12 +584,12 @@
         </div>
       </div>
 
-      <!-- Dynamic Checklist Content -->
+      <!-- Dynamic Checklist Area -->
       <div id="checklistContainer" class="checklist-container">
         <!-- Rendered dynamically once equipment number is selected -->
       </div>
 
-      <!-- Bottom Navigation Footer with Universal SVG Left Arrow -->
+      <!-- Bottom Navigation Footer -->
       <div class="bottom-action-row">
         <button class="btn-submit-main" onclick="openConfirmationModal()">Submit</button>
         <div class="btn-back-round" onclick="goHome()" title="Go Back">
@@ -610,18 +627,46 @@
     let selectedDiesel = "FULL";
     let checklistItemStates = {};
 
-    const BASE_GENERAL_CHECK_ITEMS = [
-      "Aircond / Penghawa Dingin",
-      "Warning Triangle / SegiTiga Amaran",
-      "All Gauge / Panel Meter",
-      "RFID (P1 to P23 only)",
-      "VMT",
-      "Driver's seat / Kerusi Pemandu",
-      "Steering Wheel",
-      "Horn",
-      "Wiper",
-      "Brake"
-    ];
+    // Sectioned Master Inspection Data
+    const EQUIPMENT_SECTIONS_DATA = {
+      "PM": [
+        {
+          sectionTitle: "INSIDE CABIN",
+          items: [
+            "Aircond / Penghawa Dingin",
+            "Warning Triangle / SegiTiga Amaran",
+            "All Gauge / Panel Meter",
+            "RFID (P1 to P23 only)",
+            "VMT",
+            "Driver's seat / Kerusi Pemandu",
+            "Steering Wheel",
+            "Horn",
+            "Wiper",
+            "Brake"
+          ]
+        },
+        {
+          sectionTitle: "EXTERIOR",
+          items: [
+            "Side Mirror",
+            "Pintu Tepi",
+            "Lampu Hadapan",
+            "Lampu Belakang",
+            "Lampu Brek",
+            "Lampu Signal",
+            "Lampu Beacon",
+            "Hos Angin",
+            "Hos Hitam (Electric)",
+            "Hos Merah (Brek)",
+            "Hos Biru (Supply Line)",
+            "Exhaust",
+            "Fire Extinguisher",
+            "Hydraulic Oil Level",
+            "Reverse Buzzer"
+          ]
+        }
+      ]
+    };
 
     const STATUS_MAP = {
       'G': 'Good',
@@ -763,15 +808,37 @@
       return false;
     }
 
+    function toggleSection(headerElem) {
+      const card = headerElem.closest('.section-card');
+      if (card) {
+        card.classList.toggle('collapsed');
+      }
+    }
+
     function renderChecklistUI(type, num) {
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
 
+      const sections = EQUIPMENT_SECTIONS_DATA[type] || [
+        {
+          sectionTitle: "GENERAL CHECK",
+          items: [
+            "Aircond / Penghawa Dingin",
+            "Warning Triangle / SegiTiga Amaran",
+            "All Gauge / Panel Meter",
+            "RFID (P1 to P23 only)",
+            "VMT",
+            "Driver's seat / Kerusi Pemandu",
+            "Steering Wheel",
+            "Horn",
+            "Wiper",
+            "Brake"
+          ]
+        }
+      ];
+
       const showRfid = isP1ToP23(num);
-      const items = BASE_GENERAL_CHECK_ITEMS.filter(item => {
-        if (item.includes("RFID")) return showRfid;
-        return true;
-      });
+      let globalIndex = 0;
 
       let html = `
         <!-- Diesel Level Section -->
@@ -794,40 +861,50 @@
           <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
           <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
         </div>
-
-        <!-- Section List Card -->
-        <div>
-          <div class="section-header">
-            <span>1. GENERAL CHECK (${type} - ${num})</span>
-            <span>${items.length} ITEMS</span>
-          </div>
-          <div class="section-body">
       `;
 
-      items.forEach((item, index) => {
-        checklistItemStates[index] = { itemTitle: item, status: null, remark: '' };
+      sections.forEach((sec, secIdx) => {
+        const filteredItems = sec.items.filter(item => {
+          if (item.includes("RFID")) return showRfid;
+          return true;
+        });
 
         html += `
-          <div class="item-row">
-            <div class="item-header-line">
-              <span class="item-title-text">${index + 1}. ${item}</span>
-              <div class="status-btn-group">
-                <button class="btn-status" onclick="setItemStatus(${index}, 'G', this)">✔</button>
-                <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">✗</button>
-                <button class="btn-status" onclick="setItemStatus(${index}, 'MF', this)">MF</button>
-                <button class="btn-status" onclick="setItemStatus(${index}, 'D', this)">D</button>
-                <button class="btn-status" onclick="setItemStatus(${index}, 'L', this)">L</button>
-              </div>
+          <div class="section-card">
+            <div class="section-header" onclick="toggleSection(this)">
+              <span>${secIdx + 1}. ${sec.sectionTitle} (${filteredItems.length} ITEMS)</span>
+              <span class="accordion-icon">▼</span>
             </div>
-            <input type="text" class="remark-input" placeholder="Add remark if defect..." oninput="setItemRemark(${index}, this.value)" />
+            <div class="section-body">
+        `;
+
+        filteredItems.forEach((item, itemIdx) => {
+          const itemKey = `item_${globalIndex}`;
+          checklistItemStates[itemKey] = { itemTitle: item, status: null, remark: '' };
+
+          html += `
+            <div class="item-row">
+              <div class="item-header-line">
+                <span class="item-title-text">${itemIdx + 1}. ${item}</span>
+                <div class="status-btn-group">
+                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'G', this)">✔</button>
+                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'M', this)">✗</button>
+                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'MF', this)">MF</button>
+                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'D', this)">D</button>
+                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'L', this)">L</button>
+                </div>
+              </div>
+              <input type="text" class="remark-input" placeholder="Add remark if defect..." oninput="setItemRemark('${itemKey}', this.value)" />
+            </div>
+          `;
+          globalIndex++;
+        });
+
+        html += `
+            </div>
           </div>
         `;
       });
-
-      html += `
-          </div>
-        </div>
-      `;
 
       container.innerHTML = html;
     }
@@ -838,9 +915,9 @@
       btn.classList.add('active');
     }
 
-    function setItemStatus(index, status, btn) {
-      if (checklistItemStates[index]) {
-        checklistItemStates[index].status = status;
+    function setItemStatus(key, status, btn) {
+      if (checklistItemStates[key]) {
+        checklistItemStates[key].status = status;
       }
 
       const parentGroup = btn.parentElement;
@@ -851,9 +928,9 @@
       btn.classList.add(`selected-${status.toLowerCase()}`);
     }
 
-    function setItemRemark(index, val) {
-      if (checklistItemStates[index]) {
-        checklistItemStates[index].remark = val.trim();
+    function setItemRemark(key, val) {
+      if (checklistItemStates[key]) {
+        checklistItemStates[key].remark = val.trim();
       }
     }
 
@@ -891,7 +968,7 @@
       const defectResults = [];
       let hasDefects = false;
 
-      // Filter out 'G' (Good) items completely. Only process items with defects.
+      // Filter out 'G' (Good) items completely. Compile defects only.
       Object.values(checklistItemStates).forEach(st => {
         if (st.status !== 'G') {
           hasDefects = true;
