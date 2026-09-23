@@ -17,7 +17,6 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      
       -webkit-touch-callout: none !important;
       -webkit-user-select: none !important;
       -khtml-user-select: none !important;
@@ -40,10 +39,6 @@
       justify-content: center;
       align-items: center;
       color: #334155;
-
-      /* Account for iPhone safe areas notch/status bar */
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .app-viewport {
@@ -59,10 +54,20 @@
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
     }
 
-    @media (min-width: 480px) {
+    @media (min-width: 480px) and (orientation: portrait) {
       .app-viewport {
         border-radius: 28px;
         height: 844px;
+      }
+    }
+
+    @media (orientation: landscape) {
+      .app-viewport {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        width: 100vw;
+        height: 100vh;
       }
     }
 
@@ -70,33 +75,27 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 16px;
+      padding: 14px;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
       overflow-y: auto;
     }
 
-    .hidden { display: none !important; }
-
-    .top-right-app-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 1px solid #cbd5e1;
-    }
-
-    .inspection-top-nav {
+    /* Top Nav Header */
+    .module-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin-bottom: 12px;
+      gap: 8px;
     }
 
-    .btn-home-icon {
-      width: 40px;
-      height: 40px;
+    .btn-header-icon {
+      width: 42px;
+      height: 42px;
       background-color: #f1f5f9;
-      border: 1px solid #cbd5e1;
-      border-radius: 10px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -105,327 +104,351 @@
       color: #002060;
     }
 
-    .inspection-header-title {
+    .module-title {
       flex: 1;
       text-align: center;
-      color: #002060;
+      color: #0b2545;
       font-size: 18px;
-      font-weight: 800;
-      padding: 0 8px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
     }
 
-    .banner-bar {
+    .top-right-app-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    /* Shift & User Info Card */
+    .shift-banner {
       display: flex;
-      width: 100%;
-      height: 38px;
-      border-radius: 8px;
+      border: 1.5px solid #0078D4;
+      border-radius: 10px;
       overflow: hidden;
+      margin-bottom: 10px;
       font-size: 13px;
       font-weight: 800;
-      margin-bottom: 12px;
-      border: 1.5px solid #0078D4;
     }
 
-    .shift-day { background-color: #ffd700 !important; color: #000000 !important; }
-    .shift-night { background-color: #002060 !important; color: #ffffff !important; }
-
-    .banner-shift {
-      padding: 0 12px;
+    .shift-tag {
+      background-color: #ffd100;
+      color: #000000;
+      padding: 6px 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      white-space: nowrap;
-      font-weight: 900;
+      text-transform: uppercase;
     }
 
-    .banner-date {
+    .shift-time {
+      flex: 1;
       background-color: #ffffff;
       color: #000000;
-      flex: 1;
+      padding: 6px 10px;
       display: flex;
       align-items: center;
-      justify-content: space-evenly;
-      font-size: 15px;
-      font-weight: 800;
+      justify-content: space-around;
+      letter-spacing: 0.5px;
     }
 
-    .user-info-banner {
-      color: #002060;
-      font-weight: 800;
-      font-size: 15px;
-      margin-bottom: 14px;
+    .user-info-block {
+      margin-bottom: 12px;
+      font-size: 13px;
       line-height: 1.3;
     }
 
     .user-info-company {
-      font-size: 15px;
-      font-weight: 800;
-      color: #002060;
+      font-weight: 900;
+      color: #0b2545;
     }
 
-    .user-info-details {
-      font-size: 15px;
+    .user-info-detail {
       font-weight: 800;
-      color: #002060;
+      color: #0b2545;
+      text-transform: uppercase;
     }
 
-    .form-row-2col {
+    /* Dropdown Selection Grid */
+    .select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .select-group {
       display: flex;
+      flex-direction: column;
+    }
+
+    .select-label {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0b2545;
+      margin-bottom: 4px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1.5px solid #0078D4;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 700;
+      color: #334155;
+      outline: none;
+      background-color: #ffffff;
+    }
+
+    /* Type Buttons Selector */
+    .type-buttons-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 14px;
+      max-height: 180px;
+      overflow-y: auto;
+      padding-right: 2px;
+    }
+
+    .type-btn {
+      background-color: #3b62b0;
+      color: #ffffff;
+      border: none;
+      border-radius: 8px;
+      padding: 10px 4px;
+      font-size: 11px;
+      font-weight: 800;
+      cursor: pointer;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      text-transform: uppercase;
+    }
+
+    .type-btn.active {
+      background-color: #08506b;
+      box-shadow: inset 0 0 0 2px #ffffff;
+    }
+
+    /* Dynamic Checklist Area */
+    .checklist-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
       gap: 12px;
       margin-bottom: 12px;
     }
 
-    .form-group { margin-bottom: 12px; }
-    .form-group-flex { flex: 1; margin-bottom: 0; }
+    /* Diesel Selection */
+    .diesel-box {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 8px;
+      background-color: #f8fafc;
+    }
 
-    .form-label {
-      display: block;
-      font-size: 13px;
+    .diesel-title {
+      font-size: 11px;
       font-weight: 800;
-      color: #002060;
-      margin-bottom: 4px;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 10px 12px;
-      font-size: 14px;
-      font-weight: 600;
-      border: 1.5px solid #0078D4;
-      border-radius: 8px;
-      outline: none;
-      color: #0f172a;
-    }
-
-    .active-pillbox-area { margin-bottom: 14px; }
-    .grid-container-num { display: grid; grid-template-columns: repeat(auto-fill, minmax(68px, 1fr)); gap: 6px; max-height: 150px; overflow-y: auto; padding: 2px; }
-    .grid-container-eq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; max-height: 160px; overflow-y: auto; padding: 2px; }
-    .grid-container-list { display: flex; flex-direction: column; gap: 5px; max-height: 150px; overflow-y: auto; padding: 2px; }
-    .grid-box { background-color: #3b62b0; color: #ffffff; font-size: 11px; font-weight: 800; text-align: center; padding: 10px 2px; border-radius: 6px; cursor: pointer; border: 1px solid #2d4e93; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
-    .grid-box-list { background-color: #3b62b0; color: #ffffff; font-size: 12px; font-weight: 700; text-align: left; padding: 9px 12px; border-radius: 6px; cursor: pointer; border: 1px solid #2d4e93; }
-    .grid-box.selected, .grid-box-list.selected { background-color: #1d4ed8; box-shadow: inset 0 0 0 2px #ffffff; }
-
-    .declaration-header-row {
+      color: #1e293b;
+      margin-bottom: 6px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin-bottom: 6px;
+      gap: 4px;
     }
 
-    .btn-header-group {
-      display: flex;
+    .diesel-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
       gap: 6px;
     }
 
-    .btn-clear {
-      background-color: #e00000;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 900;
-      padding: 6px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .btn-refresh {
-      background-color: #00a651;
-      color: #ffffff;
-      font-size: 13px;
-      font-weight: 900;
-      padding: 6px 14px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-    }
-
-    .declaration-table-box {
-      width: 100%;
-      max-height: 140px;
-      overflow-y: auto;
-      border: 1.5px solid #0078D4;
-      border-radius: 8px;
-      background-color: #f8fafc;
-      padding: 1px;
-    }
-
-    .declaration-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-    }
-
-    .declaration-table th {
-      background-color: #002060;
-      color: #ffffff;
-      font-weight: 800;
-      text-align: left;
-      padding: 6px 5px;
-      position: sticky;
-      top: 0;
-      z-index: 2;
-      border-right: 1px solid #1a365d;
-    }
-
-    .declaration-table td {
-      padding: 6px 5px;
-      border-bottom: 1px solid #e2e8f0;
-      color: #1e293b;
-      font-weight: 600;
-      word-break: break-word;
-    }
-
-    .declaration-empty {
+    .diesel-btn {
+      padding: 6px 0;
       text-align: center;
-      padding: 12px;
-      color: #64748b;
-      font-size: 13px;
-      font-style: italic;
-      font-weight: 700;
-    }
-
-    .action-row {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-      margin-top: 14px;
-    }
-
-    .btn-submit-inspection {
-      flex: 1;
-      background-color: #3b62b0;
-      color: white;
-      font-size: 18px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 6px;
+      background-color: #ffffff;
+      font-size: 11px;
       font-weight: 800;
-      border: none;
-      border-radius: 8px;
-      height: 48px;
+      color: #0f172a;
       cursor: pointer;
+    }
+
+    .diesel-btn.active {
+      background-color: #08506b;
+      color: #ffffff;
+      border-color: #08506b;
+    }
+
+    /* Legend Bar */
+    .legend-bar {
+      background-color: #1e293b;
+      color: #ffffff;
+      border-radius: 6px;
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 9px;
+      font-weight: 800;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .badge-icon {
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 8px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .bg-g { background-color: #16a34a; }
+    .bg-mf { background-color: #f97316; }
+    .bg-d { background-color: #dc2626; }
+    .bg-m { background-color: #9333ea; }
+    .bg-l { background-color: #0284c7; }
+
+    /* Checklist Section Card */
+    .section-header {
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 8px 10px;
+      font-size: 11px;
+      font-weight: 900;
+      border-radius: 6px 6px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-body {
+      border: 1.5px solid #1e293b;
+      border-top: none;
+      border-radius: 0 0 6px 6px;
+      padding: 8px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .item-row {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 8px;
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-title-text {
+      font-size: 11px;
+      font-weight: 800;
+      color: #0f172a;
+      flex: 1;
+    }
+
+    .status-btn-group {
+      display: flex;
+      gap: 3px;
+    }
+
+    .btn-status {
+      width: 22px;
+      height: 22px;
+      border-radius: 4px;
+      border: 1px solid #cbd5e1;
+      background-color: #f8fafc;
+      color: #64748b;
+      font-size: 9px;
+      font-weight: 800;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-status.selected-g { background-color: #16a34a; color: #ffffff; border-color: #16a34a; }
+    .btn-status.selected-mf { background-color: #f97316; color: #ffffff; border-color: #f97316; }
+    .btn-status.selected-d { background-color: #dc2626; color: #ffffff; border-color: #dc2626; }
+    .btn-status.selected-m { background-color: #9333ea; color: #ffffff; border-color: #9333ea; }
+    .btn-status.selected-l { background-color: #0284c7; color: #ffffff; border-color: #0284c7; }
+
+    .remark-input {
+      width: 100%;
+      padding: 6px 8px;
+      border: 1px solid #cbd5e1;
+      border-radius: 6px;
+      font-size: 10px;
+      color: #334155;
+      outline: none;
+    }
+
+    /* Fixed Bottom Actions */
+    .bottom-action-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: auto;
+      padding-top: 8px;
+    }
+
+    .btn-submit-main {
+      flex: 1;
+      height: 46px;
+      background-color: #3b62b0;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 900;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-submit-main:active {
+      transform: scale(0.98);
+      background-color: #2b4c8f;
     }
 
     .btn-back-round {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       border: 2px solid #3b62b0;
       border-radius: 50%;
-      background: white;
+      background: #ffffff;
       color: #3b62b0;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-    }
-
-    .alert-error {
-      background-color: #fef2f2;
-      border: 1px solid #fecaca;
-      color: #dc2626;
-      padding: 10px;
-      border-radius: 8px;
-      font-size: 13px;
-      margin-bottom: 12px;
-      text-align: center;
-      font-weight: 700;
-    }
-
-    .modal-overlay {
-      position: absolute;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background-color: rgba(15, 23, 42, 0.65);
-      backdrop-filter: blur(4px);
-      display: flex; align-items: center; justify-content: center;
-      padding: 24px; z-index: 100;
-    }
-
-    .modal-card {
-      background-color: #ffffff;
-      width: 100%;
-      border-radius: 16px;
-      padding: 24px 20px;
-      border: 1.5px solid #0078D4;
-      box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-    }
-
-    .modal-greeting-line, .modal-declaring-line { 
-      font-size: 18px; 
-      font-weight: 500; 
-      color: #0f172a; 
-      margin-bottom: 2px; 
-    }
-
-    .modal-status-highlight { 
-      font-size: 19px; 
-      font-weight: 800; 
-      color: #000; 
-      margin-bottom: 16px; 
-    }
-
-    .modal-date-line { 
-      font-size: 18px; 
-      font-weight: 500; 
-      color: #0f172a; 
-      margin-bottom: 20px; 
-    }
-
-    .modal-action-title {
-      font-size: 18px;
-      font-weight: 500;
-      color: #0f172a;
-      margin-bottom: 12px;
-    }
-
-    .modal-checkbox-group {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-
-    .modal-checkbox-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      font-size: 18px;
-      font-weight: 500;
-      color: #0f172a;
-      cursor: pointer;
-    }
-
-    .modal-checkbox-item input[type="checkbox"] {
-      width: 22px;
-      height: 22px;
-      border: 2px solid #0f172a;
-      border-radius: 4px;
-      accent-color: #0078D4;
-      cursor: pointer;
-    }
-
-    .modal-btn-row { display: flex; gap: 12px; }
-    
-    .btn-popup-cancel { 
-      flex: 1; 
-      height: 48px; 
-      background-color: #cc0000; 
-      color: white; 
-      font-size: 18px;
-      font-weight: 800; 
-      border: none; 
-      border-radius: 10px; 
-      cursor: pointer; 
-    }
-
-    .btn-popup-confirm { 
-      flex: 1; 
-      height: 48px; 
-      background-color: #1d68d8; 
-      color: white; 
-      font-size: 18px;
-      font-weight: 800; 
-      border: none; 
-      border-radius: 10px; 
-      cursor: pointer; 
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -433,132 +456,119 @@
 
   <div class="app-viewport">
     <div class="view-screen">
-      
-      <!-- Top Nav -->
-      <div class="inspection-top-nav">
-        <div class="btn-home-icon" onclick="goHome()" title="Go to Home Page">🏠</div>
-        <div class="inspection-header-title">EQUIPMENT INSPECTION</div>
+
+      <!-- Top Nav Header -->
+      <div class="module-header">
+        <div class="btn-header-icon" onclick="goHome()" title="Go Home">🏠</div>
+        <div class="module-title">EQUIPMENT INSPECTION</div>
         <img src="../icon-192.png" alt="App Icon" class="top-right-app-icon" onerror="this.style.display='none'" />
       </div>
 
-      <div id="errorMessage" class="alert-error hidden"></div>
-
-      <!-- Live Shift & Date Banner -->
-      <div class="banner-bar">
-        <div class="banner-shift shift-day" id="shiftBanner">DAY SHIFT</div>
-        <div class="banner-date" id="liveDateTime">
-          <span id="datePart">--/--/----</span>
-          <span id="timePart">--:--</span>
-          <span id="secPart">00ss</span>
+      <!-- Shift & Date Banner -->
+      <div class="shift-banner">
+        <div class="shift-tag" id="shiftNameTag">DAY SHIFT</div>
+        <div class="shift-time">
+          <span id="liveDateStr">23/09/2026</span>
+          <span id="liveTimeStr">09:44</span>
+          <span id="liveSecStr">00s</span>
         </div>
       </div>
 
-      <!-- User Info Header -->
-      <div class="user-info-banner">
-        <div class="user-info-company" id="inspCompany">SPTS</div>
-        <div class="user-info-details" id="inspOperator">T5218 | NOFIJUIDI BIN JUMRI</div>
+      <!-- User Information -->
+      <div class="user-info-block">
+        <div class="user-info-company" id="userCompanyTag">SPTS</div>
+        <div class="user-info-detail" id="userDetailTag">T5218 | NOFIJUIDI BIN JUMRI</div>
       </div>
 
-      <!-- Inputs -->
-      <div class="form-row-2col">
-        <div class="form-group-flex">
-          <label class="form-label">Select Equipment</label>
-          <input type="text" id="selectEquipment" class="form-input" placeholder="Select type..." autocomplete="off" onfocus="setActiveMode('equipment')" oninput="refreshActivePillbox()" />
+      <!-- Equipment Type Dropdown Grid -->
+      <div class="select-grid">
+        <div class="select-group">
+          <label class="select-label">Select Equipment</label>
+          <select id="equipmentTypeSelect" class="form-select" onchange="handleTypeChange(this.value)">
+            <option value="">Select type...</option>
+          </select>
         </div>
-        <div class="form-group-flex">
-          <label class="form-label">Equipment Number</label>
-          <input type="text" id="selectEquipmentNo" class="form-input" placeholder="Select number..." autocomplete="off" onfocus="setActiveMode('number')" oninput="onEquipmentNoInputChange(this.value)" />
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">Select Issue</label>
-        <input type="text" id="selectIssue" class="form-input" placeholder="Type or select issue..." autocomplete="off" onfocus="setActiveMode('issue')" oninput="refreshActivePillbox()" />
-      </div>
-
-      <!-- Grid Area -->
-      <div id="activePillboxArea" class="active-pillbox-area">
-        <div id="pillboxGrid" class="grid-container-eq"></div>
-      </div>
-
-      <!-- Declaration Table Section -->
-      <div class="form-group">
-        <div class="declaration-header-row">
-          <label class="form-label" style="margin-bottom: 0;" id="declarationLabel">Declaration (last 12 hours)</label>
-          <div class="btn-header-group">
-            <button class="btn-clear" onclick="clearAllInputs()">CLEAR</button>
-            <button class="btn-refresh" onclick="loadUser12HourLogs()">REFRESH</button>
-          </div>
-        </div>
-
-        <div class="declaration-table-box">
-          <table class="declaration-table">
-            <thead>
-              <tr>
-                <th style="width: 30%;">DATE</th>
-                <th style="width: 25%;">EQUIPNUM</th>
-                <th style="width: 30%;">AREA</th>
-                <th style="width: 15%;">ID</th>
-              </tr>
-            </thead>
-            <tbody id="declarationLogsBody">
-              <tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>
-            </tbody>
-          </table>
+        <div class="select-group">
+          <label class="select-label">Equipment Number</label>
+          <select id="equipmentNumSelect" class="form-select">
+            <option value="">Select number...</option>
+          </select>
         </div>
       </div>
 
-      <!-- Action Footer -->
-      <div class="action-row">
-        <button id="sendBtn" class="btn-submit-inspection" onclick="showConfirmModal()">Submit</button>
+      <!-- Quick Type Buttons Grid -->
+      <div id="typeButtonsGrid" class="type-buttons-grid">
+        <!-- Dynamically rendered equipment pills -->
+      </div>
+
+      <!-- Dynamic Checklist Content -->
+      <div id="checklistContainer" class="checklist-container">
+        <!-- Rendered when Equipment is selected -->
+      </div>
+
+      <!-- Bottom Navigation Footer -->
+      <div class="bottom-action-row">
+        <button class="btn-submit-main" onclick="submitInspection()">Submit</button>
         <div class="btn-back-round" onclick="goHome()">➔</div>
       </div>
 
     </div>
-
-    <!-- Confirmation Modal -->
-    <div id="confirmModal" class="modal-overlay hidden">
-      <div class="modal-card">
-        <div class="modal-greeting-line" id="modalGreeting">Dear Operator,</div>
-        <div class="modal-declaring-line">You are declaring <strong id="modalEquipNum">-</strong></div>
-        <div class="modal-status-highlight" id="modalIssue">-</div>
-
-        <div class="modal-date-line" id="modalFormattedDate">On --/--/----</div>
-
-        <div class="modal-action-title">Your action will be</div>
-
-        <div class="modal-checkbox-group">
-          <label class="modal-checkbox-item">
-            <input type="checkbox" class="action-chk" value="Sent to Workshop">
-            <span>Sent to Workshop</span>
-          </label>
-          <label class="modal-checkbox-item">
-            <input type="checkbox" class="action-chk" value="Continue with Issue">
-            <span>Continue with Issue</span>
-          </label>
-          <label class="modal-checkbox-item">
-            <input type="checkbox" class="action-chk" value="Change Equipment">
-            <span>Change Equipment</span>
-          </label>
-        </div>
-
-        <div class="modal-btn-row">
-          <button class="btn-popup-cancel" onclick="hideConfirmModal()">CANCEL</button>
-          <button id="confirmSubmitBtn" class="btn-popup-confirm" onclick="executeSubmission()">CONFIRM</button>
-        </div>
-      </div>
-    </div>
   </div>
 
   <script>
-    let EQUIPMENT_DATABASE = {};
-    let ISSUE_DATABASE = {};
-    let REVERSE_LOOKUP = {};
-    let currentUser = null;
-    let activePillboxMode = 'equipment';
+    const INSPECTION_SUBMIT_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/03/workflows/b9402ed6963f4ffb9e8a0cc515524257/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dAeC5Re7BEQYm1twyCdaWCPGJTAtP79JaUqVY1sQGIk";
 
-    const CHECKLIST_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
-    const GET_LOGS_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/41d16fdee72843db94d61e4ec314841a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_qpB6B3yesT9KNhGtnsB6oRu4TFovZPbjrKnykFpXck";
+    let equipmentDb = {};
+    let currentUser = null;
+    let selectedType = "";
+    let selectedDiesel = "FULL";
+    let checklistItemStates = {};
+
+    // Standard General Check items for PM
+    const GENERAL_CHECK_PM_ITEMS = [
+      "Aircond / Penghawa Dingin",
+      "Warning Triangle / SegiTiga Amaran",
+      "All Gauge / Panel Meter",
+      "RFID (P1 to P23 only)",
+      "VMT",
+      "Driver's seat / Kerusi Pemandu",
+      "Steering Wheel",
+      "Horn",
+      "Wiper",
+      "Brake"
+    ];
+
+    const STATUS_MAP = {
+      'G': 'Good',
+      'MF': 'Malfunction',
+      'D': 'Damage',
+      'M': 'Missing',
+      'L': 'Leaking'
+    };
+
+    function checkSession() {
+      const activeSession = sessionStorage.getItem('userSession');
+      if (!activeSession) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = JSON.parse(activeSession);
+      const accessLevel = String(currentUser.Access || currentUser.access || currentUser.ACCESS || '').trim();
+      
+      if (accessLevel === '1') {
+        alert('Unauthorized access to Equipment Checklist.');
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const name = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'USER');
+      const company = getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS');
+      const id = getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], 'N/A');
+
+      document.getElementById('userCompanyTag').innerText = company;
+      document.getElementById('userDetailTag').innerText = `${id} | ${name}`;
+    }
 
     function getPropValue(obj, keys, defaultValue = 'N/A') {
       if (!obj) return defaultValue;
@@ -568,75 +578,239 @@
       return defaultValue;
     }
 
-    function checkSession() {
-      const activeSession = sessionStorage.getItem('userSession');
-      if (activeSession) {
-        currentUser = JSON.parse(activeSession);
+    function updateLiveClock() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('liveDateStr').innerText = `${dd}/${mm}/${yyyy}`;
+      document.getElementById('liveTimeStr').innerText = `${hh}:${min}`;
+      document.getElementById('liveSecStr').innerText = `${ss}s`;
+
+      const hour = now.getHours();
+      const shiftTag = document.getElementById('shiftNameTag');
+      if (hour >= 8 && hour < 20) {
+        shiftTag.innerText = "DAY SHIFT";
+        shiftTag.style.backgroundColor = "#ffd100";
       } else {
-        currentUser = {
-          COMPANY: "SPTS",
-          COMPANY_ID: "T5218",
-          NAME: "NOFIJUIDI BIN JUMRI",
-          GROUP: "N/A"
+        shiftTag.innerText = "NIGHT SHIFT";
+        shiftTag.style.backgroundColor = "#0284c7";
+        shiftTag.style.color = "#ffffff";
+      }
+    }
+
+    async function loadEquipmentDatabase() {
+      try {
+        const response = await fetch(`../data.json?v=${Date.now()}`);
+        if (response.ok) {
+          const data = await response.json();
+          equipmentDb = data.EQUIPMENT_DATABASE || {};
+          populateTypeOptions();
+        }
+      } catch (err) {
+        console.error("Failed to load equipment database:", err);
+      }
+    }
+
+    function populateTypeOptions() {
+      const typeSelect = document.getElementById('equipmentTypeSelect');
+      const btnGrid = document.getElementById('typeButtonsGrid');
+
+      typeSelect.innerHTML = '<option value="">Select type...</option>';
+      btnGrid.innerHTML = '';
+
+      Object.keys(equipmentDb).forEach(type => {
+        // Select Dropdown
+        const opt = document.createElement('option');
+        opt.value = type;
+        opt.textContent = type;
+        typeSelect.appendChild(opt);
+
+        // Grid Button
+        const btn = document.createElement('button');
+        btn.className = 'type-btn';
+        btn.textContent = type;
+        btn.onclick = () => {
+          typeSelect.value = type;
+          handleTypeChange(type);
         };
+        btnGrid.appendChild(btn);
+      });
+    }
+
+    function handleTypeChange(type) {
+      selectedType = type;
+      const numSelect = document.getElementById('equipmentNumSelect');
+      numSelect.innerHTML = '<option value="">Select number...</option>';
+
+      // Highlight button grid
+      document.querySelectorAll('.type-btn').forEach(btn => {
+        if (btn.textContent === type) {
+          btn.classList.add('active');
+        } else {
+          btn.classList.remove('active');
+        }
+      });
+
+      if (type && equipmentDb[type]) {
+        equipmentDb[type].forEach(num => {
+          const opt = document.createElement('option');
+          opt.value = num;
+          opt.textContent = num;
+          numSelect.appendChild(opt);
+        });
+
+        if (equipmentDb[type].length > 0) {
+          numSelect.value = equipmentDb[type][0];
+        }
+
+        renderChecklistUI(type);
+      } else {
+        document.getElementById('checklistContainer').innerHTML = '';
+      }
+    }
+
+    function renderChecklistUI(type) {
+      const container = document.getElementById('checklistContainer');
+      checklistItemStates = {};
+
+      const items = GENERAL_CHECK_PM_ITEMS;
+
+      let html = `
+        <!-- Diesel Level Section -->
+        <div class="diesel-box">
+          <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
+          <div class="diesel-options">
+            <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
+            <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
+          </div>
+        </div>
+
+        <!-- Legend Bar -->
+        <div class="legend-bar">
+          <span style="color:#cbd5e1;">LEGEND:</span>
+          <div class="legend-item"><span class="badge-icon bg-g">G</span> Good</div>
+          <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
+          <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
+          <div class="legend-item"><span class="badge-icon bg-m">M</span> Missing</div>
+          <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
+        </div>
+
+        <!-- Section List Card -->
+        <div>
+          <div class="section-header">
+            <span>1. GENERAL CHECK (INSIDE ${type})</span>
+            <span>${items.length} ITEMS</span>
+          </div>
+          <div class="section-body">
+      `;
+
+      items.forEach((item, index) => {
+        checklistItemStates[index] = { itemTitle: item, status: 'G', remark: '' };
+
+        html += `
+          <div class="item-row">
+            <div class="item-header-line">
+              <span class="item-title-text">${index + 1}. ${item}</span>
+              <div class="status-btn-group">
+                <button class="btn-status selected-g" onclick="setItemStatus(${index}, 'G', this)">G</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'MF', this)">MF</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'D', this)">D</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">M</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'L', this)">L</button>
+              </div>
+            </div>
+            <input type="text" class="remark-input" placeholder="Add remark if defect..." oninput="setItemRemark(${index}, this.value)" />
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function setDiesel(btn, level) {
+      selectedDiesel = level;
+      document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function setItemStatus(index, status, btn) {
+      if (checklistItemStates[index]) {
+        checklistItemStates[index].status = status;
       }
 
-      const comp = getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS');
-      const staffId = getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218');
-      const staffName = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'NOFIJUIDI BIN JUMRI');
+      const parentGroup = btn.parentElement;
+      parentGroup.querySelectorAll('.btn-status').forEach(b => {
+        b.className = 'btn-status';
+      });
 
-      document.getElementById('inspCompany').innerText = comp;
-      document.getElementById('inspOperator').innerText = `${staffId} | ${staffName}`;
+      btn.classList.add(`selected-${status.toLowerCase()}`);
     }
 
-    function startLiveTicker() {
-      setInterval(() => {
-        const now = new Date();
-        const dd = String(now.getDate()).padStart(2, '0');
-        const mm = String(now.getMonth() + 1).padStart(2, '0');
-        const yyyy = now.getFullYear();
-        const hh = String(now.getHours()).padStart(2, '0');
-        const min = String(now.getMinutes()).padStart(2, '0');
-        const ss = String(now.getSeconds()).padStart(2, '0');
+    function setItemRemark(index, val) {
+      if (checklistItemStates[index]) {
+        checklistItemStates[index].remark = val.trim();
+      }
+    }
 
-        document.getElementById('datePart').innerText = `${dd}/${mm}/${yyyy}`;
-        document.getElementById('timePart').innerText = `${hh}:${min}`;
-        document.getElementById('secPart').innerText = `${ss}ss`;
+    async function submitInspection() {
+      const type = document.getElementById('equipmentTypeSelect').value;
+      const num = document.getElementById('equipmentNumSelect').value;
 
-        const totalMinutes = (now.getHours() * 60) + now.getMinutes();
-        const shiftBanner = document.getElementById('shiftBanner');
-        if (totalMinutes >= (8 * 60) && totalMinutes <= (20 * 60)) {
-          shiftBanner.innerText = "DAY SHIFT";
-          shiftBanner.className = "banner-shift shift-day";
+      if (!type || !num) {
+        alert("Please select Equipment Type and Number.");
+        return;
+      }
+
+      const reportedIssues = [];
+
+      Object.values(checklistItemStates).forEach(st => {
+        if (st.status !== 'G') {
+          const statusText = STATUS_MAP[st.status] || st.status;
+          const remarkText = st.remark ? `, ${st.remark}` : '';
+          reportedIssues.push(`${st.itemTitle} - ${statusText}${remarkText}`);
+        }
+      });
+
+      const areaString = reportedIssues.length > 0 ? reportedIssues.join(' | ') : "I've checked and declared all OK";
+
+      const payload = {
+        EQUIPMENT: type,
+        EQUIPMENT_NO: num,
+        DIESEL_LEVEL: selectedDiesel,
+        AREA: areaString,
+        SUBMITTED_BY: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'USER'),
+        USER_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], 'N/A')
+      };
+
+      try {
+        const response = await fetch(INSPECTION_SUBMIT_FLOW_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alert("Inspection checklist submitted successfully!");
+          goHome();
         } else {
-          shiftBanner.innerText = "NIGHT SHIFT";
-          shiftBanner.className = "banner-shift shift-night";
+          alert("Failed to submit inspection checklist.");
         }
-      }, 1000);
-    }
-
-    function clearAllInputs() {
-      document.getElementById('selectEquipment').value = '';
-      document.getElementById('selectEquipmentNo').value = '';
-      document.getElementById('selectIssue').value = '';
-      document.getElementById('errorMessage').classList.add('hidden');
-      setActiveMode('equipment');
-    }
-
-    function selectPill(val) {
-      if (activePillboxMode === 'equipment') {
-        document.getElementById('selectEquipment').value = val;
-        document.getElementById('selectEquipmentNo').value = '';
-        setActiveMode('number');
-      } else if (activePillboxMode === 'number') {
-        document.getElementById('selectEquipmentNo').value = val;
-        if (REVERSE_LOOKUP[val.toUpperCase()]) {
-          document.getElementById('selectEquipment').value = REVERSE_LOOKUP[val.toUpperCase()];
-        }
-        setActiveMode('issue');
-      } else if (activePillboxMode === 'issue') {
-        document.getElementById('selectIssue').value = val;
-        refreshActivePillbox();
+      } catch (err) {
+        console.error("Submission Error:", err);
+        alert("Network error submitting checklist.");
       }
     }
 
@@ -644,307 +818,13 @@
       window.location.href = '../index.html';
     }
 
-    async function loadConfigData() {
-      try {
-        const res = await fetch('../data.json');
-        if (res.ok) {
-          const freshData = await res.json();
-          EQUIPMENT_DATABASE = freshData.EQUIPMENT_DATABASE || {};
-          ISSUE_DATABASE = freshData.ISSUE_DATABASE || {};
-          REVERSE_LOOKUP = {};
-          for (const [eqType, numList] of Object.entries(EQUIPMENT_DATABASE)) {
-            numList.forEach(num => { REVERSE_LOOKUP[num.toUpperCase()] = eqType; });
-          }
-        }
-      } catch (e) {
-        console.warn("Using default view config.");
-      }
-      refreshActivePillbox();
-    }
-
-    function setActiveMode(mode) {
-      activePillboxMode = mode;
-      refreshActivePillbox();
-    }
-
-    function refreshActivePillbox() {
-      const eqVal = document.getElementById('selectEquipment').value.trim();
-      const numVal = document.getElementById('selectEquipmentNo').value.trim();
-      const issueVal = document.getElementById('selectIssue').value.trim();
-
-      const grid = document.getElementById('pillboxGrid');
-      
-      if (activePillboxMode === 'equipment') {
-        grid.className = 'grid-container-eq';
-        let defaultEqs = Object.keys(EQUIPMENT_DATABASE);
-        if (defaultEqs.length === 0) {
-          defaultEqs = ["PM", "TRAILER", "FORKLIFT", "TIPPER", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "CONVEYOR"];
-        }
-        
-        const eqQuery = eqVal.toUpperCase();
-        const filteredEqs = eqQuery === '' ? defaultEqs : defaultEqs.filter(e => e.includes(eqQuery));
-
-        grid.innerHTML = filteredEqs.map(eq => `<div class="grid-box ${eq === eqVal.toUpperCase() ? 'selected' : ''}" onclick="selectPill('${eq}')">${eq}</div>`).join('');
-
-      } else if (activePillboxMode === 'number') {
-        grid.className = 'grid-container-num';
-        
-        let numSource = [];
-        if (eqVal !== '' && EQUIPMENT_DATABASE[eqVal.toUpperCase()]) {
-          numSource = EQUIPMENT_DATABASE[eqVal.toUpperCase()];
-        } else {
-          numSource = Object.values(EQUIPMENT_DATABASE).flat();
-          if (numSource.length === 0) {
-            numSource = ["EQ-01", "EQ-02", "EQ-03", "EQ-04", "EQ-05", "EQ-06", "EQ-07", "EQ-08"];
-          }
-        }
-
-        const numQuery = numVal.toUpperCase();
-        const numFiltered = numQuery === '' ? numSource : numSource.filter(n => String(n).toUpperCase().includes(numQuery));
-
-        if (numFiltered.length === 0) {
-          grid.innerHTML = `<div style="grid-column: 1/-1; color: #64748b; font-size: 12px; font-style: italic; text-align: center; padding: 10px;">No matching numbers</div>`;
-        } else {
-          grid.innerHTML = numFiltered.map(n => `<div class="grid-box ${String(n).toUpperCase() === numVal.toUpperCase() ? 'selected' : ''}" onclick="selectPill('${n}')">${n}</div>`).join('');
-        }
-
-      } else if (activePillboxMode === 'issue') {
-        grid.className = 'grid-container-list';
-        let issueSource = (eqVal && ISSUE_DATABASE[eqVal.toUpperCase()]) ? ISSUE_DATABASE[eqVal.toUpperCase()] : ["Aircond - Swing Tidak Berfungsi", "Engine - Leaking Oil", "Brake - Low Pressure", "I've checked and declared all OK"];
-        
-        const rawIssueQuery = issueVal.trim().toUpperCase();
-        const keywords = rawIssueQuery.split(' ').filter(k => k.length > 0);
-
-        let issueFiltered = keywords.length === 0 
-          ? issueSource 
-          : issueSource.filter(i => keywords.every(kw => i.toUpperCase().includes(kw)));
-
-        if (issueFiltered.length === 0) {
-          grid.innerHTML = `<div style="color: #64748b; font-size: 12px; font-style: italic; text-align: center; padding: 10px;">No matching issues found</div>`;
-        } else {
-          grid.innerHTML = issueFiltered.map(i => `<div class="grid-box-list ${i === issueVal ? 'selected' : ''}" onclick="selectPill('${i}')">${i}</div>`).join('');
-        }
-      }
-    }
-
-    function onEquipmentNoInputChange(val) {
-      const num = val.trim().toUpperCase();
-      if (REVERSE_LOOKUP[num]) {
-        document.getElementById('selectEquipment').value = REVERSE_LOOKUP[num];
-      }
-      setActiveMode('number');
-    }
-
-    // Helper: Parse Excel date strings safely into JS Date object
-    function parseExcelDate(dateStr) {
-      if (!dateStr || dateStr === '-') return null;
-      
-      let d = new Date(dateStr);
-      if (!isNaN(d.getTime())) return d;
-
-      try {
-        const parts = String(dateStr).trim().split(' ');
-        const dateParts = parts[0].split(/[\/-]/);
-        const timeParts = parts[1] ? parts[1].split(':') : [0, 0, 0];
-
-        if (dateParts.length === 3) {
-          let month = parseInt(dateParts[0], 10) - 1;
-          let day = parseInt(dateParts[1], 10);
-          let year = parseInt(dateParts[2], 10);
-
-          if (year < 100) year += 2000;
-
-          let hours = parseInt(timeParts[0] || 0, 10);
-          let mins = parseInt(timeParts[1] || 0, 10);
-          let secs = parseInt(timeParts[2] || 0, 10);
-
-          d = new Date(year, month, day, hours, mins, secs);
-          if (!isNaN(d.getTime())) return d;
-        }
-      } catch (e) {}
-
-      return null;
-    }
-
-    async function loadUser12HourLogs() {
-      const tbody = document.getElementById('declarationLogsBody');
-      tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">Loading logs...</td></tr>`;
-      
-      const userIdVal = String(getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218')).trim().toLowerCase();
-
-      try {
-        const response = await fetch(GET_LOGS_FLOW_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ FETCH_ALL: true })
-        });
-
-        if (response.ok) {
-          let rawLogs = await response.json();
-          
-          if (!Array.isArray(rawLogs) && rawLogs.value && Array.isArray(rawLogs.value)) {
-            rawLogs = rawLogs.value;
-          }
-
-          if (!Array.isArray(rawLogs) || rawLogs.length === 0) {
-            tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
-            return;
-          }
-
-          const twelveHoursAgo = new Date(Date.now() - (12 * 60 * 60 * 1000));
-
-          const user12HourLogs = rawLogs.filter(row => {
-            const rowUser = String(getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '')).trim().toLowerCase();
-            const rawDate = getPropValue(row, ['DATE', 'date', 'Date'], '');
-            const parsedDate = parseExcelDate(rawDate);
-
-            const isUserMatch = rowUser === userIdVal;
-            const isRecentMatch = parsedDate ? (parsedDate >= twelveHoursAgo) : true;
-
-            return isUserMatch && isRecentMatch;
-          });
-
-          renderLogsTable(user12HourLogs);
-        } else {
-          tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
-        }
-      } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
-      }
-    }
-
-    function formatLogDate(rawDateStr) {
-      if (!rawDateStr || rawDateStr === '-') return '-';
-      const str = String(rawDateStr).trim();
-      const d = parseExcelDate(str);
-      if (d) {
-        const dd = String(d.getDate()).padStart(2, '0');
-        const mm = String(d.getMonth() + 1).padStart(2, '0');
-        const yyyy = d.getFullYear();
-        const hh = String(d.getHours()).padStart(2, '0');
-        const min = String(d.getMinutes()).padStart(2, '0');
-        return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
-      }
-      return rawDateStr;
-    }
-
-    function renderLogsTable(logs) {
-      const tbody = document.getElementById('declarationLogsBody');
-      tbody.innerHTML = '';
-
-      if (!logs || !Array.isArray(logs) || logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="4" class="declaration-empty">No declarations found.</td></tr>`;
-        return;
-      }
-
-      logs.forEach(row => {
-        const tr = document.createElement('tr');
-        const formattedDate = formatLogDate(getPropValue(row, ['DATE', 'date', 'Date'], '-'));
-        
-        tr.innerHTML = `
-          <td>${formattedDate}</td>
-          <td><strong>${getPropValue(row, ['EQUIPNUM', 'equipnum', 'EquipNum'], '-')}</strong></td>
-          <td>${getPropValue(row, ['AREA', 'area', 'Area'], '-')}</td>
-          <td><strong>${getPropValue(row, ['COMPANY_ID', 'company_id', 'COMPANY ID', 'ID', 'id'], '-')}</strong></td>
-        `;
-        tbody.appendChild(tr);
-      });
-    }
-
-    function showConfirmModal() {
-      const equipment = document.getElementById('selectEquipment').value.trim();
-      const equipmentNo = document.getElementById('selectEquipmentNo').value.trim();
-      const issue = document.getElementById('selectIssue').value.trim();
-
-      if (!equipment) return showError("Please select the Equipment.");
-      if (!equipmentNo) return showError("Please put the Equipment Number");
-      if (!issue) return showError("Please update the Equipment Condition");
-
-      const rawName = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'NOFIJUIDI BIN JUMRI');
-      const firstName = rawName.split(' ')[0];
-
-      document.getElementById('modalGreeting').innerText = `Dear ${firstName}`;
-      document.getElementById('modalEquipNum').innerText = equipmentNo;
-      document.getElementById('modalIssue').innerText = issue;
-      document.getElementById('modalFormattedDate').innerText = `On ${new Date().toLocaleDateString()}`;
-
-      document.querySelectorAll('.action-chk').forEach(chk => chk.checked = false);
-
-      document.getElementById('confirmModal').classList.remove('hidden');
-    }
-
-    function hideConfirmModal() {
-      document.getElementById('confirmModal').classList.add('hidden');
-    }
-
-    async function executeSubmission() {
-      const equipment = document.getElementById('selectEquipment').value.trim();
-      const equipmentNo = document.getElementById('selectEquipmentNo').value.trim();
-      const issue = document.getElementById('selectIssue').value.trim();
-      const shiftText = document.getElementById('shiftBanner').innerText;
-      const confirmBtn = document.getElementById('confirmSubmitBtn');
-
-      const selectedActions = Array.from(document.querySelectorAll('.action-chk:checked'))
-                                  .map(c => c.value)
-                                  .join(', ');
-
-      const userIdVal = getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id'], 'T5218');
-      
-      const payload = {
-        date: new Date().toISOString().replace('T', ' ').substring(0, 19),
-        shift: shiftText,
-        COMPANY_ID: String(userIdVal),
-        Title: String(getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'Unknown')),
-        company: String(getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS')),
-        group: String(getPropValue(currentUser, ['GROUP', 'Group', 'group'], 'N/A')),
-        equipment: String(equipment),
-        equipnum: String(equipmentNo),
-        area: String(issue),
-        declaration: String(selectedActions),
-        action: String(selectedActions),
-        isNewIssue: true
-      };
-
-      confirmBtn.disabled = true;
-      confirmBtn.innerText = 'Submitting...';
-
-      try {
-        const response = await fetch(CHECKLIST_FLOW_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          document.getElementById('selectIssue').value = '';
-          hideConfirmModal();
-          loadUser12HourLogs();
-        } else {
-          hideConfirmModal();
-          showError('Failed to submit inspection log.');
-        }
-      } catch (err) {
-        hideConfirmModal();
-        showError('Network error.');
-      } finally {
-        confirmBtn.disabled = false;
-        confirmBtn.innerText = 'CONFIRM';
-      }
-    }
-
-    function showError(msg) {
-      const errorBox = document.getElementById('errorMessage');
-      errorBox.innerText = msg;
-      errorBox.classList.remove('hidden');
-    }
-
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     window.addEventListener('DOMContentLoaded', () => {
       checkSession();
-      loadConfigData();
-      startLiveTicker();
-      loadUser12HourLogs();
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+      loadEquipmentDatabase();
     });
   </script>
 
