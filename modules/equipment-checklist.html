@@ -171,12 +171,12 @@
       text-transform: uppercase;
     }
 
-    /* Dropdown Selection Grid */
+    /* Dropdown Selection Grid & Meter Grid */
     .select-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
     .select-group {
@@ -191,9 +191,9 @@
       margin-bottom: 6px;
     }
 
-    .form-select {
+    .form-select, .form-input {
       width: 100%;
-      padding: 10px 8px;
+      padding: 10px 12px;
       border: 2px solid #0078D4;
       border-radius: 10px;
       font-size: 14px;
@@ -202,6 +202,11 @@
       outline: none;
       background-color: #ffffff;
       height: 48px;
+    }
+
+    .form-input::placeholder {
+      color: #94a3b8;
+      font-weight: 600;
     }
 
     /* Dynamic Checklist Area */
@@ -584,6 +589,18 @@
         </div>
       </div>
 
+      <!-- ODO Meter & Hour Meter Inputs -->
+      <div class="select-grid">
+        <div class="select-group">
+          <label class="select-label">ODO Meter (KM)</label>
+          <input type="number" id="odoMeterInput" class="form-input" placeholder="e.g. 12500" pattern="[0-9]*" />
+        </div>
+        <div class="select-group">
+          <label class="select-label">Hour Meter (HRS)</label>
+          <input type="number" id="hourMeterInput" class="form-input" placeholder="e.g. 4320" pattern="[0-9]*" />
+        </div>
+      </div>
+
       <!-- Dynamic Checklist Area -->
       <div id="checklistContainer" class="checklist-container">
         <!-- Rendered dynamically once equipment number is selected -->
@@ -937,9 +954,16 @@
     function openConfirmationModal() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
+      const odoVal = document.getElementById('odoMeterInput').value.trim();
+      const hourVal = document.getElementById('hourMeterInput').value.trim();
 
       if (!type || !num) {
         alert("Please select both Equipment Type and Equipment Number before submitting.");
+        return;
+      }
+
+      if (!odoVal || !hourVal) {
+        alert("Please enter both ODO Meter (KM) and Hour Meter (HRS) values.");
         return;
       }
 
@@ -960,6 +984,8 @@
     async function executeSubmission() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
+      const odoVal = document.getElementById('odoMeterInput').value.trim();
+      const hourVal = document.getElementById('hourMeterInput').value.trim();
       const btnConfirm = document.getElementById('btnConfirmSubmit');
 
       btnConfirm.disabled = true;
@@ -968,7 +994,7 @@
       const defectResults = [];
       let hasDefects = false;
 
-      // Filter out 'G' (Good) items completely. Compile defects only.
+      // Compile defect remarks only (omitting 'G' items)
       Object.values(checklistItemStates).forEach(st => {
         if (st.status !== 'G') {
           hasDefects = true;
@@ -979,10 +1005,9 @@
         }
       });
 
-      // If defects exist, concatenate them with ' | '. If all items are 'G', set to "All is Good"
       const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
 
-      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss) from user's device
+      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss)
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -995,6 +1020,7 @@
 
       const currentShift = document.getElementById('shiftNameTag').innerText;
 
+      // Updated payload mapping separate columns
       const payload = {
         date: isoDateTimeString,
         shift: currentShift,
@@ -1004,6 +1030,9 @@
         group: getPropValue(currentUser, ['GROUP', 'Group', 'group'], ''),
         equipment: type,
         equipnum: num,
+        odometer: odoVal,
+        hourmeter: hourVal,
+        fuel: selectedDiesel,
         area: areaString,
         declaration: hasDefects ? "Reported with Defects" : "Declared All OK"
       };
