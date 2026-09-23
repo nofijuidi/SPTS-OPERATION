@@ -1,73 +1,976 @@
-async function executeSubmission() {
-  const type = document.getElementById('equipmentTypeSelect').value;
-  const num = document.getElementById('equipmentNumSelect').value;
-  const btnConfirm = document.getElementById('btnConfirmSubmit');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>SPTS - Equipment Inspection</title>
+  <meta name="theme-color" content="#0f172a">
 
-  btnConfirm.disabled = true;
-  btnConfirm.innerText = "Submitting...";
+  <!-- Mobile Full-Screen Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
 
-  const defectResults = [];
-  let hasDefects = false;
-
-  // Iterate over checklist items and skip any item marked as 'G' (Good)
-  Object.values(checklistItemStates).forEach(st => {
-    if (st.status !== 'G') {
-      hasDefects = true;
-      const cleanTitle = getCleanItemTitle(st.itemTitle);
-      const statusText = STATUS_MAP[st.status] || st.status;
-      const remarkText = st.remark ? `, ${st.remark}` : '';
-      defectResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      -khtml-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
     }
-  });
 
-  // If defects exist, join only the defects. Otherwise set string to "All is Good"
-  const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
+    input, textarea {
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
 
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, '0');
-  const day = String(now.getDate()).padStart(2, '0');
-  const hours = String(now.getHours()).padStart(2, '0');
-  const minutes = String(now.getMinutes()).padStart(2, '0');
-  const seconds = String(now.getSeconds()).padStart(2, '0');
+    html, body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      background-color: #0f172a;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #334155;
+    }
 
-  const isoDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-  const currentShift = document.getElementById('shiftNameTag').innerText;
+    .app-viewport {
+      width: 100vw;
+      height: 100vh;
+      max-width: 412px;
+      max-height: 892px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    }
 
-  const payload = {
-    date: isoDateTimeString,
-    shift: currentShift,
-    COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
-    Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
-    company: getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS'),
-    group: getPropValue(currentUser, ['GROUP', 'Group', 'group'], ''),
-    equipment: type,
-    equipnum: num,
-    area: areaString,
-    declaration: hasDefects ? "Reported with Defects" : "Declared All OK",
-    action: "New Inspection Log",
-    isNewIssue: hasDefects
-  };
+    @media (min-width: 480px) and (orientation: portrait) {
+      .app-viewport {
+        border-radius: 28px;
+        height: 844px;
+      }
+    }
 
-  try {
-    const response = await fetch(INSPECTION_SUBMIT_FLOW_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+    @media (orientation: landscape) {
+      .app-viewport {
+        max-width: 100vw !important;
+        max-height: 100vh !important;
+        border-radius: 0 !important;
+        width: 100vw;
+        height: 100vh;
+      }
+    }
+
+    .view-screen {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      padding: 14px;
+      padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
+      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+      overflow-y: auto;
+    }
+
+    /* Top Nav Header */
+    .module-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+      gap: 8px;
+    }
+
+    .btn-header-icon {
+      width: 46px;
+      height: 46px;
+      background-color: #f1f5f9;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      color: #002060;
+    }
+
+    .module-title {
+      flex: 1;
+      text-align: center;
+      color: #0b2545;
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+    }
+
+    .top-right-app-icon {
+      width: 46px;
+      height: 46px;
+      border-radius: 12px;
+      object-fit: cover;
+      border: 1.5px solid #cbd5e1;
+    }
+
+    /* Shift & User Info Card */
+    .shift-banner {
+      display: flex;
+      border: 1.5px solid #0078D4;
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 10px;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .shift-tag {
+      background-color: #ffd100;
+      color: #000000;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-transform: uppercase;
+    }
+
+    .shift-time {
+      flex: 1;
+      background-color: #ffffff;
+      color: #000000;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      letter-spacing: 0.5px;
+    }
+
+    .user-info-block {
+      margin-bottom: 14px;
+      font-size: 15px;
+      line-height: 1.3;
+    }
+
+    .user-info-company {
+      font-weight: 900;
+      color: #0b2545;
+    }
+
+    .user-info-detail {
+      font-weight: 800;
+      color: #0b2545;
+      text-transform: uppercase;
+    }
+
+    /* Dropdown Selection Grid */
+    .select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .select-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .select-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: #0b2545;
+      margin-bottom: 6px;
+    }
+
+    .form-select {
+      width: 100%;
+      padding: 10px 8px;
+      border: 2px solid #0078D4;
+      border-radius: 10px;
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      outline: none;
+      background-color: #ffffff;
+      height: 48px;
+    }
+
+    /* Dynamic Checklist Area */
+    .checklist-container {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      margin-bottom: 12px;
+    }
+
+    /* Diesel Selection */
+    .diesel-box {
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 10px;
+      background-color: #f8fafc;
+    }
+
+    .diesel-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: #1e293b;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .diesel-options {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
+    }
+
+    .diesel-btn {
+      padding: 10px 0;
+      text-align: center;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      background-color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      cursor: pointer;
+    }
+
+    .diesel-btn.active {
+      background-color: #08506b;
+      color: #ffffff;
+      border-color: #08506b;
+    }
+
+    /* Legend Bar */
+    .legend-bar {
+      background-color: #1e293b;
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      font-weight: 800;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge-icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 4px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      color: #ffffff;
+    }
+
+    .bg-g { background-color: #16a34a; }
+    .bg-m { background-color: #9333ea; }
+    .bg-mf { background-color: #f97316; }
+    .bg-d { background-color: #dc2626; }
+    .bg-l { background-color: #0284c7; }
+
+    /* Checklist Section Card */
+    .section-header {
+      background-color: #1e293b;
+      color: #ffffff;
+      padding: 10px 12px;
+      font-size: 13px;
+      font-weight: 900;
+      border-radius: 8px 8px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .section-body {
+      border: 2px solid #1e293b;
+      border-top: none;
+      border-radius: 0 0 8px 8px;
+      padding: 10px;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .item-row {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 10px;
+    }
+
+    .item-row:last-child {
+      border-bottom: none;
+      padding-bottom: 0;
+    }
+
+    .item-header-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .item-title-text {
+      font-size: 14px;
+      font-weight: 800;
+      color: #0f172a;
+      flex: 1;
+      line-height: 1.3;
+    }
+
+    .status-btn-group {
+      display: flex;
+      gap: 4px;
+    }
+
+    .btn-status {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      border: 1.5px solid #cbd5e1;
+      background-color: #f8fafc;
+      color: #475569;
+      font-size: 13px;
+      font-weight: 900;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+    }
+
+    .btn-status.selected-g { background-color: #16a34a; color: #ffffff; border-color: #16a34a; font-size: 15px; }
+    .btn-status.selected-m { background-color: #9333ea; color: #ffffff; border-color: #9333ea; font-size: 15px; }
+    .btn-status.selected-mf { background-color: #f97316; color: #ffffff; border-color: #f97316; }
+    .btn-status.selected-d { background-color: #dc2626; color: #ffffff; border-color: #dc2626; }
+    .btn-status.selected-l { background-color: #0284c7; color: #ffffff; border-color: #0284c7; }
+
+    .remark-input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 8px;
+      font-size: 13px;
+      color: #334155;
+      outline: none;
+    }
+
+    /* Fixed Bottom Actions */
+    .bottom-action-row {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-top: auto;
+      padding-top: 10px;
+    }
+
+    .btn-submit-main {
+      flex: 1;
+      height: 52px;
+      background-color: #3b62b0;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 900;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-submit-main:active {
+      transform: scale(0.98);
+      background-color: #2b4c8f;
+    }
+
+    /* Cross-Platform SVG Back Button */
+    .btn-back-round {
+      width: 50px;
+      height: 50px;
+      border: 2px solid #3b62b0;
+      border-radius: 50%;
+      background: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .btn-back-round svg {
+      width: 24px;
+      height: 24px;
+      stroke: #3b62b0;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-back-round:active {
+      background-color: #f1f5f9;
+      transform: scale(0.95);
+    }
+
+    /* Declaration Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #0b2545;
+      margin-bottom: 10px;
+    }
+
+    .modal-body-text {
+      font-size: 14px;
+      color: #334155;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .modal-eq-badge {
+      display: inline-block;
+      background-color: #eff6ff;
+      color: #1e40af;
+      border: 1.5px solid #bfdbfe;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 15px;
+      margin-top: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-modal-cancel {
+      flex: 1;
+      height: 44px;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .btn-modal-confirm {
+      flex: 1;
+      height: 44px;
+      border: none;
+      background: #16a34a;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="app-viewport">
+    <div class="view-screen">
+
+      <!-- Top Nav Header -->
+      <div class="module-header">
+        <div class="btn-header-icon" onclick="goHome()" title="Go Home">🏠</div>
+        <div class="module-title">EQUIPMENT INSPECTION</div>
+        <img src="../icon-192.png" alt="App Icon" class="top-right-app-icon" onerror="this.style.display='none'" />
+      </div>
+
+      <!-- Shift & Date Banner -->
+      <div class="shift-banner">
+        <div class="shift-tag" id="shiftNameTag">DAY SHIFT</div>
+        <div class="shift-time">
+          <span id="liveDateStr">23/09/2026</span>
+          <span id="liveTimeStr">15:18</span>
+          <span id="liveSecStr">00s</span>
+        </div>
+      </div>
+
+      <!-- User Information -->
+      <div class="user-info-block">
+        <div class="user-info-company" id="userCompanyTag">SPTS</div>
+        <div class="user-info-detail" id="userDetailTag">T5218 | NOFIJUIDI BIN JUMRI</div>
+      </div>
+
+      <!-- Equipment Type & Number Selection Dropdowns -->
+      <div class="select-grid">
+        <div class="select-group">
+          <label class="select-label">Select Equipment</label>
+          <select id="equipmentTypeSelect" class="form-select" onchange="handleTypeChange(this.value)">
+            <option value="">Select type...</option>
+          </select>
+        </div>
+        <div class="select-group">
+          <label class="select-label">Equipment Number</label>
+          <select id="equipmentNumSelect" class="form-select" onchange="handleNumChange(this.value)">
+            <option value="">Select number...</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Dynamic Checklist Content -->
+      <div id="checklistContainer" class="checklist-container">
+        <!-- Rendered dynamically once equipment number is selected -->
+      </div>
+
+      <!-- Bottom Navigation Footer with Universal SVG Left Arrow -->
+      <div class="bottom-action-row">
+        <button class="btn-submit-main" onclick="openConfirmationModal()">Submit</button>
+        <div class="btn-back-round" onclick="goHome()" title="Go Back">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Confirmation Pop-Up Modal -->
+    <div id="declarationModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-title">Confirm Inspection</div>
+        <div class="modal-body-text">
+          Are you sure you want to declare the inspection checklist for:
+          <br>
+          <span class="modal-eq-badge" id="modalEqText">--</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" onclick="closeConfirmationModal()">Cancel</button>
+          <button class="btn-modal-confirm" id="btnConfirmSubmit" onclick="executeSubmission()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const INSPECTION_SUBMIT_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
+
+    let equipmentDb = {};
+    let currentUser = null;
+    let selectedType = "";
+    let selectedNum = "";
+    let selectedDiesel = "FULL";
+    let checklistItemStates = {};
+
+    const BASE_GENERAL_CHECK_ITEMS = [
+      "Aircond / Penghawa Dingin",
+      "Warning Triangle / SegiTiga Amaran",
+      "All Gauge / Panel Meter",
+      "RFID (P1 to P23 only)",
+      "VMT",
+      "Driver's seat / Kerusi Pemandu",
+      "Steering Wheel",
+      "Horn",
+      "Wiper",
+      "Brake"
+    ];
+
+    const STATUS_MAP = {
+      'G': 'Good',
+      'M': 'Missing',
+      'MF': 'Malfunction',
+      'D': 'Damage',
+      'L': 'Leaking'
+    };
+
+    function getCleanItemTitle(rawTitle) {
+      if (!rawTitle) return "";
+      let clean = rawTitle.replace(/^\d+\.\s*/, '').trim();
+      
+      if (clean.includes("Aircond")) return "Aircond";
+      if (clean.includes("Warning Triangle")) return "Warning Triangle";
+      if (clean.includes("All Gauge")) return "All Gauge";
+      if (clean.includes("RFID")) return "RFID";
+      if (clean.includes("Driver's seat")) return "Driver's seat";
+      
+      return clean;
+    }
+
+    function checkSession() {
+      const activeSession = sessionStorage.getItem('userSession');
+      if (!activeSession) {
+        window.location.href = '../index.html';
+        return;
+      }
+
+      currentUser = JSON.parse(activeSession);
+      const accessLevel = String(currentUser.Access || currentUser.access || currentUser.ACCESS || '').trim();
+      
+      if (accessLevel === '1') {
+        alert('Unauthorized access to Equipment Checklist.');
+        window.location.href = '../index.html';
+        return;
+      }
+
+      const name = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'USER');
+      const company = getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS');
+      const id = getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], 'N/A');
+
+      document.getElementById('userCompanyTag').innerText = company;
+      document.getElementById('userDetailTag').innerText = `${id} | ${name}`;
+    }
+
+    function getPropValue(obj, keys, defaultValue = 'N/A') {
+      if (!obj) return defaultValue;
+      for (const k of keys) {
+        if (obj[k] !== undefined && obj[k] !== null && String(obj[k]).trim() !== '') return obj[k];
+      }
+      return defaultValue;
+    }
+
+    function updateLiveClock() {
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+
+      const hh = String(now.getHours()).padStart(2, '0');
+      const min = String(now.getMinutes()).padStart(2, '0');
+      const ss = String(now.getSeconds()).padStart(2, '0');
+
+      document.getElementById('liveDateStr').innerText = `${dd}/${mm}/${yyyy}`;
+      document.getElementById('liveTimeStr').innerText = `${hh}:${min}`;
+      document.getElementById('liveSecStr').innerText = `${ss}s`;
+
+      const hour = now.getHours();
+      const shiftTag = document.getElementById('shiftNameTag');
+      if (hour >= 8 && hour < 20) {
+        shiftTag.innerText = "DAY SHIFT";
+        shiftTag.style.backgroundColor = "#ffd100";
+      } else {
+        shiftTag.innerText = "NIGHT SHIFT";
+        shiftTag.style.backgroundColor = "#0284c7";
+        shiftTag.style.color = "#ffffff";
+      }
+    }
+
+    async function loadEquipmentDatabase() {
+      try {
+        const response = await fetch(`../data.json?v=${Date.now()}`);
+        if (response.ok) {
+          const data = await response.json();
+          equipmentDb = data.EQUIPMENT_DATABASE || {};
+          populateTypeOptions();
+        }
+      } catch (err) {
+        console.error("Failed to load equipment database:", err);
+      }
+    }
+
+    function populateTypeOptions() {
+      const typeSelect = document.getElementById('equipmentTypeSelect');
+      typeSelect.innerHTML = '<option value="">Select type...</option>';
+
+      Object.keys(equipmentDb).forEach(type => {
+        const opt = document.createElement('option');
+        opt.value = type;
+        opt.textContent = type;
+        typeSelect.appendChild(opt);
+      });
+    }
+
+    function handleTypeChange(type) {
+      selectedType = type;
+      const numSelect = document.getElementById('equipmentNumSelect');
+      numSelect.innerHTML = '<option value="">Select number...</option>';
+
+      if (type && equipmentDb[type]) {
+        equipmentDb[type].forEach(num => {
+          const opt = document.createElement('option');
+          opt.value = num;
+          opt.textContent = num;
+          numSelect.appendChild(opt);
+        });
+      }
+      
+      handleNumChange("");
+    }
+
+    function handleNumChange(num) {
+      selectedNum = num;
+      if (selectedType && selectedNum) {
+        renderChecklistUI(selectedType, selectedNum);
+      } else {
+        document.getElementById('checklistContainer').innerHTML = '';
+      }
+    }
+
+    function isP1ToP23(eqNum) {
+      if (!eqNum) return false;
+      const match = String(eqNum).trim().toUpperCase().match(/^P0*(\d+)$/);
+      if (match) {
+        const val = parseInt(match[1], 10);
+        return val >= 1 && val <= 23;
+      }
+      return false;
+    }
+
+    function renderChecklistUI(type, num) {
+      const container = document.getElementById('checklistContainer');
+      checklistItemStates = {};
+
+      const showRfid = isP1ToP23(num);
+      const items = BASE_GENERAL_CHECK_ITEMS.filter(item => {
+        if (item.includes("RFID")) return showRfid;
+        return true;
+      });
+
+      let html = `
+        <!-- Diesel Level Section -->
+        <div class="diesel-box">
+          <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
+          <div class="diesel-options">
+            <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
+            <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
+          </div>
+        </div>
+
+        <!-- Legend Bar -->
+        <div class="legend-bar">
+          <span style="color:#cbd5e1;">LEGEND:</span>
+          <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
+          <div class="legend-item"><span class="badge-icon bg-m">✗</span> Missing</div>
+          <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
+          <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
+          <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
+        </div>
+
+        <!-- Section List Card -->
+        <div>
+          <div class="section-header">
+            <span>1. GENERAL CHECK (${type} - ${num})</span>
+            <span>${items.length} ITEMS</span>
+          </div>
+          <div class="section-body">
+      `;
+
+      items.forEach((item, index) => {
+        checklistItemStates[index] = { itemTitle: item, status: null, remark: '' };
+
+        html += `
+          <div class="item-row">
+            <div class="item-header-line">
+              <span class="item-title-text">${index + 1}. ${item}</span>
+              <div class="status-btn-group">
+                <button class="btn-status" onclick="setItemStatus(${index}, 'G', this)">✔</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">✗</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'MF', this)">MF</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'D', this)">D</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'L', this)">L</button>
+              </div>
+            </div>
+            <input type="text" class="remark-input" placeholder="Add remark if defect..." oninput="setItemRemark(${index}, this.value)" />
+          </div>
+        `;
+      });
+
+      html += `
+          </div>
+        </div>
+      `;
+
+      container.innerHTML = html;
+    }
+
+    function setDiesel(btn, level) {
+      selectedDiesel = level;
+      document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function setItemStatus(index, status, btn) {
+      if (checklistItemStates[index]) {
+        checklistItemStates[index].status = status;
+      }
+
+      const parentGroup = btn.parentElement;
+      parentGroup.querySelectorAll('.btn-status').forEach(b => {
+        b.className = 'btn-status';
+      });
+
+      btn.classList.add(`selected-${status.toLowerCase()}`);
+    }
+
+    function setItemRemark(index, val) {
+      if (checklistItemStates[index]) {
+        checklistItemStates[index].remark = val.trim();
+      }
+    }
+
+    function openConfirmationModal() {
+      const type = document.getElementById('equipmentTypeSelect').value;
+      const num = document.getElementById('equipmentNumSelect').value;
+
+      if (!type || !num) {
+        alert("Please select both Equipment Type and Equipment Number before submitting.");
+        return;
+      }
+
+      const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
+      if (unselectedCount > 0) {
+        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
+        return;
+      }
+
+      document.getElementById('modalEqText').innerText = `${type} - ${num}`;
+      document.getElementById('declarationModal').classList.remove('hidden');
+    }
+
+    function closeConfirmationModal() {
+      document.getElementById('declarationModal').classList.add('hidden');
+    }
+
+    async function executeSubmission() {
+      const type = document.getElementById('equipmentTypeSelect').value;
+      const num = document.getElementById('equipmentNumSelect').value;
+      const btnConfirm = document.getElementById('btnConfirmSubmit');
+
+      btnConfirm.disabled = true;
+      btnConfirm.innerText = "Submitting...";
+
+      const defectResults = [];
+      let hasDefects = false;
+
+      // Filter out 'G' (Good) items completely. Only process items with defects.
+      Object.values(checklistItemStates).forEach(st => {
+        if (st.status !== 'G') {
+          hasDefects = true;
+          const cleanTitle = getCleanItemTitle(st.itemTitle);
+          const statusText = STATUS_MAP[st.status] || st.status;
+          const remarkText = st.remark ? `, ${st.remark}` : '';
+          defectResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
+        }
+      });
+
+      // If defects exist, concatenate them with ' | '. If all items are 'G', set to "All is Good"
+      const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
+
+      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss) from user's device
+      const now = new Date();
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      const isoDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+
+      const currentShift = document.getElementById('shiftNameTag').innerText;
+
+      const payload = {
+        date: isoDateTimeString,
+        shift: currentShift,
+        COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
+        Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
+        company: getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS'),
+        group: getPropValue(currentUser, ['GROUP', 'Group', 'group'], ''),
+        equipment: type,
+        equipnum: num,
+        area: areaString,
+        declaration: hasDefects ? "Reported with Defects" : "Declared All OK",
+        action: "New Inspection Log",
+        isNewIssue: hasDefects
+      };
+
+      try {
+        const response = await fetch(INSPECTION_SUBMIT_FLOW_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+          alert("Inspection checklist submitted successfully!");
+          closeConfirmationModal();
+          goHome();
+        } else {
+          alert("Failed to submit inspection checklist.");
+        }
+      } catch (err) {
+        console.error("Submission Error:", err);
+        alert("Network error submitting checklist.");
+      } finally {
+        btnConfirm.disabled = false;
+        btnConfirm.innerText = "Confirm";
+      }
+    }
+
+    function goHome() {
+      window.location.href = '../index.html';
+    }
+
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+    window.addEventListener('DOMContentLoaded', () => {
+      checkSession();
+      updateLiveClock();
+      setInterval(updateLiveClock, 1000);
+      loadEquipmentDatabase();
     });
+  </script>
 
-    if (response.ok) {
-      alert("Inspection checklist submitted successfully!");
-      closeConfirmationModal();
-      goHome();
-    } else {
-      alert("Failed to submit inspection checklist.");
-    }
-  } catch (err) {
-    console.error("Submission Error:", err);
-    alert("Network error submitting checklist.");
-  } finally {
-    btnConfirm.disabled = false;
-    btnConfirm.innerText = "Confirm";
-  }
-}
+  <!-- Global Full-Screen Trigger -->
+  <script src="../js/fullscreen-global.js"></script>
+</body>
+</html>
