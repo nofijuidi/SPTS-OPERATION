@@ -287,9 +287,9 @@
     }
 
     .bg-g { background-color: #16a34a; }
+    .bg-m { background-color: #9333ea; }
     .bg-mf { background-color: #f97316; }
     .bg-d { background-color: #dc2626; }
-    .bg-m { background-color: #9333ea; }
     .bg-l { background-color: #0284c7; }
 
     /* Checklist Section Card */
@@ -364,10 +364,10 @@
       cursor: pointer;
     }
 
-    .btn-status.selected-g { background-color: #16a34a; color: #ffffff; border-color: #16a34a; font-size: 16px; }
+    .btn-status.selected-g { background-color: #16a34a; color: #ffffff; border-color: #16a34a; font-size: 15px; }
+    .btn-status.selected-m { background-color: #9333ea; color: #ffffff; border-color: #9333ea; font-size: 15px; }
     .btn-status.selected-mf { background-color: #f97316; color: #ffffff; border-color: #f97316; }
     .btn-status.selected-d { background-color: #dc2626; color: #ffffff; border-color: #dc2626; }
-    .btn-status.selected-m { background-color: #9333ea; color: #ffffff; border-color: #9333ea; }
     .btn-status.selected-l { background-color: #0284c7; color: #ffffff; border-color: #0284c7; }
 
     .remark-input {
@@ -407,20 +407,34 @@
       background-color: #2b4c8f;
     }
 
+    /* Cross-Platform SVG Back Button */
     .btn-back-round {
       width: 50px;
       height: 50px;
       border: 2px solid #3b62b0;
       border-radius: 50%;
       background: #ffffff;
-      color: #3b62b0;
-      font-size: 24px;
-      font-weight: bold;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       flex-shrink: 0;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+
+    .btn-back-round svg {
+      width: 24px;
+      height: 24px;
+      stroke: #3b62b0;
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .btn-back-round:active {
+      background-color: #f1f5f9;
+      transform: scale(0.95);
     }
   </style>
 </head>
@@ -473,10 +487,12 @@
         <!-- Rendered dynamically once equipment number is selected -->
       </div>
 
-      <!-- Bottom Navigation Footer -->
+      <!-- Bottom Navigation Footer with Universal SVG Left Arrow -->
       <div class="bottom-action-row">
         <button class="btn-submit-main" onclick="submitInspection()">Submit</button>
-        <div class="btn-back-round" onclick="goHome()" title="Go Back">🠠</div>
+        <div class="btn-back-round" onclick="goHome()" title="Go Back">
+          <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </div>
       </div>
 
     </div>
@@ -507,9 +523,9 @@
 
     const STATUS_MAP = {
       'G': 'Good',
+      'M': 'Missing',
       'MF': 'Malfunction',
       'D': 'Damage',
-      'M': 'Missing',
       'L': 'Leaking'
     };
 
@@ -655,13 +671,13 @@
           </div>
         </div>
 
-        <!-- Legend Bar -->
+        <!-- Legend Bar (Sorted: ✔, ✗, MF, D, L) -->
         <div class="legend-bar">
           <span style="color:#cbd5e1;">LEGEND:</span>
-          <div class="legend-item"><span class="badge-icon bg-g">✓</span> Good</div>
+          <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
+          <div class="legend-item"><span class="badge-icon bg-m">✗</span> Missing</div>
           <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
           <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
-          <div class="legend-item"><span class="badge-icon bg-m">M</span> Missing</div>
           <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
         </div>
 
@@ -683,10 +699,10 @@
             <div class="item-header-line">
               <span class="item-title-text">${index + 1}. ${item}</span>
               <div class="status-btn-group">
-                <button class="btn-status" onclick="setItemStatus(${index}, 'G', this)">✓</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'G', this)">✔</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">✗</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'MF', this)">MF</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'D', this)">D</button>
-                <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">M</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'L', this)">L</button>
               </div>
             </div>
@@ -740,7 +756,7 @@
       // Ensure every item has been reviewed and given a status
       const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
       if (unselectedCount > 0) {
-        alert(`Please select a status (✓, MF, D, M, or L) for all ${unselectedCount} remaining item(s).`);
+        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
         return;
       }
 
