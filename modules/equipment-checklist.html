@@ -407,6 +407,7 @@
       background-color: #2b4c8f;
     }
 
+    /* Cross-Platform SVG Back Button */
     .btn-back-round {
       width: 50px;
       height: 50px;
@@ -429,6 +430,11 @@
       fill: none;
       stroke-linecap: round;
       stroke-linejoin: round;
+    }
+
+    .btn-back-round:active {
+      background-color: #f1f5f9;
+      transform: scale(0.95);
     }
 
     /* Declaration Modal */
@@ -566,7 +572,7 @@
         <!-- Rendered dynamically once equipment number is selected -->
       </div>
 
-      <!-- Bottom Navigation Footer -->
+      <!-- Bottom Navigation Footer with Universal SVG Left Arrow -->
       <div class="bottom-action-row">
         <button class="btn-submit-main" onclick="openConfirmationModal()">Submit</button>
         <div class="btn-back-round" onclick="goHome()" title="Go Back">
@@ -595,7 +601,7 @@
   </div>
 
   <script>
-    const INSPECTION_SUBMIT_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/03/workflows/b9402ed6963f4ffb9e8a0cc515524257/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=dAeC5Re7BEQYm1twyCdaWCPGJTAtP79JaUqVY1sQGIk";
+    const INSPECTION_SUBMIT_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
 
     let equipmentDb = {};
     let currentUser = null;
@@ -617,7 +623,6 @@
       "Brake"
     ];
 
-    // Maps status keys to exact backend strings
     const STATUS_MAP = {
       'G': 'Good',
       'M': 'Missing',
@@ -626,7 +631,6 @@
       'L': 'Leaking'
     };
 
-    // Clean item titles for output string matching
     function getCleanItemTitle(rawTitle) {
       if (!rawTitle) return "";
       let clean = rawTitle.replace(/^\d+\.\s*/, '').trim();
