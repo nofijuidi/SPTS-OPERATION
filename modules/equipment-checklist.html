@@ -906,14 +906,16 @@
 
       const areaString = formattedResults.join(' | ');
 
-      // Standard ISO 8601 Date Format (YYYY-MM-DD) for Power Automate / Excel parsing
+      // Full ISO 8601 Timestamp with Date and Time (YYYY-MM-DDTHH:mm:ss)
       const now = new Date();
-      const isoDateStr = now.toISOString().split('T')[0];
-      
+      const tzOffsetMin = now.getTimezoneOffset();
+      const localTime = new Date(now.getTime() - (tzOffsetMin * 60000));
+      const isoFullDateTimeStr = localTime.toISOString().slice(0, 19);
+
       const currentShift = document.getElementById('shiftNameTag').innerText;
 
       const payload = {
-        date: isoDateStr,
+        date: isoFullDateTimeStr,
         shift: currentShift,
         COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
         Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
