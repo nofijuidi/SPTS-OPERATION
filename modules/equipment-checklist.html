@@ -407,7 +407,6 @@
       background-color: #2b4c8f;
     }
 
-    /* Cross-Platform SVG Back Button */
     .btn-back-round {
       width: 50px;
       height: 50px;
@@ -432,9 +431,89 @@
       stroke-linejoin: round;
     }
 
-    .btn-back-round:active {
-      background-color: #f1f5f9;
-      transform: scale(0.95);
+    /* Declaration Modal */
+    .modal-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(15, 23, 42, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 18px;
+      padding: 20px;
+      width: 100%;
+      max-width: 320px;
+      text-align: center;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 900;
+      color: #0b2545;
+      margin-bottom: 10px;
+    }
+
+    .modal-body-text {
+      font-size: 14px;
+      color: #334155;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 18px;
+    }
+
+    .modal-eq-badge {
+      display: inline-block;
+      background-color: #eff6ff;
+      color: #1e40af;
+      border: 1.5px solid #bfdbfe;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-weight: 800;
+      font-size: 15px;
+      margin-top: 6px;
+    }
+
+    .modal-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-modal-cancel {
+      flex: 1;
+      height: 44px;
+      border: 1.5px solid #cbd5e1;
+      background: #f8fafc;
+      color: #475569;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .btn-modal-confirm {
+      flex: 1;
+      height: 44px;
+      border: none;
+      background: #16a34a;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: 800;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
@@ -487,15 +566,32 @@
         <!-- Rendered dynamically once equipment number is selected -->
       </div>
 
-      <!-- Bottom Navigation Footer with Universal SVG Left Arrow -->
+      <!-- Bottom Navigation Footer -->
       <div class="bottom-action-row">
-        <button class="btn-submit-main" onclick="submitInspection()">Submit</button>
+        <button class="btn-submit-main" onclick="openConfirmationModal()">Submit</button>
         <div class="btn-back-round" onclick="goHome()" title="Go Back">
           <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
         </div>
       </div>
 
     </div>
+
+    <!-- Confirmation Pop-Up Modal -->
+    <div id="declarationModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-title">Confirm Inspection</div>
+        <div class="modal-body-text">
+          Are you sure you want to declare the inspection checklist for:
+          <br>
+          <span class="modal-eq-badge" id="modalEqText">--</span>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-modal-cancel" onclick="closeConfirmationModal()">Cancel</button>
+          <button class="btn-modal-confirm" id="btnConfirmSubmit" onclick="executeSubmission()">Confirm</button>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -521,6 +617,7 @@
       "Brake"
     ];
 
+    // Maps status keys to exact backend strings
     const STATUS_MAP = {
       'G': 'Good',
       'M': 'Missing',
@@ -528,6 +625,20 @@
       'D': 'Damage',
       'L': 'Leaking'
     };
+
+    // Clean item titles for output string matching
+    function getCleanItemTitle(rawTitle) {
+      if (!rawTitle) return "";
+      let clean = rawTitle.replace(/^\d+\.\s*/, '').trim();
+      
+      if (clean.includes("Aircond")) return "Aircond";
+      if (clean.includes("Warning Triangle")) return "Warning Triangle";
+      if (clean.includes("All Gauge")) return "All Gauge";
+      if (clean.includes("RFID")) return "RFID";
+      if (clean.includes("Driver's seat")) return "Driver's seat";
+      
+      return clean;
+    }
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
@@ -626,7 +737,6 @@
         });
       }
       
-      // Reset number selection and hide checklist until chosen
       handleNumChange("");
     }
 
@@ -671,7 +781,7 @@
           </div>
         </div>
 
-        <!-- Legend Bar (Sorted: ✔, ✗, MF, D, L) -->
+        <!-- Legend Bar -->
         <div class="legend-bar">
           <span style="color:#cbd5e1;">LEGEND:</span>
           <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
@@ -691,7 +801,6 @@
       `;
 
       items.forEach((item, index) => {
-        // Items start unselected (null status)
         checklistItemStates[index] = { itemTitle: item, status: null, remark: '' };
 
         html += `
@@ -744,7 +853,7 @@
       }
     }
 
-    async function submitInspection() {
+    function openConfirmationModal() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
 
@@ -753,24 +862,43 @@
         return;
       }
 
-      // Ensure every item has been reviewed and given a status
       const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
       if (unselectedCount > 0) {
         alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
         return;
       }
 
-      const reportedIssues = [];
+      document.getElementById('modalEqText').innerText = `${type} - ${num}`;
+      document.getElementById('declarationModal').classList.remove('hidden');
+    }
+
+    function closeConfirmationModal() {
+      document.getElementById('declarationModal').classList.add('hidden');
+    }
+
+    async function executeSubmission() {
+      const type = document.getElementById('equipmentTypeSelect').value;
+      const num = document.getElementById('equipmentNumSelect').value;
+      const btnConfirm = document.getElementById('btnConfirmSubmit');
+
+      btnConfirm.disabled = true;
+      btnConfirm.innerText = "Submitting...";
+
+      const formattedResults = [];
 
       Object.values(checklistItemStates).forEach(st => {
-        if (st.status !== 'G') {
-          const statusText = STATUS_MAP[st.status] || st.status;
+        const cleanTitle = getCleanItemTitle(st.itemTitle);
+        const statusText = STATUS_MAP[st.status] || st.status;
+
+        if (st.status === 'G') {
+          formattedResults.push(`${cleanTitle} - Good`);
+        } else {
           const remarkText = st.remark ? `, ${st.remark}` : '';
-          reportedIssues.push(`${st.itemTitle} - ${statusText}${remarkText}`);
+          formattedResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
         }
       });
 
-      const areaString = reportedIssues.length > 0 ? reportedIssues.join(' | ') : "I've checked and declared all OK";
+      const areaString = formattedResults.join(' | ');
 
       const payload = {
         EQUIPMENT: type,
@@ -790,6 +918,7 @@
 
         if (response.ok) {
           alert("Inspection checklist submitted successfully!");
+          closeConfirmationModal();
           goHome();
         } else {
           alert("Failed to submit inspection checklist.");
@@ -797,6 +926,9 @@
       } catch (err) {
         console.error("Submission Error:", err);
         alert("Network error submitting checklist.");
+      } finally {
+        btnConfirm.disabled = false;
+        btnConfirm.innerText = "Confirm";
       }
     }
 
