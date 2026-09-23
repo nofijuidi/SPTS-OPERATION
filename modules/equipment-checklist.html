@@ -176,7 +176,7 @@
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
     }
 
     .select-group {
@@ -191,48 +191,17 @@
       margin-bottom: 6px;
     }
 
-    /* Larger Form Selects for Accessibility */
     .form-select {
       width: 100%;
-      padding: 12px 10px;
+      padding: 10px 8px;
       border: 2px solid #0078D4;
       border-radius: 10px;
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: #0f172a;
       outline: none;
       background-color: #ffffff;
       height: 48px;
-    }
-
-    /* Type Buttons Selector */
-    .type-buttons-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 8px;
-      margin-bottom: 14px;
-      max-height: 190px;
-      overflow-y: auto;
-      padding-right: 2px;
-    }
-
-    .type-btn {
-      background-color: #3b62b0;
-      color: #ffffff;
-      border: none;
-      border-radius: 8px;
-      padding: 12px 4px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-      text-align: center;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.15);
-      text-transform: uppercase;
-    }
-
-    .type-btn.active {
-      background-color: #08506b;
-      box-shadow: inset 0 0 0 2px #ffffff;
     }
 
     /* Dynamic Checklist Area */
@@ -367,7 +336,6 @@
       gap: 8px;
     }
 
-    /* Larger Font for Item Title */
     .item-title-text {
       font-size: 14px;
       font-weight: 800;
@@ -381,7 +349,6 @@
       gap: 4px;
     }
 
-    /* Larger Touch-Friendly Buttons for Senior Operators */
     .btn-status {
       width: 32px;
       height: 32px;
@@ -403,7 +370,6 @@
     .btn-status.selected-m { background-color: #9333ea; color: #ffffff; border-color: #9333ea; }
     .btn-status.selected-l { background-color: #0284c7; color: #ffffff; border-color: #0284c7; }
 
-    /* Larger Remark Text Input */
     .remark-input {
       width: 100%;
       padding: 10px 12px;
@@ -441,7 +407,6 @@
       background-color: #2b4c8f;
     }
 
-    /* Left-Pointing Back Button */
     .btn-back-round {
       width: 50px;
       height: 50px;
@@ -487,7 +452,7 @@
         <div class="user-info-detail" id="userDetailTag">T5218 | NOFIJUIDI BIN JUMRI</div>
       </div>
 
-      <!-- Equipment Type & Number Selection Grid -->
+      <!-- Equipment Type & Number Selection Dropdowns -->
       <div class="select-grid">
         <div class="select-group">
           <label class="select-label">Select Equipment</label>
@@ -503,17 +468,12 @@
         </div>
       </div>
 
-      <!-- Quick Type Buttons Grid -->
-      <div id="typeButtonsGrid" class="type-buttons-grid">
-        <!-- Dynamically rendered equipment pills -->
-      </div>
-
-      <!-- Dynamic Checklist Content (Appears only when Equipment Number is selected) -->
+      <!-- Dynamic Checklist Content -->
       <div id="checklistContainer" class="checklist-container">
-        <!-- Rendered dynamically -->
+        <!-- Rendered dynamically once equipment number is selected -->
       </div>
 
-      <!-- Bottom Navigation Footer with Left-Pointing Back Arrow -->
+      <!-- Bottom Navigation Footer -->
       <div class="bottom-action-row">
         <button class="btn-submit-main" onclick="submitInspection()">Submit</button>
         <div class="btn-back-round" onclick="goHome()" title="Go Back">🠠</div>
@@ -532,12 +492,11 @@
     let selectedDiesel = "FULL";
     let checklistItemStates = {};
 
-    // Base Inspection List
     const BASE_GENERAL_CHECK_ITEMS = [
       "Aircond / Penghawa Dingin",
       "Warning Triangle / SegiTiga Amaran",
       "All Gauge / Panel Meter",
-      "RFID (P1 to P23 only)", // Will conditionally render based on P1-P23
+      "RFID (P1 to P23 only)",
       "VMT",
       "Driver's seat / Kerusi Pemandu",
       "Steering Wheel",
@@ -627,27 +586,13 @@
 
     function populateTypeOptions() {
       const typeSelect = document.getElementById('equipmentTypeSelect');
-      const btnGrid = document.getElementById('typeButtonsGrid');
-
       typeSelect.innerHTML = '<option value="">Select type...</option>';
-      btnGrid.innerHTML = '';
 
       Object.keys(equipmentDb).forEach(type => {
-        // Select Dropdown
         const opt = document.createElement('option');
         opt.value = type;
         opt.textContent = type;
         typeSelect.appendChild(opt);
-
-        // Grid Button
-        const btn = document.createElement('button');
-        btn.className = 'type-btn';
-        btn.textContent = type;
-        btn.onclick = () => {
-          typeSelect.value = type;
-          handleTypeChange(type);
-        };
-        btnGrid.appendChild(btn);
       });
     }
 
@@ -656,15 +601,6 @@
       const numSelect = document.getElementById('equipmentNumSelect');
       numSelect.innerHTML = '<option value="">Select number...</option>';
 
-      // Highlight button grid
-      document.querySelectorAll('.type-btn').forEach(btn => {
-        if (btn.textContent === type) {
-          btn.classList.add('active');
-        } else {
-          btn.classList.remove('active');
-        }
-      });
-
       if (type && equipmentDb[type]) {
         equipmentDb[type].forEach(num => {
           const opt = document.createElement('option');
@@ -672,16 +608,10 @@
           opt.textContent = num;
           numSelect.appendChild(opt);
         });
-
-        if (equipmentDb[type].length > 0) {
-          numSelect.value = equipmentDb[type][0];
-          handleNumChange(equipmentDb[type][0]);
-        } else {
-          handleNumChange("");
-        }
-      } else {
-        handleNumChange("");
       }
+      
+      // Reset number selection and hide checklist until chosen
+      handleNumChange("");
     }
 
     function handleNumChange(num) {
@@ -689,12 +619,10 @@
       if (selectedType && selectedNum) {
         renderChecklistUI(selectedType, selectedNum);
       } else {
-        // Hide pillbox if Equipment Number is not selected
         document.getElementById('checklistContainer').innerHTML = '';
       }
     }
 
-    // Helper: Checks if selected number is between P01 and P23 (or P1 to P23)
     function isP1ToP23(eqNum) {
       if (!eqNum) return false;
       const match = String(eqNum).trim().toUpperCase().match(/^P0*(\d+)$/);
@@ -709,7 +637,6 @@
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
 
-      // Filter RFID question based on P1 to P23 rule
       const showRfid = isP1ToP23(num);
       const items = BASE_GENERAL_CHECK_ITEMS.filter(item => {
         if (item.includes("RFID")) return showRfid;
@@ -728,7 +655,7 @@
           </div>
         </div>
 
-        <!-- Legend Bar with ✓ Tick for Good -->
+        <!-- Legend Bar -->
         <div class="legend-bar">
           <span style="color:#cbd5e1;">LEGEND:</span>
           <div class="legend-item"><span class="badge-icon bg-g">✓</span> Good</div>
@@ -748,14 +675,15 @@
       `;
 
       items.forEach((item, index) => {
-        checklistItemStates[index] = { itemTitle: item, status: 'G', remark: '' };
+        // Items start unselected (null status)
+        checklistItemStates[index] = { itemTitle: item, status: null, remark: '' };
 
         html += `
           <div class="item-row">
             <div class="item-header-line">
               <span class="item-title-text">${index + 1}. ${item}</span>
               <div class="status-btn-group">
-                <button class="btn-status selected-g" onclick="setItemStatus(${index}, 'G', this)">✓</button>
+                <button class="btn-status" onclick="setItemStatus(${index}, 'G', this)">✓</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'MF', this)">MF</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'D', this)">D</button>
                 <button class="btn-status" onclick="setItemStatus(${index}, 'M', this)">M</button>
@@ -806,6 +734,13 @@
 
       if (!type || !num) {
         alert("Please select both Equipment Type and Equipment Number before submitting.");
+        return;
+      }
+
+      // Ensure every item has been reviewed and given a status
+      const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
+      if (unselectedCount > 0) {
+        alert(`Please select a status (✓, MF, D, M, or L) for all ${unselectedCount} remaining item(s).`);
         return;
       }
 
