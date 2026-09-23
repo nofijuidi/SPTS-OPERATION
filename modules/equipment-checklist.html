@@ -889,6 +889,7 @@
       btnConfirm.innerText = "Submitting...";
 
       const formattedResults = [];
+      let hasDefects = false;
 
       Object.values(checklistItemStates).forEach(st => {
         const cleanTitle = getCleanItemTitle(st.itemTitle);
@@ -897,6 +898,7 @@
         if (st.status === 'G') {
           formattedResults.push(`${cleanTitle} - Good`);
         } else {
+          hasDefects = true;
           const remarkText = st.remark ? `, ${st.remark}` : '';
           formattedResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
         }
@@ -904,13 +906,27 @@
 
       const areaString = formattedResults.join(' | ');
 
+      const now = new Date();
+      const dd = String(now.getDate()).padStart(2, '0');
+      const mm = String(now.getMonth() + 1).padStart(2, '0');
+      const yyyy = now.getFullYear();
+      const dateStr = `${dd}/${mm}/${yyyy}`;
+      
+      const currentShift = document.getElementById('shiftNameTag').innerText;
+
       const payload = {
-        EQUIPMENT: type,
-        EQUIPMENT_NO: num,
-        DIESEL_LEVEL: selectedDiesel,
-        AREA: areaString,
-        SUBMITTED_BY: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'USER'),
-        USER_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], 'N/A')
+        date: dateStr,
+        shift: currentShift,
+        COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
+        Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
+        company: getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS'),
+        group: getPropValue(currentUser, ['GROUP', 'Group', 'group'], ''),
+        equipment: type,
+        equipnum: num,
+        area: areaString,
+        declaration: hasDefects ? "Reported with Defects" : "Declared All OK",
+        action: "New Inspection Log",
+        isNewIssue: hasDefects
       };
 
       try {
