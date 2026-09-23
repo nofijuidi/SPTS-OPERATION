@@ -540,7 +540,7 @@
         <div class="shift-tag" id="shiftNameTag">DAY SHIFT</div>
         <div class="shift-time">
           <span id="liveDateStr">23/09/2026</span>
-          <span id="liveTimeStr">09:44</span>
+          <span id="liveTimeStr">15:18</span>
           <span id="liveSecStr">00s</span>
         </div>
       </div>
@@ -906,16 +906,22 @@
 
       const areaString = formattedResults.join(' | ');
 
-      // Full ISO 8601 Timestamp with Date and Time (YYYY-MM-DDTHH:mm:ss)
+      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss) from the user's phone/browser clock
       const now = new Date();
-      const tzOffsetMin = now.getTimezoneOffset();
-      const localTime = new Date(now.getTime() - (tzOffsetMin * 60000));
-      const isoFullDateTimeStr = localTime.toISOString().slice(0, 19);
+      const year = now.getFullYear();
+      const month = String(now.getMonth() + 1).padStart(2, '0');
+      const day = String(now.getDate()).padStart(2, '0');
+      const hours = String(now.getHours()).padStart(2, '0');
+      const minutes = String(now.getMinutes()).padStart(2, '0');
+      const seconds = String(now.getSeconds()).padStart(2, '0');
+
+      // Example: "2026-09-23T15:18:38"
+      const isoDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
       const currentShift = document.getElementById('shiftNameTag').innerText;
 
       const payload = {
-        date: isoFullDateTimeStr,
+        date: isoDateTimeString,
         shift: currentShift,
         COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
         Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
