@@ -888,23 +888,21 @@
       btnConfirm.disabled = true;
       btnConfirm.innerText = "Submitting...";
 
-      const formattedResults = [];
+      const defectResults = [];
       let hasDefects = false;
 
       Object.values(checklistItemStates).forEach(st => {
-        const cleanTitle = getCleanItemTitle(st.itemTitle);
-        const statusText = STATUS_MAP[st.status] || st.status;
-
-        if (st.status === 'G') {
-          formattedResults.push(`${cleanTitle} - Good`);
-        } else {
+        if (st.status !== 'G') {
           hasDefects = true;
+          const cleanTitle = getCleanItemTitle(st.itemTitle);
+          const statusText = STATUS_MAP[st.status] || st.status;
           const remarkText = st.remark ? `, ${st.remark}` : '';
-          formattedResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
+          defectResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
         }
       });
 
-      const areaString = formattedResults.join(' | ');
+      // If defects exist, combine them with ' | '. Otherwise, output "All is Good".
+      const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
 
       // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss) from the user's phone/browser clock
       const now = new Date();
@@ -915,7 +913,6 @@
       const minutes = String(now.getMinutes()).padStart(2, '0');
       const seconds = String(now.getSeconds()).padStart(2, '0');
 
-      // Example: "2026-09-23T15:18:38"
       const isoDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
 
       const currentShift = document.getElementById('shiftNameTag').innerText;
