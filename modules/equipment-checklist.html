@@ -1,4 +1,3 @@
-/CONNECTOR/INSPECTIONLOG.xlsx
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -662,7 +661,7 @@
     let selectedDiesel = "FULL";
     let checklistItemStates = {};
 
-    // Sectioned Master Inspection Data
+    // 1. MASTER INSPECTION DATA DICTIONARY BY EQUIPMENT TYPE
     const EQUIPMENT_SECTIONS_DATA = {
       "PM": [
         {
@@ -700,6 +699,43 @@
             "Reverse Buzzer",
             "Rim",
             "Tayar"
+          ]
+        }
+      ],
+      "TIPPER": [
+        {
+          sectionTitle: "GENERAL CHECK (INSIDE TT)",
+          items: [
+            "Driver Seat / Tempat Duduk Pemandu",
+            "Air Condition / Penghawa Dingin",
+            "Reflective Triangle / Segitiga Amaran",
+            "Steering Wheel",
+            "Parking Brake / Brek Parkir",
+            "Accelerator Linkage",
+            "Horn",
+            "Lampu Hadapan - Headlight",
+            "Lampu Belakang - Floodlight",
+            "Lampu Brek",
+            "Lampu - Beacon",
+            "All Gauge Meter / Semua Meter Penunjuk",
+            "Reverse Camera",
+            "Transmission Oil Level / Paras Minyak Transmisi",
+            "Engine Oil Level / Paras Minyak Enjin",
+            "Fire Extinguisher / Pemadam Api"
+          ]
+        },
+        {
+          sectionTitle: "OUTSIDE TT",
+          items: [
+            "Tires - Condition and Pressure",
+            "Side Mirrors / Cemin Sisi",
+            "Jack and Cabin",
+            "Condition - Hydraulic and Battery",
+            "Water Level / Coolant Level",
+            "Reverse Buzzer Alarm",
+            "Brake Fluid / Minyak Brek",
+            "Canvas Function (wire/ remote/ canvas)",
+            "Wiper & Washer"
           ]
         }
       ]
@@ -852,29 +888,43 @@
       }
     }
 
+    // 2. DYNAMIC ROUTING & RENDERING FUNCTION
     function renderChecklistUI(type, num) {
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
 
-      const sections = EQUIPMENT_SECTIONS_DATA[type] || [
-        {
-          sectionTitle: "GENERAL CHECK",
-          items: [
-            "Aircond / Penghawa Dingin",
-            "Warning Triangle / SegiTiga Amaran",
-            "All Gauge / Panel Meter",
-            "RFID (P1 to P23 only)",
-            "VMT",
-            "Driver's seat / Kerusi Pemandu",
-            "Steering Wheel",
-            "Horn",
-            "Wiper",
-            "Brake"
-          ]
-        }
-      ];
+      const uppercaseType = String(type).trim().toUpperCase();
+      let sections = null;
 
-      const showRfid = isP1ToP23(num);
+      // Match equipment type to key in dictionary
+      if (uppercaseType.includes("PM")) {
+        sections = EQUIPMENT_SECTIONS_DATA["PM"];
+      } else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) {
+        sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
+      } else {
+        sections = EQUIPMENT_SECTIONS_DATA[type];
+      }
+
+      // Safe fallback if an equipment type is not yet configured
+      if (!sections || !Array.isArray(sections)) {
+        sections = [
+          {
+            sectionTitle: "GENERAL CHECK",
+            items: [
+              "Aircond / Penghawa Dingin",
+              "Warning Triangle / SegiTiga Amaran",
+              "All Gauge / Panel Meter",
+              "Driver's seat / Kerusi Pemandu",
+              "Steering Wheel",
+              "Horn",
+              "Wiper",
+              "Brake"
+            ]
+          }
+        ];
+      }
+
+      const showRfid = (uppercaseType.includes("PM") && isP1ToP23(num));
       let globalIndex = 0;
 
       let html = `
@@ -901,7 +951,7 @@
       `;
 
       sections.forEach((sec, secIdx) => {
-        const filteredItems = sec.items.filter(item => {
+        const filteredItems = (sec.items || []).filter(item => {
           if (item.includes("RFID")) return showRfid;
           return true;
         });
@@ -1047,7 +1097,7 @@
 
       const currentShift = document.getElementById('shiftNameTag').innerText;
 
-      // Complete payload mapped to individual log table columns
+      // Payload mapping directly matching Power Automate schema
       const payload = {
         date: isoDateTimeString,
         shift: currentShift,
