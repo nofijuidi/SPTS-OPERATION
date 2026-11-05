@@ -661,7 +661,7 @@
     let selectedDiesel = "FULL";
     let checklistItemStates = {};
 
-    // 1. MASTER INSPECTION DATA DICTIONARY BY EQUIPMENT TYPE
+    // 1. MASTER INSPECTION SECTIONS BY EQUIPMENT TYPE
     const EQUIPMENT_SECTIONS_DATA = {
       "PM": [
         {
@@ -736,6 +736,79 @@
             "Brake Fluid / Minyak Brek",
             "Canvas Function (wire/ remote/ canvas)",
             "Wiper & Washer"
+          ]
+        }
+      ],
+      "QC": [
+        {
+          sectionTitle: "OPERATOR CABIN",
+          items: [
+            "Air Condition (Penyaman Udara)",
+            "All Switches and Push buttons",
+            "Joystick",
+            "Indicator Panel Light",
+            "Foot Siren",
+            "Emergency Stop",
+            "Intercom / Mobile Radio",
+            "Operator Seat",
+            "Cabin Glass & Cleanliness",
+            "Door"
+          ]
+        },
+        {
+          sectionTitle: "BOOM CABIN",
+          items: [
+            "Cabin Display / Indicator Panel",
+            "Indicator Panel Light",
+            "Boom Up / Down Motion",
+            "Flood Light (Boom Girder)",
+            "Cabin Condition & Cleanliness"
+          ]
+        },
+        {
+          sectionTitle: "MAIN HOIST SYSTEM",
+          items: [
+            "Upper / Lower Slowdown",
+            "Stopping Effectiveness",
+            "Hoisting / Lowering Motion"
+          ]
+        },
+        {
+          sectionTitle: "GANTRY SYSTEM",
+          items: [
+            "Gantry Motion",
+            "Stopping Effectiveness",
+            "Gantry Warning Light (Beacon)",
+            "Gantry Warning Siren"
+          ]
+        },
+        {
+          sectionTitle: "SPREADER",
+          items: [
+            "Extend / Retract Conditions (20',40')",
+            "Twistlock Lock / Unlock Signals",
+            "T.L.S System Conditions",
+            "Flipper Up / Down Conditions"
+          ]
+        },
+        {
+          sectionTitle: "TROLLEY MOTION",
+          items: [
+            "Stopping Effectiveness",
+            "Trolley Motion"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Fire Extinguisher",
+            "Man Lift",
+            "Walking Platform",
+            "Hand Rail",
+            "Emergency Stop Conditions",
+            "First Aid Kits",
+            "Intercom - Portal Leg (Kaki Kren)",
+            "CCTV"
           ]
         }
       ]
@@ -871,288 +944,4 @@
       }
     }
 
-    function isP1ToP23(eqNum) {
-      if (!eqNum) return false;
-      const match = String(eqNum).trim().toUpperCase().match(/^P0*(\d+)$/);
-      if (match) {
-        const val = parseInt(match[1], 10);
-        return val >= 1 && val <= 23;
-      }
-      return false;
-    }
-
-    function toggleSection(headerElem) {
-      const card = headerElem.closest('.section-card');
-      if (card) {
-        card.classList.toggle('collapsed');
-      }
-    }
-
-    // 2. DYNAMIC ROUTING & RENDERING FUNCTION
-    function renderChecklistUI(type, num) {
-      const container = document.getElementById('checklistContainer');
-      checklistItemStates = {};
-
-      const uppercaseType = String(type).trim().toUpperCase();
-      let sections = null;
-
-      // Match equipment type to key in dictionary
-      if (uppercaseType.includes("PM")) {
-        sections = EQUIPMENT_SECTIONS_DATA["PM"];
-      } else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) {
-        sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
-      } else {
-        sections = EQUIPMENT_SECTIONS_DATA[type];
-      }
-
-      // Safe fallback if an equipment type is not yet configured
-      if (!sections || !Array.isArray(sections)) {
-        sections = [
-          {
-            sectionTitle: "GENERAL CHECK",
-            items: [
-              "Aircond / Penghawa Dingin",
-              "Warning Triangle / SegiTiga Amaran",
-              "All Gauge / Panel Meter",
-              "Driver's seat / Kerusi Pemandu",
-              "Steering Wheel",
-              "Horn",
-              "Wiper",
-              "Brake"
-            ]
-          }
-        ];
-      }
-
-      const showRfid = (uppercaseType.includes("PM") && isP1ToP23(num));
-      let globalIndex = 0;
-
-      let html = `
-        <!-- Diesel Level Section -->
-        <div class="diesel-box">
-          <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
-          <div class="diesel-options">
-            <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
-            <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
-            <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
-            <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
-          </div>
-        </div>
-
-        <!-- Legend Bar -->
-        <div class="legend-bar">
-          <span style="color:#cbd5e1;">LEGEND:</span>
-          <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
-          <div class="legend-item"><span class="badge-icon bg-m">✗</span> Missing</div>
-          <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
-          <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
-          <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
-        </div>
-      `;
-
-      sections.forEach((sec, secIdx) => {
-        const filteredItems = (sec.items || []).filter(item => {
-          if (item.includes("RFID")) return showRfid;
-          return true;
-        });
-
-        html += `
-          <div class="section-card">
-            <div class="section-header" onclick="toggleSection(this)">
-              <span>${secIdx + 1}. ${sec.sectionTitle} (${filteredItems.length} ITEMS)</span>
-              <span class="accordion-icon">▼</span>
-            </div>
-            <div class="section-body">
-        `;
-
-        filteredItems.forEach((item, itemIdx) => {
-          const itemKey = `item_${globalIndex}`;
-          checklistItemStates[itemKey] = { itemTitle: item, status: null, remark: '' };
-
-          html += `
-            <div class="item-row">
-              <div class="item-header-line">
-                <span class="item-title-text">${itemIdx + 1}. ${item}</span>
-                <div class="status-btn-group">
-                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'G', this)">✔</button>
-                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'M', this)">✗</button>
-                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'MF', this)">MF</button>
-                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'D', this)">D</button>
-                  <button class="btn-status" onclick="setItemStatus('${itemKey}', 'L', this)">L</button>
-                </div>
-              </div>
-              <input type="text" class="remark-input" placeholder="Add remark if defect..." oninput="setItemRemark('${itemKey}', this.value)" />
-            </div>
-          `;
-          globalIndex++;
-        });
-
-        html += `
-            </div>
-          </div>
-        `;
-      });
-
-      container.innerHTML = html;
-    }
-
-    function setDiesel(btn, level) {
-      selectedDiesel = level;
-      document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    function setItemStatus(key, status, btn) {
-      if (checklistItemStates[key]) {
-        checklistItemStates[key].status = status;
-      }
-
-      const parentGroup = btn.parentElement;
-      parentGroup.querySelectorAll('.btn-status').forEach(b => {
-        b.className = 'btn-status';
-      });
-
-      btn.classList.add(`selected-${status.toLowerCase()}`);
-    }
-
-    function setItemRemark(key, val) {
-      if (checklistItemStates[key]) {
-        checklistItemStates[key].remark = val.trim();
-      }
-    }
-
-    function openConfirmationModal() {
-      const type = document.getElementById('equipmentTypeSelect').value;
-      const num = document.getElementById('equipmentNumSelect').value;
-      const chockVal = document.getElementById('chockSelect').value;
-      const odoVal = document.getElementById('odoMeterInput').value.trim();
-      const hourVal = document.getElementById('hourMeterInput').value.trim();
-
-      if (!type || !num) {
-        alert("Please select both Equipment Type and Equipment Number before submitting.");
-        return;
-      }
-
-      if (chockVal === "") {
-        alert("Please select a Chock Quantity (0, 1, or 2).");
-        return;
-      }
-
-      if (!odoVal || !hourVal) {
-        alert("Please enter both ODO Meter (KM) and Hour Meter (HRS) values.");
-        return;
-      }
-
-      const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
-      if (unselectedCount > 0) {
-        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
-        return;
-      }
-
-      document.getElementById('modalEqText').innerText = `${type} - ${num}`;
-      document.getElementById('declarationModal').classList.remove('hidden');
-    }
-
-    function closeConfirmationModal() {
-      document.getElementById('declarationModal').classList.add('hidden');
-    }
-
-    async function executeSubmission() {
-      const type = document.getElementById('equipmentTypeSelect').value;
-      const num = document.getElementById('equipmentNumSelect').value;
-      const chockVal = document.getElementById('chockSelect').value;
-      const odoVal = document.getElementById('odoMeterInput').value.trim();
-      const hourVal = document.getElementById('hourMeterInput').value.trim();
-      const btnConfirm = document.getElementById('btnConfirmSubmit');
-
-      btnConfirm.disabled = true;
-      btnConfirm.innerText = "Submitting...";
-
-      const defectResults = [];
-      let hasDefects = false;
-
-      // Compile defect remarks only (omitting 'G' items)
-      Object.values(checklistItemStates).forEach(st => {
-        if (st.status !== 'G') {
-          hasDefects = true;
-          const cleanTitle = getCleanItemTitle(st.itemTitle);
-          const statusText = STATUS_MAP[st.status] || st.status;
-          const remarkText = st.remark ? `, ${st.remark}` : '';
-          defectResults.push(`${cleanTitle} - ${statusText}${remarkText}`);
-        }
-      });
-
-      const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
-
-      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss)
-      const now = new Date();
-      const year = now.getFullYear();
-      const month = String(now.getMonth() + 1).padStart(2, '0');
-      const day = String(now.getDate()).padStart(2, '0');
-      const hours = String(now.getHours()).padStart(2, '0');
-      const minutes = String(now.getMinutes()).padStart(2, '0');
-      const seconds = String(now.getSeconds()).padStart(2, '0');
-
-      const isoDateTimeString = `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-
-      const currentShift = document.getElementById('shiftNameTag').innerText;
-
-      // Payload mapping directly matching Power Automate schema
-      const payload = {
-        date: isoDateTimeString,
-        shift: currentShift,
-        COMPANY_ID: getPropValue(currentUser, ['COMPANY_ID', 'company_id', 'Company_ID', 'ID', 'id', 'Username'], ''),
-        Title: getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], ''),
-        company: getPropValue(currentUser, ['COMPANY', 'Company', 'company'], 'SPTS'),
-        group: getPropValue(currentUser, ['GROUP', 'Group', 'group'], ''),
-        equipment: type,
-        equipnum: num,
-        chock: chockVal,
-        odometer: odoVal,
-        hourmeter: hourVal,
-        fuel: selectedDiesel,
-        area: areaString,
-        declaration: hasDefects ? "Reported with Defects" : "Declared All OK"
-      };
-
-      try {
-        const response = await fetch(INSPECTION_SUBMIT_FLOW_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        if (response.ok) {
-          alert("Inspection checklist submitted successfully!");
-          closeConfirmationModal();
-          goHome();
-        } else {
-          alert("Failed to submit inspection checklist.");
-        }
-      } catch (err) {
-        console.error("Submission Error:", err);
-        alert("Network error submitting checklist.");
-      } finally {
-        btnConfirm.disabled = false;
-        btnConfirm.innerText = "Confirm";
-      }
-    }
-
-    function goHome() {
-      window.location.href = '../index.html';
-    }
-
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    window.addEventListener('DOMContentLoaded', () => {
-      checkSession();
-      updateLiveClock();
-      setInterval(updateLiveClock, 1000);
-      loadEquipmentDatabase();
-    });
-  </script>
-
-  <!-- Global Full-Screen Trigger -->
-  <script src="../js/fullscreen-global.js"></script>
-</body>
-</html>
+    function isP1ToP23(eq
