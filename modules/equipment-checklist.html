@@ -222,8 +222,8 @@
       margin-bottom: 12px;
     }
 
-    /* Diesel Selection */
-    .diesel-box {
+    /* Diesel / Spillage Option Boxes */
+    .diesel-box, .spillage-box {
       border: 1.5px solid #cbd5e1;
       border-radius: 10px;
       padding: 10px;
@@ -231,7 +231,7 @@
       margin-bottom: 12px;
     }
 
-    .diesel-title {
+    .diesel-title, .spillage-title {
       font-size: 13px;
       font-weight: 800;
       color: #1e293b;
@@ -241,25 +241,25 @@
       gap: 4px;
     }
 
-    .diesel-options {
+    .diesel-options, .spillage-options {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
     }
 
-    .diesel-btn {
-      padding: 10px 0;
+    .diesel-btn, .spillage-btn {
+      padding: 8px 0;
       text-align: center;
       border: 1.5px solid #cbd5e1;
       border-radius: 8px;
       background-color: #ffffff;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 800;
       color: #0f172a;
       cursor: pointer;
     }
 
-    .diesel-btn.active {
+    .diesel-btn.active, .spillage-btn.active {
       background-color: #08506b;
       color: #ffffff;
       border-color: #08506b;
@@ -670,15 +670,18 @@
     let currentUser = null;
     let selectedType = "";
     let selectedNum = "";
-    let selectedDiesel = ""; // Initialized empty so user must explicitly choose
+    let selectedDiesel = ""; 
+    let selectedSpillage = "";
+    let spillageRemark = "";
     let checklistItemStates = {};
 
-    // Equipment field configuration matrix from image table
+    // Base equipment field configuration matrix
     const FIELD_CONFIG = {
       "PM":           { chock: true,  odo: true,  hour: true,  diesel: true  },
       "TIPPER TRUCK": { chock: true,  odo: true,  hour: true,  diesel: true  },
       "TIPPER":       { chock: true,  odo: true,  hour: true,  diesel: true  },
       "TRAILER":      { chock: false, odo: false, hour: false, diesel: false },
+      "CONVEYOR":     { chock: false, odo: false, hour: false, diesel: false },
       "FORKLIFT":     { chock: false, odo: false, hour: true,  diesel: true  },
       "RTG":          { chock: false, odo: false, hour: true,  diesel: true  },
       "ECH":          { chock: false, odo: true,  hour: true,  diesel: true  },
@@ -687,9 +690,88 @@
       "SHIPLOADER":   { chock: false, odo: false, hour: true,  diesel: false },
       "RECLAIMER":    { chock: false, odo: false, hour: true,  diesel: false },
       "STACKER":      { chock: false, odo: false, hour: true,  diesel: false },
-      "CONVEYOR":     { chock: false, odo: false, hour: true,  diesel: false },
       "QC":           { chock: false, odo: false, hour: true,  diesel: false },
       "VAN":          { chock: true,  odo: true,  hour: true,  diesel: true  }
+    };
+
+    // Standard Conveyor Sections
+    const CONVEYOR_STANDARD_SECTIONS = [
+      {
+        sectionTitle: "CONVEYOR BELT",
+        items: [
+          "Cuts",
+          "Marks",
+          "Fabric edges",
+          "Fabric Expose",
+          "Belt joint Vulcanized joint weak / cuts"
+        ]
+      },
+      {
+        sectionTitle: "BELT SCRAPPER",
+        items: [
+          "Proper Contact",
+          "Effectiveness",
+          "Rubber wear"
+        ]
+      },
+      {
+        sectionTitle: "MOTOR HEAD",
+        items: [
+          "Temperature Reading (Acceptable 75°)",
+          "Abnormal noise",
+          "Loose bolt and nut at motor base",
+          "Condition or motor casing crack / damage"
+        ]
+      },
+      {
+        sectionTitle: "GEARBOX",
+        items: [
+          "Temperature Reading (Acceptable 70°)",
+          "Leak",
+          "Abnormal noise",
+          "Loose bolt and nut at gearbox base"
+        ]
+      },
+      {
+        sectionTitle: "PULLEY (HEAD / SNUB / TAIL)",
+        items: [
+          "Temperature Reading (Acceptable 70°)",
+          "Lubrication",
+          "Abnormal noise",
+          "Bearing housing fixing bolts",
+          "Condition of bearing housing & bearing",
+          "Rubber lagging had issues"
+        ]
+      },
+      {
+        sectionTitle: "IDLER (ABNORMAL NOISE / LOCATION)",
+        items: [
+          "Carrying Idler",
+          "Return Idler",
+          "Impact Idler"
+        ]
+      }
+    ];
+
+    const TRANSFER_POINT_1_SEC = {
+      sectionTitle: "TRANSFER POINT 1 AND SIDE SKIRTING",
+      items: [
+        "Metal Detector",
+        "Body hole / bolt nut missing",
+        "Wear liner- missing / worn out / broken",
+        "Rubber skirts had issues",
+        "Materials spillage"
+      ]
+    };
+
+    const TRANSFER_POINT_2_SEC = {
+      sectionTitle: "TRANSFER POINT 2 AND SIDE SKIRTING",
+      items: [
+        "Body hole / bolt nut missing",
+        "Wear liner- missing / worn out / broken",
+        "Rubber skirts had issues",
+        "Materials spillage"
+      ]
     };
 
     // Sectioned Master Inspection Data
@@ -1428,6 +1510,11 @@
         if (response.ok) {
           const data = await response.json();
           equipmentDb = data.EQUIPMENT_DATABASE || {};
+          
+          // Override Conveyor list options
+          if (equipmentDb["CONVEYOR"] || equipmentDb["Conveyor"]) {
+            equipmentDb["CONVEYOR"] = ["BC01", "BC02", "BC03", "BC04", "PC01", "TP01", "TP02", "TP03"];
+          }
           populateTypeOptions();
         }
       } catch (err) {
@@ -1447,16 +1534,20 @@
       });
     }
 
-    function updateDynamicFields(type) {
-      const key = (type || "").trim().toUpperCase();
-      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+    function getEquipmentFieldConfig(type, num) {
+      const typeKey = (type || "").trim().toUpperCase();
+      return FIELD_CONFIG[typeKey] || { chock: false, odo: false, hour: true, diesel: false };
+    }
+
+    function updateDynamicFields(type, num) {
+      const cfg = getEquipmentFieldConfig(type, num);
 
       const chockGroup = document.getElementById('chockGroup');
       const odoGroup = document.getElementById('odoGroup');
       const hourGroup = document.getElementById('hourGroup');
       const dieselBox = document.getElementById('dieselBox');
 
-      // Reset active selection for diesel
+      // Reset active selections
       selectedDiesel = "";
       document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
 
@@ -1497,22 +1588,26 @@
       const numSelect = document.getElementById('equipmentNumSelect');
       numSelect.innerHTML = '<option value="">Select number...</option>';
 
-      updateDynamicFields(type);
-
-      if (type && equipmentDb[type]) {
-        equipmentDb[type].forEach(num => {
-          const opt = document.createElement('option');
-          opt.value = num;
-          opt.textContent = num;
-          numSelect.appendChild(opt);
-        });
+      let numbers = equipmentDb[type] || [];
+      if (type.toUpperCase() === "CONVEYOR") {
+        numbers = ["BC01", "BC02", "BC03", "BC04", "PC01", "TP01", "TP02", "TP03"];
       }
+
+      numbers.forEach(num => {
+        const opt = document.createElement('option');
+        opt.value = num;
+        opt.textContent = num;
+        numSelect.appendChild(opt);
+      });
       
+      updateDynamicFields(type, "");
       handleNumChange("");
     }
 
     function handleNumChange(num) {
       selectedNum = num;
+      updateDynamicFields(selectedType, num);
+
       if (selectedType && selectedNum) {
         renderChecklistUI(selectedType, selectedNum);
       } else {
@@ -1537,19 +1632,68 @@
       }
     }
 
+    function getSectionsForEquipment(type, num) {
+      const typeKey = (type || "").trim().toUpperCase();
+      const numKey = (num || "").trim().toUpperCase();
+
+      if (typeKey === "CONVEYOR") {
+        if (["TP01", "TP02", "TP03"].includes(numKey)) {
+          return [
+            {
+              sectionTitle: "TRANSFER POINT INSPECTION",
+              items: [
+                "Magnetic Separator",
+                "Body hole / bolt nut missing",
+                "Wear liner- missing / worn out / broken",
+                "Rubber skirts had issues",
+                "Materials spillage"
+              ]
+            }
+          ];
+        }
+
+        if (numKey === "BC01") {
+          return CONVEYOR_STANDARD_SECTIONS;
+        }
+
+        if (numKey === "BC02") {
+          const secs = [...CONVEYOR_STANDARD_SECTIONS];
+          secs.splice(2, 0, TRANSFER_POINT_1_SEC);
+          return secs;
+        }
+
+        if (numKey === "BC03") {
+          const secs = [...CONVEYOR_STANDARD_SECTIONS];
+          secs.splice(2, 0, TRANSFER_POINT_2_SEC);
+          return secs;
+        }
+
+        if (numKey === "BC04" || numKey === "PC01") {
+          const secs = [...CONVEYOR_STANDARD_SECTIONS];
+          secs.splice(2, 0, TRANSFER_POINT_2_SEC);
+          return secs;
+        }
+      }
+
+      return EQUIPMENT_SECTIONS_DATA[typeKey];
+    }
+
     function renderChecklistUI(type, num) {
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
+      selectedSpillage = "";
+      spillageRemark = "";
 
-      const key = (type || "").trim().toUpperCase();
-      const sections = EQUIPMENT_SECTIONS_DATA[key];
+      const sections = getSectionsForEquipment(type, num);
 
-      // If sections are not configured for this equipment type yet, leave checklist blank
+      // Leave checklist blank if equipment configuration is not defined
       if (!sections || sections.length === 0) {
         container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-weight: 700;">Checklist items for this equipment type are not yet configured.</div>';
         return;
       }
 
+      const numKey = (num || "").trim().toUpperCase();
+      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
       const showRfid = isP1ToP23(num);
       let globalIndex = 0;
 
@@ -1564,6 +1708,23 @@
           <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
         </div>
       `;
+
+      if (showSpillageBin) {
+        html += `
+          <!-- Spillage Bin Section -->
+          <div class="spillage-box">
+            <div class="spillage-title">🗑️ SPILLAGE BIN LEVEL / PARAS TONG SPILLAGE</div>
+            <div class="spillage-options">
+              <div class="spillage-btn" onclick="setSpillage(this, 'Empty')">Empty</div>
+              <div class="spillage-btn" onclick="setSpillage(this, '1/4')">1/4</div>
+              <div class="spillage-btn" onclick="setSpillage(this, '1/2')">1/2</div>
+              <div class="spillage-btn" onclick="setSpillage(this, '3/4')">3/4</div>
+              <div class="spillage-btn" onclick="setSpillage(this, 'Full')">Full</div>
+            </div>
+            <input type="text" class="remark-input" style="margin-top: 8px;" placeholder="Spillage bin remark..." oninput="spillageRemark = this.value.trim()" />
+          </div>
+        `;
+      }
 
       sections.forEach((sec, secIdx) => {
         const filteredItems = sec.items.filter(item => {
@@ -1617,6 +1778,12 @@
       btn.classList.add('active');
     }
 
+    function setSpillage(btn, level) {
+      selectedSpillage = level;
+      document.querySelectorAll('.spillage-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
     function setItemStatus(key, status, btn) {
       if (checklistItemStates[key]) {
         checklistItemStates[key].status = status;
@@ -1639,8 +1806,7 @@
     function openConfirmationModal() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
-      const key = (type || "").trim().toUpperCase();
-      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+      const cfg = getEquipmentFieldConfig(type, num);
 
       const chockVal = document.getElementById('chockSelect').value;
       const odoVal = document.getElementById('odoMeterInput').value.trim();
@@ -1671,6 +1837,13 @@
         return;
       }
 
+      const numKey = (num || "").trim().toUpperCase();
+      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
+      if (showSpillageBin && !selectedSpillage) {
+        alert("Please select a Spillage Bin Level (Empty, 1/4, 1/2, 3/4, or Full).");
+        return;
+      }
+
       const totalItems = Object.keys(checklistItemStates).length;
       if (totalItems > 0) {
         const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
@@ -1691,8 +1864,7 @@
     async function executeSubmission() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
-      const key = (type || "").trim().toUpperCase();
-      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+      const cfg = getEquipmentFieldConfig(type, num);
 
       const chockVal = cfg.chock ? document.getElementById('chockSelect').value : "N/A";
       const odoVal = cfg.odo ? document.getElementById('odoMeterInput').value.trim() : "N/A";
@@ -1705,6 +1877,13 @@
 
       const defectResults = [];
       let hasDefects = false;
+
+      const numKey = (num || "").trim().toUpperCase();
+      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
+      if (showSpillageBin && selectedSpillage) {
+        const rmk = spillageRemark ? `, ${spillageRemark}` : '';
+        defectResults.push(`Spillage Bin - ${selectedSpillage}${rmk}`);
+      }
 
       // Compile defect remarks only (omitting 'G' items)
       Object.values(checklistItemStates).forEach(st => {
