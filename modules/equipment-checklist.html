@@ -626,7 +626,7 @@
           <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
           <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
           <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
-          <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
+          <div class="diesel-btn" onclick="setDiesel(this, 'FULL')">FULL</div>
         </div>
       </div>
 
@@ -670,7 +670,7 @@
     let currentUser = null;
     let selectedType = "";
     let selectedNum = "";
-    let selectedDiesel = "FULL";
+    let selectedDiesel = ""; // Initialized empty so user must explicitly choose
     let checklistItemStates = {};
 
     // Equipment field configuration matrix from image table
@@ -1456,6 +1456,10 @@
       const hourGroup = document.getElementById('hourGroup');
       const dieselBox = document.getElementById('dieselBox');
 
+      // Reset active selection for diesel
+      selectedDiesel = "";
+      document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
+
       // Chock Quantity
       if (cfg.chock) {
         chockGroup.classList.remove('hidden');
@@ -1537,23 +1541,14 @@
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
 
-      const sections = EQUIPMENT_SECTIONS_DATA[type] || [
-        {
-          sectionTitle: "GENERAL CHECK",
-          items: [
-            "Aircond / Penghawa Dingin",
-            "Warning Triangle / SegiTiga Amaran",
-            "All Gauge / Panel Meter",
-            "RFID (P1 to P23 only)",
-            "VMT",
-            "Driver's seat / Kerusi Pemandu",
-            "Steering Wheel",
-            "Horn",
-            "Wiper",
-            "Brake"
-          ]
-        }
-      ];
+      const key = (type || "").trim().toUpperCase();
+      const sections = EQUIPMENT_SECTIONS_DATA[key];
+
+      // If sections are not configured for this equipment type yet, leave checklist blank
+      if (!sections || sections.length === 0) {
+        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-weight: 700;">Checklist items for this equipment type are not yet configured.</div>';
+        return;
+      }
 
       const showRfid = isP1ToP23(num);
       let globalIndex = 0;
@@ -1671,10 +1666,18 @@
         return;
       }
 
-      const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
-      if (unselectedCount > 0) {
-        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
+      if (cfg.diesel && !selectedDiesel) {
+        alert("Please select a Diesel Level (1/4, 1/2, 3/4, or FULL).");
         return;
+      }
+
+      const totalItems = Object.keys(checklistItemStates).length;
+      if (totalItems > 0) {
+        const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
+        if (unselectedCount > 0) {
+          alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
+          return;
+        }
       }
 
       document.getElementById('modalEqText').innerText = `${type} - ${num}`;
