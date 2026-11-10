@@ -228,6 +228,7 @@
       border-radius: 10px;
       padding: 10px;
       background-color: #f8fafc;
+      margin-bottom: 12px;
     }
 
     .diesel-title {
@@ -594,7 +595,7 @@
       </div>
 
       <!-- Chock Selection Dropdown -->
-      <div class="select-grid">
+      <div class="select-grid hidden" id="chockGroup">
         <div class="select-group full-width">
           <label class="select-label">Chock Quantity</label>
           <select id="chockSelect" class="form-select">
@@ -608,13 +609,24 @@
 
       <!-- ODO Meter & Hour Meter Inputs -->
       <div class="select-grid">
-        <div class="select-group">
+        <div class="select-group hidden" id="odoGroup">
           <label class="select-label">ODO Meter (KM)</label>
           <input type="number" id="odoMeterInput" class="form-input" placeholder="e.g. 12500" pattern="[0-9]*" />
         </div>
-        <div class="select-group">
+        <div class="select-group hidden" id="hourGroup">
           <label class="select-label">Hour Meter (HRS)</label>
           <input type="number" id="hourMeterInput" class="form-input" placeholder="e.g. 4320" pattern="[0-9]*" />
+        </div>
+      </div>
+
+      <!-- Diesel Level Section -->
+      <div class="diesel-box hidden" id="dieselBox">
+        <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
+        <div class="diesel-options">
+          <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
+          <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
+          <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
+          <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
         </div>
       </div>
 
@@ -660,6 +672,25 @@
     let selectedNum = "";
     let selectedDiesel = "FULL";
     let checklistItemStates = {};
+
+    // Equipment field configuration matrix from image table
+    const FIELD_CONFIG = {
+      "PM":           { chock: true,  odo: true,  hour: true,  diesel: true  },
+      "TIPPER TRUCK": { chock: true,  odo: true,  hour: true,  diesel: true  },
+      "TIPPER":       { chock: true,  odo: true,  hour: true,  diesel: true  },
+      "TRAILER":      { chock: false, odo: false, hour: false, diesel: false },
+      "FORKLIFT":     { chock: false, odo: false, hour: true,  diesel: true  },
+      "RTG":          { chock: false, odo: false, hour: true,  diesel: true  },
+      "ECH":          { chock: false, odo: true,  hour: true,  diesel: true  },
+      "CRS":          { chock: false, odo: true,  hour: true,  diesel: true  },
+      "SHOVEL":       { chock: false, odo: true,  hour: false, diesel: true  },
+      "SHIPLOADER":   { chock: false, odo: false, hour: true,  diesel: false },
+      "RECLAIMER":    { chock: false, odo: false, hour: true,  diesel: false },
+      "STACKER":      { chock: false, odo: false, hour: true,  diesel: false },
+      "CONVEYOR":     { chock: false, odo: false, hour: true,  diesel: false },
+      "QC":           { chock: false, odo: false, hour: true,  diesel: false },
+      "VAN":          { chock: true,  odo: true,  hour: true,  diesel: true  }
+    };
 
     // Sectioned Master Inspection Data
     const EQUIPMENT_SECTIONS_DATA = {
@@ -1416,10 +1447,53 @@
       });
     }
 
+    function updateDynamicFields(type) {
+      const key = (type || "").trim().toUpperCase();
+      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+
+      const chockGroup = document.getElementById('chockGroup');
+      const odoGroup = document.getElementById('odoGroup');
+      const hourGroup = document.getElementById('hourGroup');
+      const dieselBox = document.getElementById('dieselBox');
+
+      // Chock Quantity
+      if (cfg.chock) {
+        chockGroup.classList.remove('hidden');
+      } else {
+        chockGroup.classList.add('hidden');
+        document.getElementById('chockSelect').value = "";
+      }
+
+      // ODO Meter
+      if (cfg.odo) {
+        odoGroup.classList.remove('hidden');
+      } else {
+        odoGroup.classList.add('hidden');
+        document.getElementById('odoMeterInput').value = "";
+      }
+
+      // Hour Meter
+      if (cfg.hour) {
+        hourGroup.classList.remove('hidden');
+      } else {
+        hourGroup.classList.add('hidden');
+        document.getElementById('hourMeterInput').value = "";
+      }
+
+      // Diesel Level
+      if (cfg.diesel) {
+        dieselBox.classList.remove('hidden');
+      } else {
+        dieselBox.classList.add('hidden');
+      }
+    }
+
     function handleTypeChange(type) {
       selectedType = type;
       const numSelect = document.getElementById('equipmentNumSelect');
       numSelect.innerHTML = '<option value="">Select number...</option>';
+
+      updateDynamicFields(type);
 
       if (type && equipmentDb[type]) {
         equipmentDb[type].forEach(num => {
@@ -1485,17 +1559,6 @@
       let globalIndex = 0;
 
       let html = `
-        <!-- Diesel Level Section -->
-        <div class="diesel-box">
-          <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
-          <div class="diesel-options">
-            <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
-            <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
-            <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
-            <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
-          </div>
-        </div>
-
         <!-- Legend Bar -->
         <div class="legend-bar">
           <span style="color:#cbd5e1;">LEGEND:</span>
@@ -1581,6 +1644,9 @@
     function openConfirmationModal() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
+      const key = (type || "").trim().toUpperCase();
+      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+
       const chockVal = document.getElementById('chockSelect').value;
       const odoVal = document.getElementById('odoMeterInput').value.trim();
       const hourVal = document.getElementById('hourMeterInput').value.trim();
@@ -1590,13 +1656,18 @@
         return;
       }
 
-      if (chockVal === "") {
+      if (cfg.chock && chockVal === "") {
         alert("Please select a Chock Quantity (0, 1, or 2).");
         return;
       }
 
-      if (!odoVal || !hourVal) {
-        alert("Please enter both ODO Meter (KM) and Hour Meter (HRS) values.");
+      if (cfg.odo && !odoVal) {
+        alert("Please enter ODO Meter (KM) value.");
+        return;
+      }
+
+      if (cfg.hour && !hourVal) {
+        alert("Please enter Hour Meter (HRS) value.");
         return;
       }
 
@@ -1617,9 +1688,13 @@
     async function executeSubmission() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
-      const chockVal = document.getElementById('chockSelect').value;
-      const odoVal = document.getElementById('odoMeterInput').value.trim();
-      const hourVal = document.getElementById('hourMeterInput').value.trim();
+      const key = (type || "").trim().toUpperCase();
+      const cfg = FIELD_CONFIG[key] || { chock: false, odo: false, hour: true, diesel: false };
+
+      const chockVal = cfg.chock ? document.getElementById('chockSelect').value : "N/A";
+      const odoVal = cfg.odo ? document.getElementById('odoMeterInput').value.trim() : "N/A";
+      const hourVal = cfg.hour ? document.getElementById('hourMeterInput').value.trim() : "N/A";
+      const fuelVal = cfg.diesel ? selectedDiesel : "N/A";
       const btnConfirm = document.getElementById('btnConfirmSubmit');
 
       btnConfirm.disabled = true;
@@ -1667,7 +1742,7 @@
         chock: chockVal,
         odometer: odoVal,
         hourmeter: hourVal,
-        fuel: selectedDiesel,
+        fuel: fuelVal,
         area: areaString,
         declaration: hasDefects ? "Reported with Defects" : "Declared All OK"
       };
