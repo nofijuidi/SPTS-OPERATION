@@ -105,6 +105,7 @@
       display: flex;
       gap: 8px;
       justify-content: center;
+      flex-wrap: wrap;
     }
 
     .badge-pill {
@@ -292,11 +293,11 @@
 
       <!-- Profile Header -->
       <div class="profile-card">
-        <div class="user-fullname" id="userDisplayName">NOFIJUIDI BIN JUMRI</div>
+        <div class="user-fullname" id="userDisplayName">--</div>
         <div class="profile-badges">
-          <div class="badge-pill" id="userBadgeCompany">SPTS</div>
-          <div class="badge-pill navy" id="userBadgeId">ID : T5218</div>
-          <div class="badge-pill" id="userBadgeGroup">Group : OFFICE</div>
+          <div class="badge-pill" id="userBadgeCompany">--</div>
+          <div class="badge-pill navy" id="userBadgeId">ID : --</div>
+          <div class="badge-pill" id="userBadgeGroup">Group : --</div>
         </div>
       </div>
 
@@ -345,7 +346,7 @@
 
       <!-- Monthly Birthday Section -->
       <div class="birthday-section">
-        <div class="birthday-header-title" id="birthdayTitle">JANUARY'S BIRTHDAY</div>
+        <div class="birthday-header-title" id="birthdayTitle">MONTHLY BIRTHDAYS</div>
         <div class="birthday-table-box">
           <table class="birthday-table">
             <thead>
@@ -385,16 +386,25 @@
   <script>
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
-      if (activeSession) {
-        try {
-          const user = JSON.parse(activeSession);
-          document.getElementById('userDisplayName').innerText = user.NAME || 'NOFIJUIDI BIN JUMRI';
-          document.getElementById('userBadgeCompany').innerText = user.COMPANY || 'SPTS';
-          document.getElementById('userBadgeId').innerText = `ID : ${user.COMPANY_ID || 'T5218'}`;
-          document.getElementById('userBadgeGroup').innerText = `Group : ${user.GROUP || 'OFFICE'}`;
-        } catch (e) {
-          console.warn("Session parse error:", e);
-        }
+      
+      // Strict Session Guard: Redirect to login if no session is active
+      if (!activeSession) {
+        window.location.href = 'login.html';
+        return false;
+      }
+
+      try {
+        const user = JSON.parse(activeSession);
+        document.getElementById('userDisplayName').innerText = user.NAME || 'USER';
+        document.getElementById('userBadgeCompany').innerText = user.COMPANY || 'SPTS';
+        document.getElementById('userBadgeId').innerText = `ID : ${user.COMPANY_ID || 'N/A'}`;
+        document.getElementById('userBadgeGroup').innerText = `Group : ${user.GROUP || 'OPERATIONS'}`;
+        return true;
+      } catch (e) {
+        console.error("Invalid session format, clearing:", e);
+        sessionStorage.removeItem('userSession');
+        window.location.href = 'login.html';
+        return false;
       }
     }
 
@@ -410,49 +420,61 @@
 
       titleElem.innerText = `${currentMonthName}'S BIRTHDAY`;
 
+      let staffList = [];
+
       try {
         const res = await fetch(`data/birthday.json?v=${Date.now()}`);
-        if (!res.ok) {
-          container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 12px; color: #94a3b8;">Unable to load birthday records.</td></tr>`;
-          return;
+        if (res.ok) {
+          staffList = await res.json();
+        } else {
+          throw new Error("HTTP " + res.status);
         }
-        
-        const staffList = await res.json();
-
-        // Filter staff born in current month
-        const monthlyBirthdays = staffList.filter(item => {
-          if (!item.dob) return false;
-          const month = parseInt(item.dob.split('-')[1], 10);
-          return month === currentMonth;
-        });
-
-        // Sort ascending by Day
-        monthlyBirthdays.sort((a, b) => {
-          const dayA = parseInt(a.dob.split('-')[2], 10);
-          const dayB = parseInt(b.dob.split('-')[2], 10);
-          return dayA - dayB;
-        });
-
-        if (monthlyBirthdays.length === 0) {
-          container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
-          return;
-        }
-
-        container.innerHTML = monthlyBirthdays.map(item => {
-          const dayNum = parseInt(item.dob.split('-')[2], 10);
-          return `
-            <tr>
-              <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
-              <td style="font-weight: 700; color: #0f172a;">${item.name}</td>
-              <td style="text-align: center; font-weight: 800; color: #0b2545;">${item.group}</td>
-            </tr>
-          `;
-        }).join('');
-
       } catch (e) {
-        console.warn("Could not load birthday data:", e);
-        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 12px; color: #94a3b8;">Error fetching birthdays.</td></tr>`;
+        console.warn("Could not fetch data/birthday.json directly, trying root birthday.json:", e);
+        try {
+          const resFallback = await fetch(`birthday.json?v=${Date.now()}`);
+          if (resFallback.ok) {
+            staffList = await resFallback.json();
+          }
+        } catch (err) {
+          console.warn("Fallback fetch also failed:", err);
+        }
       }
+
+      if (!staffList || staffList.length === 0) {
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthday records available.</td></tr>`;
+        return;
+      }
+
+      // Filter staff born in current month
+      const monthlyBirthdays = staffList.filter(item => {
+        if (!item.dob) return false;
+        const month = parseInt(item.dob.split('-')[1], 10);
+        return month === currentMonth;
+      });
+
+      // Sort ascending by Day
+      monthlyBirthdays.sort((a, b) => {
+        const dayA = parseInt(a.dob.split('-')[2], 10);
+        const dayB = parseInt(b.dob.split('-')[2], 10);
+        return dayA - dayB;
+      });
+
+      if (monthlyBirthdays.length === 0) {
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
+        return;
+      }
+
+      container.innerHTML = monthlyBirthdays.map(item => {
+        const dayNum = parseInt(item.dob.split('-')[2], 10);
+        return `
+          <tr>
+            <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
+            <td style="font-weight: 700; color: #0f172a;">${item.name}</td>
+            <td style="text-align: center; font-weight: 800; color: #0b2545;">${item.group}</td>
+          </tr>
+        `;
+      }).join('');
     }
 
     function navigateTo(url) {
@@ -467,8 +489,10 @@
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
     window.addEventListener('DOMContentLoaded', () => {
-      checkSession();
-      renderMonthlyBirthdays();
+      const isAuthenticated = checkSession();
+      if (isAuthenticated) {
+        renderMonthlyBirthdays();
+      }
     });
   </script>
 
