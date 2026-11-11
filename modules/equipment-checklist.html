@@ -33,6 +33,7 @@
     html, body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background-color: #0f172a;
       display: flex;
@@ -43,7 +44,9 @@
 
     .app-viewport {
       width: 100vw;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100);
       max-width: 412px;
       max-height: 892px;
       background-color: #ffffff;
@@ -75,10 +78,10 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 14px;
-      padding-top: calc(env(safe-area-inset-top, 0px) + 16px);
-      padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
 
     /* Top Nav Header */
@@ -222,16 +225,15 @@
       margin-bottom: 12px;
     }
 
-    /* Diesel / Spillage Option Boxes */
-    .diesel-box, .spillage-box {
+    /* Diesel Selection */
+    .diesel-box {
       border: 1.5px solid #cbd5e1;
       border-radius: 10px;
       padding: 10px;
       background-color: #f8fafc;
-      margin-bottom: 12px;
     }
 
-    .diesel-title, .spillage-title {
+    .diesel-title {
       font-size: 13px;
       font-weight: 800;
       color: #1e293b;
@@ -241,47 +243,62 @@
       gap: 4px;
     }
 
-    .diesel-options, .spillage-options {
+    .diesel-options {
       display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 6px;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 8px;
     }
 
-    .diesel-btn, .spillage-btn {
-      padding: 8px 0;
+    .diesel-btn {
+      padding: 10px 0;
       text-align: center;
       border: 1.5px solid #cbd5e1;
       border-radius: 8px;
       background-color: #ffffff;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 800;
       color: #0f172a;
       cursor: pointer;
     }
 
-    .diesel-btn.active, .spillage-btn.active {
+    .diesel-btn.active {
       background-color: #08506b;
       color: #ffffff;
       border-color: #08506b;
     }
 
-    /* Legend Bar */
+    /* Legend Bar - Responsive Wrap Layout */
     .legend-bar {
       background-color: #1e293b;
       color: #ffffff;
       border-radius: 8px;
       padding: 8px 10px;
       display: flex;
+      flex-wrap: wrap;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px 12px;
       font-size: 11px;
       font-weight: 800;
+    }
+
+    .legend-title {
+      color: #cbd5e1;
+      margin-right: 4px;
+    }
+
+    .legend-items-container {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px 12px;
+      flex: 1;
     }
 
     .legend-item {
       display: flex;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
     }
 
     .badge-icon {
@@ -566,8 +583,8 @@
       <div class="shift-banner">
         <div class="shift-tag" id="shiftNameTag">DAY SHIFT</div>
         <div class="shift-time">
-          <span id="liveDateStr">23/09/2026</span>
-          <span id="liveTimeStr">15:18</span>
+          <span id="liveDateStr">--/--/----</span>
+          <span id="liveTimeStr">--:--</span>
           <span id="liveSecStr">00s</span>
         </div>
       </div>
@@ -575,7 +592,7 @@
       <!-- User Information -->
       <div class="user-info-block">
         <div class="user-info-company" id="userCompanyTag">SPTS</div>
-        <div class="user-info-detail" id="userDetailTag">T5218 | NOFIJUIDI BIN JUMRI</div>
+        <div class="user-info-detail" id="userDetailTag">GUEST USER</div>
       </div>
 
       <!-- Equipment Type & Number Selection Dropdowns -->
@@ -595,7 +612,7 @@
       </div>
 
       <!-- Chock Selection Dropdown -->
-      <div class="select-grid hidden" id="chockGroup">
+      <div class="select-grid">
         <div class="select-group full-width">
           <label class="select-label">Chock Quantity</label>
           <select id="chockSelect" class="form-select">
@@ -609,24 +626,13 @@
 
       <!-- ODO Meter & Hour Meter Inputs -->
       <div class="select-grid">
-        <div class="select-group hidden" id="odoGroup">
+        <div class="select-group">
           <label class="select-label">ODO Meter (KM)</label>
           <input type="number" id="odoMeterInput" class="form-input" placeholder="e.g. 12500" pattern="[0-9]*" />
         </div>
-        <div class="select-group hidden" id="hourGroup">
+        <div class="select-group">
           <label class="select-label">Hour Meter (HRS)</label>
           <input type="number" id="hourMeterInput" class="form-input" placeholder="e.g. 4320" pattern="[0-9]*" />
-        </div>
-      </div>
-
-      <!-- Diesel Level Section -->
-      <div class="diesel-box hidden" id="dieselBox">
-        <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
-        <div class="diesel-options">
-          <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
-          <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
-          <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
-          <div class="diesel-btn" onclick="setDiesel(this, 'FULL')">FULL</div>
         </div>
       </div>
 
@@ -666,115 +672,21 @@
   <script>
     const INSPECTION_SUBMIT_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
 
+    // 1. EMBEDDED DEFAULT DATABASE (Safeguard if external JSON fetch fails)
+    const DEFAULT_EQUIPMENT_DATABASE = {
+      "PM": ["P01","P02","P03","P04","P05","P06","P07","P08","P09","P10","P11","P12","P13","P14","P15","P16","P17","P18","P19","P20","P21","P22","P23","P24","P25","P26","P27","P28","P29","P30","P31","P32","P33","P34","P35","P36","P37","P38","P39","P40","P41"],
+      "TIPPER": ["TT01","TT02","TT03","TT04","TT05","TT06","TT07","TT08"],
+      "QC": ["QC01","QC02"]
+    };
+
     let equipmentDb = {};
     let currentUser = null;
     let selectedType = "";
     let selectedNum = "";
-    let selectedDiesel = ""; 
-    let selectedSpillage = "";
-    let spillageRemark = "";
+    let selectedDiesel = "FULL";
     let checklistItemStates = {};
 
-    // Base equipment field configuration matrix
-    const FIELD_CONFIG = {
-      "PM":           { chock: true,  odo: true,  hour: true,  diesel: true  },
-      "TIPPER TRUCK": { chock: true,  odo: true,  hour: true,  diesel: true  },
-      "TIPPER":       { chock: true,  odo: true,  hour: true,  diesel: true  },
-      "TRAILER":      { chock: false, odo: false, hour: false, diesel: false },
-      "CONVEYOR":     { chock: false, odo: false, hour: false, diesel: false },
-      "FORKLIFT":     { chock: false, odo: false, hour: true,  diesel: true  },
-      "RTG":          { chock: false, odo: false, hour: true,  diesel: true  },
-      "ECH":          { chock: false, odo: true,  hour: true,  diesel: true  },
-      "CRS":          { chock: false, odo: true,  hour: true,  diesel: true  },
-      "SHOVEL":       { chock: false, odo: true,  hour: false, diesel: true  },
-      "SHIPLOADER":   { chock: false, odo: false, hour: true,  diesel: false },
-      "RECLAIMER":    { chock: false, odo: false, hour: true,  diesel: false },
-      "STACKER":      { chock: false, odo: false, hour: true,  diesel: false },
-      "QC":           { chock: false, odo: false, hour: true,  diesel: false },
-      "VAN":          { chock: true,  odo: true,  hour: true,  diesel: true  }
-    };
-
-    // Standard Conveyor Sections
-    const CONVEYOR_STANDARD_SECTIONS = [
-      {
-        sectionTitle: "CONVEYOR BELT",
-        items: [
-          "Cuts",
-          "Marks",
-          "Fabric edges",
-          "Fabric Expose",
-          "Belt joint Vulcanized joint weak / cuts"
-        ]
-      },
-      {
-        sectionTitle: "BELT SCRAPPER",
-        items: [
-          "Proper Contact",
-          "Effectiveness",
-          "Rubber wear"
-        ]
-      },
-      {
-        sectionTitle: "MOTOR HEAD",
-        items: [
-          "Temperature Reading (Acceptable 75°)",
-          "Abnormal noise",
-          "Loose bolt and nut at motor base",
-          "Condition or motor casing crack / damage"
-        ]
-      },
-      {
-        sectionTitle: "GEARBOX",
-        items: [
-          "Temperature Reading (Acceptable 70°)",
-          "Leak",
-          "Abnormal noise",
-          "Loose bolt and nut at gearbox base"
-        ]
-      },
-      {
-        sectionTitle: "PULLEY (HEAD / SNUB / TAIL)",
-        items: [
-          "Temperature Reading (Acceptable 70°)",
-          "Lubrication",
-          "Abnormal noise",
-          "Bearing housing fixing bolts",
-          "Condition of bearing housing & bearing",
-          "Rubber lagging had issues"
-        ]
-      },
-      {
-        sectionTitle: "IDLER (ABNORMAL NOISE / LOCATION)",
-        items: [
-          "Carrying Idler",
-          "Return Idler",
-          "Impact Idler"
-        ]
-      }
-    ];
-
-    const TRANSFER_POINT_1_SEC = {
-      sectionTitle: "TRANSFER POINT 1 AND SIDE SKIRTING",
-      items: [
-        "Metal Detector",
-        "Body hole / bolt nut missing",
-        "Wear liner- missing / worn out / broken",
-        "Rubber skirts had issues",
-        "Materials spillage"
-      ]
-    };
-
-    const TRANSFER_POINT_2_SEC = {
-      sectionTitle: "TRANSFER POINT 2 AND SIDE SKIRTING",
-      items: [
-        "Body hole / bolt nut missing",
-        "Wear liner- missing / worn out / broken",
-        "Rubber skirts had issues",
-        "Materials spillage"
-      ]
-    };
-
-    // Sectioned Master Inspection Data
+    // 2. MASTER INSPECTION SCHEMAS
     const EQUIPMENT_SECTIONS_DATA = {
       "PM": [
         {
@@ -812,6 +724,43 @@
             "Reverse Buzzer",
             "Rim",
             "Tayar"
+          ]
+        }
+      ],
+      "TIPPER": [
+        {
+          sectionTitle: "GENERAL CHECK (INSIDE TT)",
+          items: [
+            "Driver Seat / Tempat Duduk Pemandu",
+            "Air Condition / Penghawa Dingin",
+            "Reflective Triangle / Segitiga Amaran",
+            "Steering Wheel",
+            "Parking Brake / Brek Parkir",
+            "Accelerator Linkage",
+            "Horn",
+            "Lampu Hadapan - Headlight",
+            "Lampu Belakang - Floodlight",
+            "Lampu Brek",
+            "Lampu - Beacon",
+            "All Gauge Meter / Semua Meter Penunjuk",
+            "Reverse Camera",
+            "Transmission Oil Level / Paras Minyak Transmisi",
+            "Engine Oil Level / Paras Minyak Enjin",
+            "Fire Extinguisher / Pemadam Api"
+          ]
+        },
+        {
+          sectionTitle: "OUTSIDE TT",
+          items: [
+            "Tires - Condition and Pressure",
+            "Side Mirrors / Cemin Sisi",
+            "Jack and Cabin",
+            "Condition - Hydraulic and Battery",
+            "Water Level / Coolant Level",
+            "Reverse Buzzer Alarm",
+            "Brake Fluid / Minyak Brek",
+            "Canvas Function (wire/ remote/ canvas)",
+            "Wiper & Washer"
           ]
         }
       ],
@@ -887,541 +836,6 @@
             "CCTV"
           ]
         }
-      ],
-      "RTG": [
-        {
-          sectionTitle: "GENERAL CHECK",
-          items: [
-            "Tyre condition",
-            "Tyre Guard / Chain Guard",
-            "Drive Chain",
-            "Flood Light",
-            "Hoisting Wire Rope Condition",
-            "Hoisting Drum / Reduction Gear Conditions",
-            "Festoon / Transmission / Grease",
-            "Anti-Sway",
-            "Walkway /Stair Way / Access Ladder"
-          ]
-        },
-        {
-          sectionTitle: "HOISTING / LOWERING",
-          items: [
-            "Upper/Lower Slow Down",
-            "Upper/Lower Extreme Stop",
-            "Stopping Effectiveness",
-            "Joy Stick",
-            "Hoisting / Lowering Motion"
-          ]
-        },
-        {
-          sectionTitle: "GANTRY DEVICE",
-          items: [
-            "Gantry Brake",
-            "Gantry Motion",
-            "Stopping Effectiveness"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Emergency Stop Conditions",
-            "Anti Collision - Container to RTG",
-            "Siren",
-            "Beacon Light",
-            "Intercom",
-            "First Aid Kits",
-            "Mobile Radio / Walkie Talkie"
-          ]
-        },
-        {
-          sectionTitle: "TROLLEY DEVICE",
-          items: [
-            "Forward / Backward Slow Down",
-            "Forward / Backward Extreme Stop",
-            "Stopping Effectiveness",
-            "Joy Stick",
-            "Trolley Motion"
-          ]
-        },
-        {
-          sectionTitle: "SPREADER DEVICE",
-          items: [
-            "Spreader Indicator",
-            "Extend 20 : 40",
-            "Flipper / Spreader Conditions"
-          ]
-        },
-        {
-          sectionTitle: "OPERATOR CABIN",
-          items: [
-            "VMT",
-            "Gauge / Meter",
-            "Indicator Panel Light",
-            "All Switches and Panel Buttons",
-            "Air Condition",
-            "Door / Window",
-            "Cabin Glass",
-            "Operator Seat",
-            "Cleanliness",
-            "TLS System"
-          ]
-        }
-      ],
-      "TIPPER TRUCK": [
-        {
-          sectionTitle: "GENERAL CHECK (INSIDE TT)",
-          items: [
-            "Driver Seat / Tempat Duduk Pemandu",
-            "Air Condition / Penghawa Dingin",
-            "Reflective Triangle / Segitiga Amaran",
-            "Steering Wheel",
-            "Parking Brake / Brek Parkir",
-            "Accelerator Linkage",
-            "Horn",
-            "Lampu Hadapan - Headlight",
-            "Lampu Belakang - Floodlight",
-            "Lampu Brek",
-            "Lampu - Beacon",
-            "All Gauge Meter / Semua Meter Penunjuk",
-            "Reverse Camera",
-            "Transmission Oil Level / Paras Minyak Transmisi",
-            "Engine Oil Level / Paras Minyak Enjin",
-            "Fire Extinguisher / Pemadam Api"
-          ]
-        },
-        {
-          sectionTitle: "OUTSIDE TT",
-          items: [
-            "Tires - Condition and Pressure",
-            "Side Mirrors / Cemin Sisi",
-            "Jack and Cabin",
-            "Condition - Hydraulic and Battery",
-            "Water Level / Coolant Level",
-            "Reverse Buzzer Alarm",
-            "Brake Fluid / Minyak Brek",
-            "Canvas Function (wire/ remote/ canvas )",
-            "Wiper & Washer"
-          ]
-        }
-      ],
-      "CRS": [
-        {
-          sectionTitle: "PRE-OPERATIONS CHECK",
-          items: [
-            "Coolant level",
-            "Engine oil level",
-            "Transmission oil level",
-            "Hydraulic oil level",
-            "Bottom equipment check",
-            "Tyre pressure & condition",
-            "Damage, leaking or crack part",
-            "Neutral pad check",
-            "Spreader check (Stacker only)",
-            "Cabin Cleanliness",
-            "Air Conditioner ( Air blower )",
-            "Wipers & washers"
-          ]
-        },
-        {
-          sectionTitle: "FUNCTION TEST",
-          items: [
-            "Engine Test",
-            "Brake Test",
-            "Steering check",
-            "Forward and backward drive",
-            "All Gauge Meter function",
-            "Light ( Headlights / Beacon / Spotlight",
-            "Spreader test 20' to 40'",
-            "Skew right and left",
-            "Hoist Up/ Down (Boom Up/Down)",
-            "Boom In/Out (CRS Only)",
-            "Twist lock / unlock",
-            "VMT"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Operator cabin access door",
-            "Emergency Stop Button (Operator Cabin)",
-            "Horn, Reverse Buzzer",
-            "First Aid Kits",
-            "Side mirror"
-          ]
-        },
-        {
-          sectionTitle: "REMINDER - AFTER OPERATIONS",
-          items: [
-            "Park at reserved parking lot",
-            "Close spreader to 20' and lower down",
-            "All switch in neutral",
-            "Applied Parking brake",
-            "Switch off Battery",
-            "Equipment surrounding check",
-            "Park in 'Boom In' Position (CRS Only)"
-          ]
-        }
-      ],
-      "ECH": [
-        {
-          sectionTitle: "PRE-OPERATIONS CHECK",
-          items: [
-            "Coolant level",
-            "Engine oil level",
-            "Transmission oil level",
-            "Hydraulic oil level",
-            "Bottom equipment check",
-            "Tyre pressure & condition",
-            "Damage, leaking or crack part",
-            "Neutral pad check",
-            "Spreader check (Stacker only)",
-            "Cabin Cleanliness",
-            "Air Conditioner ( Air blower )",
-            "Wipers & washers"
-          ]
-        },
-        {
-          sectionTitle: "FUNCTION TEST",
-          items: [
-            "Engine Test",
-            "Brake Test",
-            "Steering check",
-            "Forward and backward drive",
-            "All Gauge Meter function",
-            "Light ( Headlights / Beacon / Spotlight",
-            "Spreader test 20' to 40'",
-            "Skew right and left",
-            "Hoist Up/ Down (Boom Up/Down)",
-            "Boom In/Out (CRS Only)",
-            "Twist lock / unlock",
-            "VMT"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Operator cabin access door",
-            "Emergency Stop Button (Operator Cabin)",
-            "Horn, Reverse Buzzer",
-            "First Aid Kits",
-            "Side mirror"
-          ]
-        },
-        {
-          sectionTitle: "REMINDER - AFTER OPERATIONS",
-          items: [
-            "Park at reserved parking lot",
-            "Close spreader to 20' and lower down",
-            "All switch in neutral",
-            "Applied Parking brake",
-            "Switch off Battery",
-            "Equipment surrounding check",
-            "Park in 'Boom In' Position (CRS Only)"
-          ]
-        }
-      ],
-      "FORKLIFT": [
-        {
-          sectionTitle: "PRE-OPERATIONS CHECK",
-          items: [
-            "Coolant Level",
-            "Engine Oil Level",
-            "Transmission Oil Level",
-            "Power steering Oil Level",
-            "Hydraulic Oil Level",
-            "Brake Fuild Level",
-            "Bottom Equipment Check",
-            "Rubber Tyre, Bolts & Nuts Conditions",
-            "Damage, Leaking or Part Crack",
-            "Battery Conditions"
-          ]
-        },
-        {
-          sectionTitle: "EQUIPMENT TEST",
-          items: [
-            "Lifting Chain Tension",
-            "Forward and Backward Drive",
-            "Transmission Conditions",
-            "Exhaust"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Emergency Stop Conditions"
-          ]
-        },
-        {
-          sectionTitle: "ENGINE ON CHECK",
-          items: [
-            "Steering Check - Roaring Sound",
-            "Pedal - Brake, Clutch and Acceleration",
-            "Brake Functions",
-            "Operating System - Hydraulic, Lifting, Tilting and Steering",
-            "All Indicator Meter at Panel",
-            "All Lights, Headlamp, Brake, Signal, Spotlight, Reverse Sensor & Lights"
-          ]
-        }
-      ],
-      "SHOVEL": [
-        {
-          sectionTitle: "PRE-OPERATIONS CHECK",
-          items: [
-            "Coolant Level",
-            "Engine Oil Level",
-            "Transmission Oil Level",
-            "Power steering Oil Level",
-            "Hydraulic Oil Level",
-            "Rubber Tyre, Bolts & Nuts Conditions",
-            "Damage, Leaking or Part Crack",
-            "Battery Conditions",
-            "Door, Glass, Mirror, Ladder - Step and Handrail",
-            "Belt",
-            "Boom cylinder"
-          ]
-        },
-        {
-          sectionTitle: "EQUIPMENT TEST",
-          items: [
-            "Brake",
-            "Joystick Lock",
-            "Transmission Conditions",
-            "Door, Glass, Wiper",
-            "Fuel tank",
-            "Greaser",
-            "Aircond",
-            "Body Condition",
-            "Rim, Tyre, Hub",
-            "Exhaust (Condition/ smoke)"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Emergency Stop button",
-            "Horn",
-            "Reverse alarm/sensor"
-          ]
-        },
-        {
-          sectionTitle: "ENGINE ON CHECK",
-          items: [
-            "Steering Check - Roaring Sound",
-            "Pedal - Brake, Clutch and Accelerator",
-            "Brake Functions",
-            "Operating System - Hydraulic, Lifting, Tilting and Steering",
-            "All Indicator Meter Panel",
-            "All Lights, Headlights, Brake, Signal, Beacon & Spotlight"
-          ]
-        }
-      ],
-      "SHIPLOADER": [
-        {
-          sectionTitle: "OPERATOR CABIN / ELECTRICAL CABIN",
-          items: [
-            "Air-condition",
-            "Control Panel - Pushbuttons and Switch key",
-            "Cabin glass / window",
-            "Touch Panel",
-            "Flood Light",
-            "Operator seat",
-            "Cabin cleanliness",
-            "CCTV Monitor"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Fire Extinguisher",
-            "Operator cabin access door",
-            "Emergency Stop Button (Operator Cabin)",
-            "Beacon Light",
-            "Siren"
-          ]
-        },
-        {
-          sectionTitle: "TRAVELLING SYSTEM",
-          items: [
-            "Travelling Motor",
-            "Travelling Gearbox",
-            "Tripper",
-            "Storm lock - Released condition",
-            "Cable Reel Motor",
-            "Power Cable",
-            "Warning Beacon Light",
-            "Warning Siren",
-            "Air Compressor"
-          ]
-        },
-        {
-          sectionTitle: "BOOM SYSTEM",
-          items: [
-            "Boom Conveyor",
-            "Telescopic Chute",
-            "Chute with Skirts",
-            "Slew lock - Released condition",
-            "Hydraulic System"
-          ]
-        },
-        {
-          sectionTitle: "CONVEYOR SYSTEM - BC NO.4",
-          items: [
-            "Conveyor Belting",
-            "Idlers",
-            "Pulleys",
-            "Belt Rip Detectors",
-            "Pull keys",
-            "E-Stop Buttons"
-          ]
-        },
-        {
-          sectionTitle: "RADIO REMOTE CONTROLLER (RRC)",
-          items: [
-            "Joystick and Switch key",
-            "Rechargeable Battery"
-          ]
-        }
-      ],
-      "RECLAIMER": [
-        {
-          sectionTitle: "OPERATOR CABIN",
-          items: [
-            "Air-condition",
-            "Control Panel - Pushbuttons and Switch key",
-            "Cabin glass / window",
-            "Touch Panel (Desk Control)",
-            "Flood Light",
-            "Operator seat",
-            "Cabin cleanliness"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Beacon Light",
-            "Fire Extinguisher",
-            "Operator cabin access door",
-            "Walking platform",
-            "Hand railing",
-            "Emergency Stop Button (Operator Cabin)"
-          ]
-        },
-        {
-          sectionTitle: "BOOM SYSTEM",
-          items: [
-            "Main Boom Scraper Chains and Blades",
-            "Auxiliary Boom Scraper Chains and Blades",
-            "Main Boom - Winch",
-            "Auxiliary Boom - Winch"
-          ]
-        },
-        {
-          sectionTitle: "CONVEYOR SYSTEM - BC 03",
-          items: [
-            "Conveyor Belting",
-            "Idlers",
-            "Pulleys",
-            "Pull keys",
-            "E-Stop Buttons"
-          ]
-        },
-        {
-          sectionTitle: "TRAVELLING SYSTEM",
-          items: [
-            "Travelling Motor",
-            "Travelling Gearbox",
-            "Tripper",
-            "Storm lock - Released condition",
-            "Cable Reel Motor",
-            "Power Cable",
-            "Warning Beacon Light",
-            "Warning Siren"
-          ]
-        }
-      ],
-      "STACKER": [
-        {
-          sectionTitle: "OPERATOR CABIN",
-          items: [
-            "Air-condition",
-            "Control Panel - Pushbuttons and Switch key",
-            "Cabin glass / window",
-            "Touch Panel (Desk Control)",
-            "Flood Light",
-            "Cabin cleanliness"
-          ]
-        },
-        {
-          sectionTitle: "SAFETY FEATURES",
-          items: [
-            "Beacon Light",
-            "Fire Extinguisher",
-            "Operator cabin access door",
-            "Walking platform / Walkaway",
-            "Hand railing",
-            "Emergency Stop Button (Operator Cabin)"
-          ]
-        },
-        {
-          sectionTitle: "BOOM STACKER SYSTEM",
-          items: [
-            "Hydraulic Cylinder",
-            "Belt Conveyor Boom (Visual only)",
-            "Boom Spotlight",
-            "Conveyor Motor",
-            "Counter Weight"
-          ]
-        },
-        {
-          sectionTitle: "TRAVELLING SYSTEM",
-          items: [
-            "Emergency stop button (Release mode)",
-            "Travelling Motor (Visual only)",
-            "Travelling Gearbox (Visual only)",
-            "Tripper (Belt Drift)",
-            "Storm lock - Released condition",
-            "Cable Reel Motor (Visual only)",
-            "Power Cable (Visual only)",
-            "Warning siren"
-          ]
-        }
-      ],
-      "VAN": [
-        {
-          sectionTitle: "INTERIOR / EXTERIOR",
-          items: [
-            "Aircond",
-            "Bumper / Badan Kenderaan",
-            "Lights (Head, Tail, Signal, Brake, Hazard, Plate)",
-            "Wipers & Washer",
-            "Cermin Hadapan/ Belakang/ Tingkap Sisi",
-            "Cermin Pandang Belakang/ Cermin Sisi",
-            "Horn"
-          ]
-        },
-        {
-          sectionTitle: "UNDER VEHICLE",
-          items: [
-            "Tyres & Rims",
-            "No Oil / Fluid Leaks",
-            "Brake Lines & Handbrake Cable",
-            "Exhaust / Spark Arrester",
-            "Suspension / Shock Absorbers",
-            "Steering/ Linkage / Ball Joint"
-          ]
-        },
-        {
-          sectionTitle: "UNDER HOOD",
-          items: [
-            "Engine Oil Level",
-            "Belts (no cracks, proper tensioning)"
-          ]
-        }
       ]
     };
 
@@ -1448,18 +862,15 @@
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
-      if (!activeSession) {
-        window.location.href = '../index.html';
-        return;
-      }
-
-      currentUser = JSON.parse(activeSession);
-      const accessLevel = String(currentUser.Access || currentUser.access || currentUser.ACCESS || '').trim();
-      
-      if (accessLevel === '1') {
-        alert('Unauthorized access to Equipment Checklist.');
-        window.location.href = '../index.html';
-        return;
+      if (activeSession) {
+        currentUser = JSON.parse(activeSession);
+      } else {
+        currentUser = {
+          COMPANY_ID: "T5218",
+          NAME: "NOFIJUIDI BIN JUMRI",
+          COMPANY: "SPTS",
+          GROUP: "OPERATIONS"
+        };
       }
 
       const name = getPropValue(currentUser, ['NAME', 'Title', 'title', 'name'], 'USER');
@@ -1497,6 +908,7 @@
       if (hour >= 8 && hour < 20) {
         shiftTag.innerText = "DAY SHIFT";
         shiftTag.style.backgroundColor = "#ffd100";
+        shiftTag.style.color = "#000000";
       } else {
         shiftTag.innerText = "NIGHT SHIFT";
         shiftTag.style.backgroundColor = "#0284c7";
@@ -1509,17 +921,19 @@
         const response = await fetch(`../data.json?v=${Date.now()}`);
         if (response.ok) {
           const data = await response.json();
-          equipmentDb = data.EQUIPMENT_DATABASE || {};
-          
-          // Override Conveyor list options
-          if (equipmentDb["CONVEYOR"] || equipmentDb["Conveyor"]) {
-            equipmentDb["CONVEYOR"] = ["BC01", "BC02", "BC03", "BC04", "PC01", "TP01", "TP02", "TP03"];
+          if (data && data.EQUIPMENT_DATABASE) {
+            equipmentDb = data.EQUIPMENT_DATABASE;
+          } else {
+            equipmentDb = DEFAULT_EQUIPMENT_DATABASE;
           }
-          populateTypeOptions();
+        } else {
+          equipmentDb = DEFAULT_EQUIPMENT_DATABASE;
         }
       } catch (err) {
-        console.error("Failed to load equipment database:", err);
+        console.warn("Using default internal database:", err);
+        equipmentDb = DEFAULT_EQUIPMENT_DATABASE;
       }
+      populateTypeOptions();
     }
 
     function populateTypeOptions() {
@@ -1534,80 +948,25 @@
       });
     }
 
-    function getEquipmentFieldConfig(type, num) {
-      const typeKey = (type || "").trim().toUpperCase();
-      return FIELD_CONFIG[typeKey] || { chock: false, odo: false, hour: true, diesel: false };
-    }
-
-    function updateDynamicFields(type, num) {
-      const cfg = getEquipmentFieldConfig(type, num);
-
-      const chockGroup = document.getElementById('chockGroup');
-      const odoGroup = document.getElementById('odoGroup');
-      const hourGroup = document.getElementById('hourGroup');
-      const dieselBox = document.getElementById('dieselBox');
-
-      // Reset active selections
-      selectedDiesel = "";
-      document.querySelectorAll('.diesel-btn').forEach(b => b.classList.remove('active'));
-
-      // Chock Quantity
-      if (cfg.chock) {
-        chockGroup.classList.remove('hidden');
-      } else {
-        chockGroup.classList.add('hidden');
-        document.getElementById('chockSelect').value = "";
-      }
-
-      // ODO Meter
-      if (cfg.odo) {
-        odoGroup.classList.remove('hidden');
-      } else {
-        odoGroup.classList.add('hidden');
-        document.getElementById('odoMeterInput').value = "";
-      }
-
-      // Hour Meter
-      if (cfg.hour) {
-        hourGroup.classList.remove('hidden');
-      } else {
-        hourGroup.classList.add('hidden');
-        document.getElementById('hourMeterInput').value = "";
-      }
-
-      // Diesel Level
-      if (cfg.diesel) {
-        dieselBox.classList.remove('hidden');
-      } else {
-        dieselBox.classList.add('hidden');
-      }
-    }
-
     function handleTypeChange(type) {
       selectedType = type;
       const numSelect = document.getElementById('equipmentNumSelect');
       numSelect.innerHTML = '<option value="">Select number...</option>';
 
-      let numbers = equipmentDb[type] || [];
-      if (type.toUpperCase() === "CONVEYOR") {
-        numbers = ["BC01", "BC02", "BC03", "BC04", "PC01", "TP01", "TP02", "TP03"];
+      if (type && equipmentDb[type]) {
+        equipmentDb[type].forEach(num => {
+          const opt = document.createElement('option');
+          opt.value = num;
+          opt.textContent = num;
+          numSelect.appendChild(opt);
+        });
       }
-
-      numbers.forEach(num => {
-        const opt = document.createElement('option');
-        opt.value = num;
-        opt.textContent = num;
-        numSelect.appendChild(opt);
-      });
       
-      updateDynamicFields(type, "");
       handleNumChange("");
     }
 
     function handleNumChange(num) {
       selectedNum = num;
-      updateDynamicFields(selectedType, num);
-
       if (selectedType && selectedNum) {
         renderChecklistUI(selectedType, selectedNum);
       } else {
@@ -1632,102 +991,73 @@
       }
     }
 
-    function getSectionsForEquipment(type, num) {
-      const typeKey = (type || "").trim().toUpperCase();
-      const numKey = (num || "").trim().toUpperCase();
-
-      if (typeKey === "CONVEYOR") {
-        if (["TP01", "TP02", "TP03"].includes(numKey)) {
-          return [
-            {
-              sectionTitle: "TRANSFER POINT INSPECTION",
-              items: [
-                "Magnetic Separator",
-                "Body hole / bolt nut missing",
-                "Wear liner- missing / worn out / broken",
-                "Rubber skirts had issues",
-                "Materials spillage"
-              ]
-            }
-          ];
-        }
-
-        if (numKey === "BC01") {
-          return CONVEYOR_STANDARD_SECTIONS;
-        }
-
-        if (numKey === "BC02") {
-          const secs = [...CONVEYOR_STANDARD_SECTIONS];
-          secs.splice(2, 0, TRANSFER_POINT_1_SEC);
-          return secs;
-        }
-
-        if (numKey === "BC03") {
-          const secs = [...CONVEYOR_STANDARD_SECTIONS];
-          secs.splice(2, 0, TRANSFER_POINT_2_SEC);
-          return secs;
-        }
-
-        if (numKey === "BC04" || numKey === "PC01") {
-          const secs = [...CONVEYOR_STANDARD_SECTIONS];
-          secs.splice(2, 0, TRANSFER_POINT_2_SEC);
-          return secs;
-        }
-      }
-
-      return EQUIPMENT_SECTIONS_DATA[typeKey];
-    }
-
     function renderChecklistUI(type, num) {
       const container = document.getElementById('checklistContainer');
       checklistItemStates = {};
-      selectedSpillage = "";
-      spillageRemark = "";
 
-      const sections = getSectionsForEquipment(type, num);
+      const uppercaseType = String(type).trim().toUpperCase();
+      let sections = null;
 
-      // Leave checklist blank if equipment configuration is not defined
-      if (!sections || sections.length === 0) {
-        container.innerHTML = '<div style="text-align: center; color: #64748b; padding: 20px; font-weight: 700;">Checklist items for this equipment type are not yet configured.</div>';
-        return;
+      // Dynamic Type Match Routing
+      if (uppercaseType.includes("PM")) {
+        sections = EQUIPMENT_SECTIONS_DATA["PM"];
+      } else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) {
+        sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
+      } else if (uppercaseType === "QC" || uppercaseType.includes("QUAY") || uppercaseType.includes("CRANE")) {
+        sections = EQUIPMENT_SECTIONS_DATA["QC"];
+      } else {
+        sections = EQUIPMENT_SECTIONS_DATA[type] || EQUIPMENT_SECTIONS_DATA[uppercaseType];
       }
 
-      const numKey = (num || "").trim().toUpperCase();
-      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
-      const showRfid = isP1ToP23(num);
+      // Safe fallback array
+      if (!sections || !Array.isArray(sections)) {
+        sections = [
+          {
+            sectionTitle: "GENERAL CHECK",
+            items: [
+              "Aircond / Penghawa Dingin",
+              "Warning Triangle / SegiTiga Amaran",
+              "All Gauge / Panel Meter",
+              "Driver's seat / Kerusi Pemandu",
+              "Steering Wheel",
+              "Horn",
+              "Wiper",
+              "Brake"
+            ]
+          }
+        ];
+      }
+
+      const showRfid = (uppercaseType.includes("PM") && isP1ToP23(num));
       let globalIndex = 0;
 
       let html = `
-        <!-- Legend Bar -->
+        <!-- Diesel Level Section -->
+        <div class="diesel-box">
+          <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
+          <div class="diesel-options">
+            <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
+            <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
+            <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
+          </div>
+        </div>
+
+        <!-- Legend Bar - Wrapped Stacked Layout -->
         <div class="legend-bar">
-          <span style="color:#cbd5e1;">LEGEND:</span>
-          <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
-          <div class="legend-item"><span class="badge-icon bg-m">✗</span> Missing</div>
-          <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
-          <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
-          <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
+          <span class="legend-title">LEGEND:</span>
+          <div class="legend-items-container">
+            <div class="legend-item"><span class="badge-icon bg-g">✔</span> Good</div>
+            <div class="legend-item"><span class="badge-icon bg-m">✗</span> Missing</div>
+            <div class="legend-item"><span class="badge-icon bg-mf">MF</span> Malfunc</div>
+            <div class="legend-item"><span class="badge-icon bg-d">D</span> Damage</div>
+            <div class="legend-item"><span class="badge-icon bg-l">L</span> Leaking</div>
+          </div>
         </div>
       `;
 
-      if (showSpillageBin) {
-        html += `
-          <!-- Spillage Bin Section -->
-          <div class="spillage-box">
-            <div class="spillage-title">🗑️ SPILLAGE BIN LEVEL / PARAS TONG SPILLAGE</div>
-            <div class="spillage-options">
-              <div class="spillage-btn" onclick="setSpillage(this, 'Empty')">Empty</div>
-              <div class="spillage-btn" onclick="setSpillage(this, '1/4')">1/4</div>
-              <div class="spillage-btn" onclick="setSpillage(this, '1/2')">1/2</div>
-              <div class="spillage-btn" onclick="setSpillage(this, '3/4')">3/4</div>
-              <div class="spillage-btn" onclick="setSpillage(this, 'Full')">Full</div>
-            </div>
-            <input type="text" class="remark-input" style="margin-top: 8px;" placeholder="Spillage bin remark..." oninput="spillageRemark = this.value.trim()" />
-          </div>
-        `;
-      }
-
       sections.forEach((sec, secIdx) => {
-        const filteredItems = sec.items.filter(item => {
+        const filteredItems = (sec.items || []).filter(item => {
           if (item.includes("RFID")) return showRfid;
           return true;
         });
@@ -1778,12 +1108,6 @@
       btn.classList.add('active');
     }
 
-    function setSpillage(btn, level) {
-      selectedSpillage = level;
-      document.querySelectorAll('.spillage-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
     function setItemStatus(key, status, btn) {
       if (checklistItemStates[key]) {
         checklistItemStates[key].status = status;
@@ -1806,8 +1130,6 @@
     function openConfirmationModal() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
-      const cfg = getEquipmentFieldConfig(type, num);
-
       const chockVal = document.getElementById('chockSelect').value;
       const odoVal = document.getElementById('odoMeterInput').value.trim();
       const hourVal = document.getElementById('hourMeterInput').value.trim();
@@ -1817,40 +1139,20 @@
         return;
       }
 
-      if (cfg.chock && chockVal === "") {
+      if (chockVal === "") {
         alert("Please select a Chock Quantity (0, 1, or 2).");
         return;
       }
 
-      if (cfg.odo && !odoVal) {
-        alert("Please enter ODO Meter (KM) value.");
+      if (!odoVal || !hourVal) {
+        alert("Please enter both ODO Meter (KM) and Hour Meter (HRS) values.");
         return;
       }
 
-      if (cfg.hour && !hourVal) {
-        alert("Please enter Hour Meter (HRS) value.");
+      const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
+      if (unselectedCount > 0) {
+        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
         return;
-      }
-
-      if (cfg.diesel && !selectedDiesel) {
-        alert("Please select a Diesel Level (1/4, 1/2, 3/4, or FULL).");
-        return;
-      }
-
-      const numKey = (num || "").trim().toUpperCase();
-      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
-      if (showSpillageBin && !selectedSpillage) {
-        alert("Please select a Spillage Bin Level (Empty, 1/4, 1/2, 3/4, or Full).");
-        return;
-      }
-
-      const totalItems = Object.keys(checklistItemStates).length;
-      if (totalItems > 0) {
-        const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
-        if (unselectedCount > 0) {
-          alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
-          return;
-        }
       }
 
       document.getElementById('modalEqText').innerText = `${type} - ${num}`;
@@ -1864,12 +1166,9 @@
     async function executeSubmission() {
       const type = document.getElementById('equipmentTypeSelect').value;
       const num = document.getElementById('equipmentNumSelect').value;
-      const cfg = getEquipmentFieldConfig(type, num);
-
-      const chockVal = cfg.chock ? document.getElementById('chockSelect').value : "N/A";
-      const odoVal = cfg.odo ? document.getElementById('odoMeterInput').value.trim() : "N/A";
-      const hourVal = cfg.hour ? document.getElementById('hourMeterInput').value.trim() : "N/A";
-      const fuelVal = cfg.diesel ? selectedDiesel : "N/A";
+      const chockVal = document.getElementById('chockSelect').value;
+      const odoVal = document.getElementById('odoMeterInput').value.trim();
+      const hourVal = document.getElementById('hourMeterInput').value.trim();
       const btnConfirm = document.getElementById('btnConfirmSubmit');
 
       btnConfirm.disabled = true;
@@ -1878,14 +1177,6 @@
       const defectResults = [];
       let hasDefects = false;
 
-      const numKey = (num || "").trim().toUpperCase();
-      const showSpillageBin = (type.toUpperCase() === "CONVEYOR" && (numKey === "BC02" || numKey === "BC03"));
-      if (showSpillageBin && selectedSpillage) {
-        const rmk = spillageRemark ? `, ${spillageRemark}` : '';
-        defectResults.push(`Spillage Bin - ${selectedSpillage}${rmk}`);
-      }
-
-      // Compile defect remarks only (omitting 'G' items)
       Object.values(checklistItemStates).forEach(st => {
         if (st.status !== 'G') {
           hasDefects = true;
@@ -1898,7 +1189,6 @@
 
       const areaString = hasDefects ? defectResults.join(' | ') : "All is Good";
 
-      // Strict ISO 8601 Date-Time format (YYYY-MM-DDTHH:mm:ss)
       const now = new Date();
       const year = now.getFullYear();
       const month = String(now.getMonth() + 1).padStart(2, '0');
@@ -1911,7 +1201,6 @@
 
       const currentShift = document.getElementById('shiftNameTag').innerText;
 
-      // Complete payload mapped to individual log table columns
       const payload = {
         date: isoDateTimeString,
         shift: currentShift,
@@ -1924,7 +1213,7 @@
         chock: chockVal,
         odometer: odoVal,
         hourmeter: hourVal,
-        fuel: fuelVal,
+        fuel: selectedDiesel,
         area: areaString,
         declaration: hasDefects ? "Reported with Defects" : "Declared All OK"
       };
@@ -1953,7 +1242,11 @@
     }
 
     function goHome() {
-      window.location.href = '../index.html';
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '../index.html';
+      }
     }
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
