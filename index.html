@@ -1,23 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Operation Portal</title>
-  <title>SPTS - Operations Portal</title>
-<meta name="theme-color" content="#0f172a">
+  <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
 
   <!-- Mobile Full-Screen & iOS PWA Meta Tags -->
-  <!-- Mobile Full-Screen Meta Tags -->
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Operation Portal">
-<meta name="mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
 
   <!-- Mandatory iOS Home Screen Icon -->
   <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="180x180" href="icon-192.png">
 
-<style>
+  <style>
     /* Global Reset & Callout Suppression */
     * { 
       box-sizing: border-box; 
@@ -25,52 +25,36 @@
       padding: 0; 
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
       
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
--webkit-touch-callout: none !important;
--webkit-user-select: none !important;
--khtml-user-select: none !important;
-@@ -33,612 +25,450 @@
-user-select: none !important;
-}
+      -webkit-touch-callout: none !important;
+      -webkit-user-select: none !important;
+      -khtml-user-select: none !important;
+      -moz-user-select: none !important;
+      -ms-user-select: none !important;
+      user-select: none !important;
+    }
 
     input, textarea {
-    input, textarea, select {
--webkit-user-select: text !important;
-user-select: text !important;
-}
+      -webkit-user-select: text !important;
+      user-select: text !important;
+    }
 
     html, body { 
       width: 100%; 
       height: 100%; 
-    html, body {
-      width: 100%;
-      height: 100%;
-height: 100dvh;
+      height: 100dvh;
       overflow: hidden; 
       background-color: #0f172a; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
       color: #334155; 
-      overflow: hidden;
-      background-color: #0f172a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #334155;
-}
+    }
 
     .app-viewport { 
       width: 100vw; 
-    .app-viewport {
-      width: 100vw;
-height: 100%;
-height: 100dvh;
-height: calc(var(--vh, 1vh) * 100);
+      height: 100%;
+      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100);
       max-width: 412px; 
       max-height: 892px; 
       background-color: #ffffff; 
@@ -78,15 +62,8 @@ height: calc(var(--vh, 1vh) * 100);
       flex-direction: column; 
       overflow: hidden; 
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5); 
-      max-width: 412px;
-      max-height: 892px;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-position: relative;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-}
+      position: relative;
+    }
 
     @media (min-width: 480px) and (orientation: portrait) { 
       .app-viewport { 
@@ -156,12 +133,7 @@ position: relative;
       border: 1.5px solid #0078D4; 
       border-radius: 8px; 
       outline: none; 
-    @media (min-width: 480px) and (orientation: portrait) {
-      .app-viewport {
-        border-radius: 28px;
-        height: 844px;
-      }
-}
+    }
 
     .btn-login-primary { 
       width: 100%; 
@@ -176,15 +148,7 @@ position: relative;
       display: flex; 
       align-items: center; 
       justify-content: center; 
-    @media (orientation: landscape) {
-      .app-viewport {
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        border-radius: 0 !important;
-        width: 100vw;
-        height: 100vh;
-      }
-}
+    }
 
     .alert-error { 
       background-color: #fef2f2; 
@@ -195,58 +159,34 @@ position: relative;
       font-size: 14px; 
       margin-bottom: 16px; 
       text-align: center; 
-    .view-screen {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: calc(env(safe-area-inset-top, 0px) + 16px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px) 16px;
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-}
+    }
 
     /* TOP USER CARD HEADER */
     .user-header-card {
       text-align: center;
       margin-bottom: 24px;
       padding-top: 4px;
-    /* Header Profile Card */
-    .profile-card {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: 20px;
-}
+    }
 
     .user-name-title {
-    .user-fullname {
-font-size: 20px;
-font-weight: 900;
+      font-size: 20px;
+      font-weight: 900;
       color: #000000;
       letter-spacing: 0.3px;
       margin-bottom: 12px;
-      color: #0b2545;
-text-transform: uppercase;
-      text-align: center;
-      margin-bottom: 10px;
-      letter-spacing: 0.5px;
-}
+      text-transform: uppercase;
+    }
 
     .badge-row {
-    .profile-badges {
-display: flex;
+      display: flex;
       align-items: center;
       justify-content: center;
-gap: 8px;
-      justify-content: center;
-}
+      gap: 8px;
+    }
 
     .pill-badge {
-    .badge-pill {
-      border: 2px solid #002060;
-      border-radius: 20px;
-      padding: 4px 14px;
-font-size: 13px;
-font-weight: 800;
+      font-size: 13px;
+      font-weight: 800;
       padding: 6px 14px;
       border-radius: 20px;
       border: 2px solid #0f172a;
@@ -255,70 +195,47 @@ font-weight: 800;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      color: #002060;
-      background-color: #ffffff;
-}
+    }
 
     .pill-badge-teal {
       background-color: #08506b !important;
       color: #ffffff !important;
       border-color: #08506b !important;
-    .badge-pill.navy {
-      background-color: #08506b;
-      color: #ffffff;
-      border-color: #08506b;
-}
+    }
 
     /* NAV CARDS */
     .modules-container {
-    /* Modules List */
-    .modules-list {
-display: flex;
-flex-direction: column;
-gap: 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
       margin-bottom: 20px;
-      margin-bottom: 24px;
-}
+    }
 
     .nav-card-teal {
       background: #08506b;
       border: 2px solid #063c50;
-    .module-btn {
-      background-color: #08506b;
-border-radius: 14px;
+      border-radius: 14px;
       padding: 12px 16px;
-      padding: 14px 16px;
-display: flex;
-align-items: center;
+      display: flex;
+      align-items: center;
       gap: 16px;
       cursor: pointer;
-      gap: 14px;
-      color: #ffffff;
-      text-decoration: none;
-box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       transition: transform 0.15s ease;
-      cursor: pointer;
-      transition: transform 0.15s ease, background-color 0.15s ease;
-}
+    }
 
     .nav-card-teal:active {
-    .module-btn:active {
-transform: scale(0.98);
-      background-color: #063c50;
-}
+      transform: scale(0.98);
+    }
 
     .nav-icon-box {
       width: 44px;
       height: 44px;
-    .module-icon {
-      width: 36px;
-      height: 36px;
-display: flex;
-align-items: center;
-justify-content: center;
-      font-size: 26px;
-flex-shrink: 0;
-}
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
 
     .nav-icon-box svg {
       width: 36px;
@@ -331,39 +248,32 @@ flex-shrink: 0;
     }
 
     .nav-text-group {
-    .module-info {
-display: flex;
-flex-direction: column;
-}
+      display: flex;
+      flex-direction: column;
+    }
 
     .nav-card-title-white {
       font-weight: 800;
-    .module-title {
-font-size: 16px;
+      font-size: 16px;
       color: #ffffff;
-      font-weight: 800;
-line-height: 1.2;
-}
-
-    .nav-card-sub-white {
-    .module-desc {
-font-size: 12px;
-      color: #e2e8f0;
-      margin-top: 3px;
-      color: #94a3b8;
-font-weight: 500;
-      margin-top: 2px;
+      line-height: 1.2;
     }
 
-    /* Birthday Section Card */
+    .nav-card-sub-white {
+      font-size: 12px;
+      color: #e2e8f0;
+      margin-top: 3px;
+      font-weight: 500;
+    }
+
+    /* MONTHLY BIRTHDAY CARD */
     .birthday-section {
-      margin-bottom: 24px;
+      margin-bottom: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
-}
+    }
 
-    /* ANNOUNCEMENT NOTICE CARD */
     .birthday-header-title {
       font-size: 18px;
       font-weight: 900;
@@ -412,23 +322,20 @@ font-weight: 500;
       background-color: #f8fafc;
     }
 
-    /* Notis Portal Announcement Box */
-.announcement-card {
+    /* ANNOUNCEMENT NOTICE CARD */
+    .announcement-card {
       background: #eff6ff;
-      background-color: #eff6ff;
-border: 1.5px solid #bfdbfe;
-border-radius: 14px;
+      border: 1.5px solid #bfdbfe;
+      border-radius: 14px;
       padding: 14px 16px;
-      margin-top: 8px;
+      margin-top: 4px;
       margin-bottom: 20px;
-      padding: 16px;
-      margin-bottom: 24px;
-}
+    }
 
-.announcement-header {
-display: flex;
-align-items: center;
-gap: 8px;
+    .announcement-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
       margin-bottom: 6px;
     }
 
@@ -439,45 +346,30 @@ gap: 8px;
     .announcement-title {
       font-size: 13px;
       font-weight: 800;
-color: #1e40af;
-      font-size: 15px;
-      font-weight: 900;
-      margin-bottom: 8px;
-text-transform: uppercase;
+      color: #1e40af;
+      text-transform: uppercase;
       letter-spacing: 0.5px;
-}
+    }
 
     .announcement-text {
-    .announcement-body {
-font-size: 13px;
+      font-size: 13px;
       line-height: 1.5;
-color: #1e3a8a;
+      color: #1e3a8a;
       font-weight: 500;
       white-space: pre-line;
-      line-height: 1.5;
-      font-weight: 600;
-}
+    }
 
     /* SIGN OUT BUTTON */
     .btn-signout-pill {
       width: 180px;
-    /* Sign Out Button */
-    .btn-signout {
-      width: 60%;
-      max-width: 200px;
-height: 46px;
+      height: 46px;
       background-color: #607085;
-      background-color: #5c6b73;
-color: #ffffff;
-font-size: 16px;
-font-weight: 800;
+      color: #ffffff;
+      font-size: 16px;
+      font-weight: 800;
       border: 2px solid #1e293b;
       border-radius: 24px;
-      border: none;
-      border-radius: 23px;
-      margin: 0 auto 16px auto;
-      display: block;
-cursor: pointer;
+      cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -485,13 +377,10 @@ cursor: pointer;
       flex-shrink: 0;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       transition: transform 0.15s ease;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.15);
-      transition: transform 0.15s ease, background-color 0.15s ease;
-}
+    }
 
     .btn-signout-pill:active {
-    .btn-signout:active {
-transform: scale(0.96);
+      transform: scale(0.96);
       background-color: #475569;
     }
 
@@ -526,13 +415,12 @@ transform: scale(0.96);
       font-size: 18px;
       cursor: pointer;
       line-height: 1;
-      background-color: #4a555c;
-}
-</style>
+    }
+  </style>
 </head>
 <body>
 
-<div class="app-viewport">
+  <div class="app-viewport">
 
     <!-- LOGIN SCREEN -->
     <div id="loginView" class="view-screen">
@@ -571,17 +459,8 @@ transform: scale(0.96);
           <span class="pill-badge" id="displayCompany">SPTS</span>
           <span class="pill-badge pill-badge-teal" id="displayUserId">ID : T5218</span>
           <span class="pill-badge" id="displayGroup">Group : OFFICE</span>
-    <div class="view-screen">
-
-      <!-- Profile Header -->
-      <div class="profile-card">
-        <div class="user-fullname" id="userDisplayName">NOFIJUIDI BIN JUMRI</div>
-        <div class="profile-badges">
-          <div class="badge-pill" id="userBadgeCompany">SPTS</div>
-          <div class="badge-pill navy" id="userBadgeId">ID : T5218</div>
-          <div class="badge-pill" id="userBadgeGroup">Group : OFFICE</div>
-</div>
-</div>
+        </div>
+      </div>
 
       <!-- Modules List -->
       <div class="modules-container">
@@ -594,15 +473,8 @@ transform: scale(0.96);
           <div class="nav-text-group">
             <div class="nav-card-title-white">Equipment Checklist</div>
             <div class="nav-card-sub-white">Inspect and Update Issues</div>
-      <!-- Navigation Modules -->
-      <div class="modules-list">
-        <div class="module-btn" onclick="navigateTo('modules/equipment-checklist.html')">
-          <div class="module-icon">📋</div>
-          <div class="module-info">
-            <div class="module-title">Equipment Checklist</div>
-            <div class="module-desc">Inspect and Update Issues</div>
-</div>
-</div>
+          </div>
+        </div>
 
         <!-- Module 2: Manpower Booking -->
         <div class="nav-card-teal" onclick="navigateTo('modules/manpower-booking.html')">
@@ -612,13 +484,8 @@ transform: scale(0.96);
           <div class="nav-text-group">
             <div class="nav-card-title-white">Manpower Booking</div>
             <div class="nav-card-sub-white">View Latest Booking</div>
-        <div class="module-btn" onclick="navigateTo('modules/manpower-booking.html')">
-          <div class="module-icon">👥</div>
-          <div class="module-info">
-            <div class="module-title">Manpower Booking</div>
-            <div class="module-desc">View Latest Booking</div>
-</div>
-</div>
+          </div>
+        </div>
 
         <!-- Module 3: Walkie Talkie Declaration -->
         <div class="nav-card-teal" onclick="navigateTo('modules/walkie-talkie-declaration.html')">
@@ -628,13 +495,8 @@ transform: scale(0.96);
           <div class="nav-text-group">
             <div class="nav-card-title-white">Walkie Talkie Declaration</div>
             <div class="nav-card-sub-white">Submit daily walkie-talkie usage</div>
-        <div class="module-btn" onclick="navigateTo('modules/walkie-talkie.html')">
-          <div class="module-icon">📻</div>
-          <div class="module-info">
-            <div class="module-title">Walkie Talkie Declaration</div>
-            <div class="module-desc">Submit daily walkie-talkie usage</div>
-</div>
-</div>
+          </div>
+        </div>
 
         <!-- Module 4: Historical Record -->
         <div id="card-historical-record" class="nav-card-teal" onclick="navigateTo('modules/historical-record.html')">
@@ -644,13 +506,8 @@ transform: scale(0.96);
           <div class="nav-text-group">
             <div class="nav-card-title-white">Historical Record</div>
             <div class="nav-card-sub-white">Search & View Past Inspection Logs</div>
-        <div class="module-btn" onclick="navigateTo('modules/historical-record.html')">
-          <div class="module-icon">📑</div>
-          <div class="module-info">
-            <div class="module-title">Historical Record</div>
-            <div class="module-desc">Search & View Past Inspection Logs</div>
-</div>
-</div>
+          </div>
+        </div>
 
         <!-- Module 5: Incoming Operation Activities -->
         <div class="nav-card-teal" onclick="navigateTo('modules/incoming-operation-activities.html')">
@@ -660,18 +517,14 @@ transform: scale(0.96);
           <div class="nav-text-group">
             <div class="nav-card-title-white">Incoming Operation Activities</div>
             <div class="nav-card-sub-white">View vessels, transfers & housekeeping</div>
-        <div class="module-btn" onclick="navigateTo('modules/incoming-operation.html')">
-          <div class="module-icon">🚚</div>
-          <div class="module-info">
-            <div class="module-title">Incoming Operation Activities</div>
-            <div class="module-desc">View vessels, transfers & housekeeping</div>
-</div>
-</div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Monthly Birthday Section -->
       <div class="birthday-section">
-        <div class="birthday-header-title" id="birthdayTitle">JANUARY'S BIRTHDAY</div>
+        <div class="birthday-header-title" id="birthdayTitle">MONTHLY BIRTHDAYS</div>
         <div class="birthday-table-box">
           <table class="birthday-table">
             <thead>
@@ -688,24 +541,16 @@ transform: scale(0.96);
             </tbody>
           </table>
         </div>
-</div>
+      </div>
 
       <!-- Dynamic Announcement Banner -->
       <div id="announcementBox" class="announcement-card hidden">
-      <!-- Notis Portal -->
-      <div class="announcement-card">
-<div class="announcement-header">
+        <div class="announcement-header">
           <span class="announcement-icon">📢</span>
           <span class="announcement-title" id="noticeTitle">NOTIS PORTAL</span>
-          <span>📢</span> NOTIS PORTAL
         </div>
-        <div class="announcement-body">
-          Assalamualaikum semua<br>
-          Ini adalah portal terbaru kami dan kami sedang menaik taraf agar ia dapat memberi manfaat kepada semua.<br><br>
-          Sebarang cadangan atau penambahbaikan amatlah dialu-alukan.
-</div>
         <div class="announcement-text" id="noticeMessage">--</div>
-</div>
+      </div>
 
       <!-- Resized Centered Sign Out Button -->
       <button onclick="handleLogout()" class="btn-signout-pill">
@@ -713,8 +558,6 @@ transform: scale(0.96);
       </button>
 
     </div>
-      <!-- Sign Out Button -->
-      <button class="btn-signout" onclick="signOut()">Sign Out</button>
 
     <!-- iOS INSTALL INSTRUCTION PROMPT -->
     <div id="iosPrompt" class="ios-install-banner hidden">
@@ -725,11 +568,11 @@ transform: scale(0.96);
       <div>
         Tap the <strong>Share</strong> button below (⬆️) and select <strong>'Add to Home Screen'</strong> to install.
       </div>
-</div>
+    </div>
 
-</div>
+  </div>
 
-<script>
+  <script>
     const LOGIN_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/29ef85880a4c4deaa667684c428d530d/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=MBH_x3BWausPompPfN0xNODkcPhbDVA7Bv3vGgFW2SY";
     let currentUser = null;
 
@@ -745,23 +588,81 @@ transform: scale(0.96);
           } else {
             document.getElementById('announcementBox').classList.add('hidden');
           }
-    function checkSession() {
-      const activeSession = sessionStorage.getItem('userSession');
-      if (activeSession) {
-        try {
-          const user = JSON.parse(activeSession);
-          document.getElementById('userDisplayName').innerText = user.NAME || 'NOFIJUIDI BIN JUMRI';
-          document.getElementById('userBadgeCompany').innerText = user.COMPANY || 'SPTS';
-          document.getElementById('userBadgeId').innerText = `ID : ${user.COMPANY_ID || 'T5218'}`;
-          document.getElementById('userBadgeGroup').innerText = `Group : ${user.GROUP || 'OFFICE'}`;
-        } catch (e) {
-          console.warn("Session parse error:", e);
-}
+        }
       } catch (e) {
         console.warn("Announcement fetch failed:", e);
         document.getElementById('announcementBox').classList.add('hidden');
-}
-}
+      }
+    }
+
+    async function renderMonthlyBirthdays() {
+      const container = document.getElementById('birthdayContainer');
+      const titleElem = document.getElementById('birthdayTitle');
+      if (!container || !titleElem) return;
+
+      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
+      const now = new Date();
+      const currentMonth = now.getMonth() + 1; // 1 to 12
+      const currentMonthName = monthNames[now.getMonth()];
+
+      titleElem.innerText = `${currentMonthName}'S BIRTHDAY`;
+
+      let staffList = [];
+
+      try {
+        const res = await fetch(`data/birthday.json?v=${Date.now()}`);
+        if (res.ok) {
+          staffList = await res.json();
+        } else {
+          throw new Error("HTTP " + res.status);
+        }
+      } catch (e) {
+        console.warn("Could not fetch data/birthday.json directly, trying root birthday.json:", e);
+        try {
+          const resFallback = await fetch(`birthday.json?v=${Date.now()}`);
+          if (resFallback.ok) {
+            staffList = await resFallback.json();
+          }
+        } catch (err) {
+          console.warn("Fallback fetch also failed:", err);
+        }
+      }
+
+      if (!staffList || staffList.length === 0) {
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthday records available.</td></tr>`;
+        return;
+      }
+
+      // Filter staff born in current month
+      const monthlyBirthdays = staffList.filter(item => {
+        if (!item.dob) return false;
+        const month = parseInt(item.dob.split('-')[1], 10);
+        return month === currentMonth;
+      });
+
+      // Sort ascending by Day
+      monthlyBirthdays.sort((a, b) => {
+        const dayA = parseInt(a.dob.split('-')[2], 10);
+        const dayB = parseInt(b.dob.split('-')[2], 10);
+        return dayA - dayB;
+      });
+
+      if (monthlyBirthdays.length === 0) {
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
+        return;
+      }
+
+      container.innerHTML = monthlyBirthdays.map(item => {
+        const dayNum = parseInt(item.dob.split('-')[2], 10);
+        return `
+          <tr>
+            <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
+            <td style="font-weight: 700; color: #0f172a;">${item.name}</td>
+            <td style="text-align: center; font-weight: 800; color: #0b2545;">${item.group}</td>
+          </tr>
+        `;
+      }).join('');
+    }
 
     async function handleLogin(e) {
       e.preventDefault();
@@ -774,10 +675,6 @@ transform: scale(0.96);
       errorBox.classList.add('hidden');
       submitBtn.disabled = true;
       btnText.innerText = 'Authenticating...';
-    async function renderMonthlyBirthdays() {
-      const container = document.getElementById('birthdayContainer');
-      const titleElem = document.getElementById('birthdayTitle');
-      if (!container || !titleElem) return;
 
       try {
         const response = await fetch(LOGIN_FLOW_URL, {
@@ -785,13 +682,8 @@ transform: scale(0.96);
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username: usernameInput, password: passwordInput })
         });
-      const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
-      const now = new Date();
-      const currentMonth = now.getMonth() + 1; // 1 to 12
-      const currentMonthName = monthNames[now.getMonth()];
 
         const result = await response.json();
-      titleElem.innerText = `${currentMonthName}'S BIRTHDAY`;
 
         if (response.ok && (result.status === 'success' || result.Title || result.NAME || result.ID || result.COMPANY_ID || result.name)) {
           currentUser = result;
@@ -799,12 +691,7 @@ transform: scale(0.96);
           showHomeView();
         } else {
           showError(result.message || 'Invalid Username or Password.');
-      try {
-        const res = await fetch(`data/birthday.json?v=${Date.now()}`);
-        if (!res.ok) {
-          container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 12px; color: #94a3b8;">Unable to load birthday records.</td></tr>`;
-          return;
-}
+        }
       } catch (err) {
         showError('Network error. Unable to connect.');
       } finally {
@@ -824,56 +711,25 @@ transform: scale(0.96);
       }
       return defaultValue;
     }
-        
-        const staffList = await res.json();
 
     function applyAccessControl() {
       const eqCard = document.getElementById('card-equipment-checklist');
       const histCard = document.getElementById('card-historical-record');
-        // Filter staff born in current month
-        const monthlyBirthdays = staffList.filter(item => {
-          if (!item.dob) return false;
-          const month = parseInt(item.dob.split('-')[1], 10);
-          return month === currentMonth;
-        });
 
       if (eqCard) eqCard.classList.remove('hidden');
       if (histCard) histCard.classList.remove('hidden');
-        // Sort ascending by Day
-        monthlyBirthdays.sort((a, b) => {
-          const dayA = parseInt(a.dob.split('-')[2], 10);
-          const dayB = parseInt(b.dob.split('-')[2], 10);
-          return dayA - dayB;
-        });
 
       if (!currentUser) return;
-        if (monthlyBirthdays.length === 0) {
-          container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
-          return;
-        }
 
       const rawAccess = getPropValue(currentUser, ['Access', 'access', 'ACCESS'], '');
       const accessLevel = String(rawAccess).trim();
-        container.innerHTML = monthlyBirthdays.map(item => {
-          const dayNum = parseInt(item.dob.split('-')[2], 10);
-          return `
-            <tr>
-              <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
-              <td style="font-weight: 700; color: #0f172a;">${item.name}</td>
-              <td style="text-align: center; font-weight: 800; color: #0b2545;">${item.group}</td>
-            </tr>
-          `;
-        }).join('');
 
       if (accessLevel === '1') {
         if (eqCard) eqCard.classList.add('hidden');
       } else if (accessLevel === '2') {
         if (histCard) histCard.classList.add('hidden');
-      } catch (e) {
-        console.warn("Could not load birthday data:", e);
-        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 12px; color: #94a3b8;">Error fetching birthdays.</td></tr>`;
-}
-}
+      }
+    }
 
     function showHomeView() {
       document.getElementById('loginView').classList.add('hidden');
@@ -887,14 +743,12 @@ transform: scale(0.96);
       }
 
       applyAccessControl();
+      renderMonthlyBirthdays();
       loadAnnouncement();
-    function navigateTo(url) {
-      window.location.href = url;
-}
+    }
 
     function handleLogout() {
-    function signOut() {
-sessionStorage.removeItem('userSession');
+      sessionStorage.removeItem('userSession');
       currentUser = null;
       document.getElementById('usernameInput').value = '';
       document.getElementById('passwordInput').value = '';
@@ -921,19 +775,21 @@ sessionStorage.removeItem('userSession');
     function dismissIosPrompt() {
       document.getElementById('iosPrompt').classList.add('hidden');
       localStorage.setItem('iosPromptDismissed', 'true');
-      window.location.href = 'login.html';
-}
+    }
 
-document.addEventListener('contextmenu', (e) => e.preventDefault());
+    document.addEventListener('contextmenu', (e) => e.preventDefault());
 
-window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', () => {
       const activeSession = sessionStorage.getItem('userSession');
       if (activeSession) {
         currentUser = JSON.parse(activeSession);
         showHomeView();
       }
       checkIosPrompt();
-      checkSession();
-      renderMonthlyBirthdays();
-});
-</script>
+    });
+  </script>
+
+  <!-- Global Full-Screen Trigger -->
+  <script src="js/fullscreen-global.js"></script>
+</body>
+</html>
