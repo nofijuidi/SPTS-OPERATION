@@ -393,7 +393,6 @@
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
       if (!activeSession) {
-        // Fallback for standalone/dev view
         console.warn("No active session found, continuing in local mode.");
       }
     }
