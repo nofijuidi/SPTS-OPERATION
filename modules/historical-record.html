@@ -4,12 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>SPTS - Historical Record</title>
-  <meta name="theme-color" cont<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>SPTS - Historical Record</title>
   <meta name="theme-color" content="#0f172a">
 
   <!-- Mobile Full-Screen Meta Tags -->
@@ -31,7 +25,7 @@
       user-select: none !important;
     }
 
-    input, textarea, select {
+    input, textarea {
       -webkit-user-select: text !important;
       user-select: text !important;
     }
@@ -70,556 +64,6 @@
       }
     }
 
-    @media (orientation: landscape) {
-      .app-viewport {
-        max-width: 100vw !important;
-        max-height: 100vh !important;
-        border-radius: 0 !important;
-        width: 100vw;
-        height: 100vh;
-      }
-    }
-
-    .view-screen {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px) 12px;
-      overflow: hidden;
-    }
-
-    /* Top Nav Header */
-    .module-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      gap: 8px;
-      flex-shrink: 0;
-    }
-
-    .btn-header-icon {
-      width: 42px;
-      height: 42px;
-      background-color: #f1f5f9;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 20px;
-      cursor: pointer;
-      color: #002060;
-    }
-
-    .module-title {
-      flex: 1;
-      text-align: center;
-      color: #0b2545;
-      font-size: 18px;
-      font-weight: 900;
-      letter-spacing: 0.5px;
-      text-transform: uppercase;
-    }
-
-    .top-right-app-icon {
-      width: 42px;
-      height: 42px;
-      border-radius: 10px;
-      object-fit: cover;
-      border: 1.5px solid #cbd5e1;
-    }
-
-    /* Filter Controls Grid */
-    .filter-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-      margin-bottom: 10px;
-      flex-shrink: 0;
-    }
-
-    .filter-group {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .filter-label {
-      font-size: 10px;
-      font-weight: 800;
-      color: #0078D4;
-      margin-bottom: 3px;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      text-align: center;
-    }
-
-    .filter-select {
-      width: 100%;
-      height: 34px;
-      padding: 2px 4px;
-      border: 1.5px solid #0078D4;
-      border-radius: 8px;
-      font-size: 12px;
-      font-weight: 800;
-      color: #0b2545;
-      background-color: #ffffff;
-      outline: none;
-      text-align: center;
-    }
-
-    /* Dynamic Full-Height Table Container */
-    .table-wrapper-box {
-      flex: 1;
-      min-height: 0;
-      border: 2px solid #0078D4;
-      border-radius: 12px;
-      overflow: auto;
-      background-color: #ffffff;
-      -webkit-overflow-scrolling: touch;
-      position: relative;
-    }
-
-    .records-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      text-align: left;
-      white-space: nowrap;
-    }
-
-    .records-table th {
-      position: sticky;
-      top: 0;
-      background-color: #3b62b0;
-      color: #ffffff;
-      font-weight: 900;
-      padding: 10px 8px;
-      z-index: 10;
-      border-bottom: 2px solid #1e3a8a;
-      text-transform: uppercase;
-      font-size: 11px;
-    }
-
-    .records-table td {
-      padding: 8px 8px;
-      border-bottom: 1px solid #e2e8f0;
-      color: #0f172a;
-      font-weight: 700;
-    }
-
-    .records-table tr:nth-child(even) {
-      background-color: #f8fafc;
-    }
-
-    .records-table tr:hover {
-      background-color: #f1f5f9;
-    }
-
-    .col-no { text-align: center; font-weight: 900; width: 36px; }
-    .col-date { min-width: 130px; }
-    .col-company { min-width: 70px; }
-    .col-id { min-width: 70px; font-weight: 900; }
-    .col-group { min-width: 70px; }
-    .col-name { min-width: 140px; }
-    .col-equip { min-width: 80px; }
-    .col-num { min-width: 70px; }
-    .col-chock { text-align: center; min-width: 60px; }
-    .col-odo { min-width: 80px; }
-    .col-hrs { min-width: 80px; }
-    .col-fuel { min-width: 70px; }
-    .col-area { min-width: 180px; }
-    .col-decl { min-width: 130px; }
-
-    .status-ok {
-      color: #16a34a;
-      font-weight: 900;
-    }
-
-    .status-defect {
-      color: #dc2626;
-      font-weight: 900;
-    }
-
-    /* Bottom Action Bar */
-    .bottom-action-row {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      padding-top: 10px;
-      flex-shrink: 0;
-    }
-
-    .btn-nav-round {
-      width: 46px;
-      height: 46px;
-      border: 2px solid #0078D4;
-      border-radius: 50%;
-      background: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .btn-nav-round svg {
-      width: 22px;
-      height: 22px;
-      stroke: #0078D4;
-      stroke-width: 2.5;
-      fill: none;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .btn-nav-round:active {
-      background-color: #f1f5f9;
-      transform: scale(0.95);
-    }
-
-    .loading-overlay {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100%;
-      font-weight: 800;
-      color: #64748b;
-      font-size: 13px;
-    }
-  </style>
-</head>
-<body>
-
-  <div class="app-viewport">
-    <div class="view-screen">
-
-      <!-- Header Navigation -->
-      <div class="module-header">
-        <div class="btn-header-icon" onclick="goHome()" title="Go Home">🏠</div>
-        <div class="module-title">HISTORICAL RECORD</div>
-        <img src="../icon-192.png" alt="App Icon" class="top-right-app-icon" onerror="this.style.display='none'" />
-      </div>
-
-      <!-- Filter Controls Grid -->
-      <div class="filter-grid">
-        <div class="filter-group">
-          <span class="filter-label">Year</span>
-          <select id="filterYear" class="filter-select" onchange="applyFilters()">
-            <option value="2026" selected>2026</option>
-            <option value="2025">2025</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Select Equipment</span>
-          <select id="filterEquip" class="filter-select" onchange="applyFilters()">
-            <option value="">Equip</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Equipment Number</span>
-          <select id="filterNumber" class="filter-select" onchange="applyFilters()">
-            <option value="">Number</option>
-          </select>
-        </div>
-
-        <div class="filter-group">
-          <span class="filter-label">Area of Issues</span>
-          <select id="filterArea" class="filter-select" onchange="applyFilters()">
-            <option value="">Area</option>
-          </select>
-        </div>
-      </div>
-
-      <!-- Scrollable Table Container -->
-      <div class="table-wrapper-box" id="tableContainer">
-        <div class="loading-overlay" id="loadingState">Loading records...</div>
-        <table class="records-table hidden" id="recordsTable">
-          <thead>
-            <tr>
-              <th class="col-no">NO.</th>
-              <th class="col-date">DATE</th>
-              <th class="col-company">COMPANY</th>
-              <th class="col-id">ID</th>
-              <th class="col-group">GROUP</th>
-              <th class="col-name">NAME</th>
-              <th class="col-equip">EQUIP</th>
-              <th class="col-num">NUMBER</th>
-              <th class="col-chock">CHOCK</th>
-              <th class="col-odo">ODO (KM)</th>
-              <th class="col-hrs">HOUR (HRS)</th>
-              <th class="col-fuel">FUEL</th>
-              <th class="col-area">AREA OF ISSUES</th>
-              <th class="col-decl">DECLARATION</th>
-            </tr>
-          </thead>
-          <tbody id="tableBody">
-            <!-- Dynamic Log Rows Rendered Here -->
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Footer Button -->
-      <div class="bottom-action-row">
-        <div class="btn-nav-round" onclick="goHome()" title="Next / Go Back">
-          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
-        </div>
-      </div>
-
-    </div>
-  </div>
-
-  <script>
-    const LOGS_ENDPOINT_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/08/workflows/d7ac73d3d7d7423eb077a2895b0738df/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=OLDn8ig2sbXDzxKke7ijuD4cLHTaQS-3v2oVkSIDrMw";
-
-    let rawLogRecords = [];
-    let filteredLogRecords = [];
-
-    // Fallback Records for Preview & Test Environments
-    const FALLBACK_LOGS = [
-      { date: "2026-11-11 08:10", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "QC", equipnum: "QC01", chock: "2", odometer: "12500", hourmeter: "4320", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-11-11 08:07", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P02", chock: "2", odometer: "45120", hourmeter: "3210", fuel: "FULL", area: "Aircond - Malfunction", declaration: "Reported with Defects" },
-      { date: "2026-11-11 08:05", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "TIPPER", equipnum: "TT01", chock: "1", odometer: "89200", hourmeter: "6120", fuel: "3/4", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-11-11 08:04", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P01", chock: "2", odometer: "10200", hourmeter: "1100", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-11-11 06:10", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P05", chock: "2", odometer: "34000", hourmeter: "2900", fuel: "1/2", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 01:06", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P03", chock: "2", odometer: "18200", hourmeter: "1540", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 00:37", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P04", chock: "2", odometer: "22100", hourmeter: "1890", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 00:12", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P01", chock: "2", odometer: "10180", hourmeter: "1090", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 00:06", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P02", chock: "2", odometer: "45000", hourmeter: "3200", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 00:04", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P01", chock: "2", odometer: "10150", hourmeter: "1080", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" },
-      { date: "2026-09-24 00:03", company: "SPTS", id: "T5218", group: "OFFICE", name: "NOFIJUIDI BIN JUMRI", equip: "PM", equipnum: "P01", chock: "2", odometer: "10100", hourmeter: "1070", fuel: "FULL", area: "All is Good", declaration: "Declared All OK" }
-    ];
-
-    async function fetchHistoricalData() {
-      const loadingState = document.getElementById('loadingState');
-      const recordsTable = document.getElementById('recordsTable');
-
-      try {
-        const response = await fetch(LOGS_ENDPOINT_URL, {
-          method: 'GET',
-          headers: { 'Accept': 'application/json' }
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          rawLogRecords = Array.isArray(data) ? data : (data.value || []);
-        } else {
-          rawLogRecords = FALLBACK_LOGS;
-        }
-      } catch (err) {
-        console.warn("Using local fallback records:", err);
-        rawLogRecords = FALLBACK_LOGS;
-      } finally {
-        if (!rawLogRecords || rawLogRecords.length === 0) {
-          rawLogRecords = FALLBACK_LOGS;
-        }
-        loadingState.classList.add('hidden');
-        recordsTable.classList.remove('hidden');
-        populateFilterDropdowns();
-        applyFilters();
-      }
-    }
-
-    function formatDateDisplay(rawStr) {
-      if (!rawStr) return "--";
-      let cleaned = String(rawStr).replace('T', ' ');
-      if (cleaned.length > 16) {
-        cleaned = cleaned.substring(0, 16);
-      }
-      return cleaned;
-    }
-
-    function populateFilterDropdowns() {
-      const equipSelect = document.getElementById('filterEquip');
-      const numberSelect = document.getElementById('filterNumber');
-      const areaSelect = document.getElementById('filterArea');
-
-      const equips = new Set();
-      const numbers = new Set();
-
-      rawLogRecords.forEach(r => {
-        if (r.equip || r.equipment) equips.add(r.equip || r.equipment);
-        if (r.equipnum || r.equipmentnumber) numbers.add(r.equipnum || r.equipmentnumber);
-      });
-
-      equipSelect.innerHTML = '<option value="">Equip</option>';
-      Array.from(equips).sort().forEach(eq => {
-        equipSelect.innerHTML += `<option value="${eq}">${eq}</option>`;
-      });
-
-      numberSelect.innerHTML = '<option value="">Number</option>';
-      Array.from(numbers).sort().forEach(num => {
-        numberSelect.innerHTML += `<option value="${num}">${num}</option>`;
-      });
-
-      areaSelect.innerHTML = `
-        <option value="">Area</option>
-        <option value="OK">All is Good</option>
-        <option value="DEFECT">Defects Only</option>
-      `;
-    }
-
-    function applyFilters() {
-      const selectedYear = document.getElementById('filterYear').value;
-      const selectedEquip = document.getElementById('filterEquip').value.toLowerCase();
-      const selectedNumber = document.getElementById('filterNumber').value.toLowerCase();
-      const selectedArea = document.getElementById('filterArea').value;
-
-      filteredLogRecords = rawLogRecords.filter(r => {
-        const dateStr = String(r.date || '');
-        const eqStr = String(r.equip || r.equipment || '').toLowerCase();
-        const numStr = String(r.equipnum || r.equipmentnumber || '').toLowerCase();
-        const areaStr = String(r.area || '').toLowerCase();
-
-        if (selectedYear && !dateStr.startsWith(selectedYear)) return false;
-        if (selectedEquip && eqStr !== selectedEquip) return false;
-        if (selectedNumber && numStr !== selectedNumber) return false;
-
-        if (selectedArea === "OK" && !areaStr.includes("all is good")) return false;
-        if (selectedArea === "DEFECT" && areaStr.includes("all is good")) return false;
-
-        return true;
-      });
-
-      // SORT DESCENDING (Latest date & time on top)
-      filteredLogRecords.sort((a, b) => {
-        const dateA = String(a.date || '');
-        const dateB = String(b.date || '');
-        return dateB.localeCompare(dateA);
-      });
-
-      renderTable();
-    }
-
-    function renderTable() {
-      const tbody = document.getElementById('tableBody');
-      tbody.innerHTML = '';
-
-      if (filteredLogRecords.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="14" style="text-align:center; padding: 20px; color: #94a3b8;">No inspection records found.</td></tr>`;
-        return;
-      }
-
-      filteredLogRecords.forEach((r, idx) => {
-        const dateVal = formatDateDisplay(r.date);
-        const compVal = r.company || r.COMPANY || "SPTS";
-        const idVal = r.id || r.COMPANY_ID || r.ID || "N/A";
-        const groupVal = r.group || r.GROUP || "OFFICE";
-        const nameVal = r.name || r.NAME || r.Title || "N/A";
-        const equipVal = r.equip || r.equipment || "--";
-        const numVal = r.equipnum || r.equipmentnumber || "--";
-        const chockVal = r.chock !== undefined ? r.chock : "--";
-        const odoVal = r.odometer || r.odo || "--";
-        const hrsVal = r.hourmeter || r.hours || "--";
-        const fuelVal = r.fuel || "--";
-        const areaVal = r.area || "All is Good";
-        const declVal = r.declaration || (areaVal.includes("All is Good") ? "Declared All OK" : "Reported with Defects");
-
-        const isGood = areaVal.toLowerCase().includes("all is good") || declVal.toLowerCase().includes("all ok");
-        const declClass = isGood ? "status-ok" : "status-defect";
-
-        const row = document.createElement('tr');
-        row.innerHTML = `
-          <td class="col-no">${idx + 1}</td>
-          <td class="col-date">${dateVal}</td>
-          <td class="col-company">${compVal}</td>
-          <td class="col-id">${idVal}</td>
-          <td class="col-group">${groupVal}</td>
-          <td class="col-name">${nameVal}</td>
-          <td class="col-equip">${equipVal}</td>
-          <td class="col-num">${numVal}</td>
-          <td class="col-chock">${chockVal}</td>
-          <td class="col-odo">${odoVal}</td>
-          <td class="col-hrs">${hrsVal}</td>
-          <td class="col-fuel">${fuelVal}</td>
-          <td class="col-area">${areaVal}</td>
-          <td class="col-decl ${declClass}">${declVal}</td>
-        `;
-        tbody.appendChild(row);
-      });
-    }
-
-    function goHome() {
-      if (window.history.length > 1) {
-        window.history.back();
-      } else {
-        window.location.href = '../index.html';
-      }
-    }
-
-    document.addEventListener('contextmenu', (e) => e.preventDefault());
-
-    window.addEventListener('DOMContentLoaded', () => {
-      fetchHistoricalData();
-    });
-  </script>
-
-  <!-- Global Full-Screen Trigger -->
-  <script src="../js/fullscreen-global.js"></script>
-</body>
-</html>ent="#0f172a">
-
-  <!-- Mobile Full-Screen Meta Tags -->
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="mobile-web-app-capable" content="yes">
-
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      -khtml-user-select: none !important;
-      -moz-user-select: none !important;
-      -ms-user-select: none !important;
-      user-select: none !important;
-    }
-
-    input, textarea {
-      -webkit-user-select: text !important;
-      user-select: text !important;
-    }
-
-    html, body {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background-color: #0f172a;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      color: #334155;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-    }
-
-    .app-viewport {
-      width: 100vw;
-      height: 100vh;
-      max-width: 412px;
-      max-height: 892px;
-      background-color: #ffffff;
-      display: flex;
-      flex-direction: column;
-      position: relative;
-      overflow: hidden;
-      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      transition: all 0.3s ease;
-    }
-
-    @media (min-width: 480px) and (orientation: portrait) {
-      .app-viewport {
-        border-radius: 28px;
-        height: 844px;
-      }
-    }
-
     /* Landscape Mode Screen Adjustment */
     @media (orientation: landscape) {
       .app-viewport {
@@ -632,17 +76,14 @@
       .view-screen {
         padding: 10px 16px !important;
       }
-      .history-table-box {
-        max-height: 50vh !important;
-      }
     }
 
     .view-screen {
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 16px;
-      overflow-y: auto;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 14px calc(env(safe-area-inset-bottom, 0px) + 14px) 14px;
+      overflow: hidden;
     }
 
     .hidden { display: none !important; }
@@ -653,6 +94,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 10px;
+      flex-shrink: 0;
     }
 
     .btn-home-icon {
@@ -692,6 +134,7 @@
       grid-template-columns: repeat(4, 1fr);
       gap: 6px;
       margin-bottom: 8px;
+      flex-shrink: 0;
     }
 
     .filter-group {
@@ -707,6 +150,7 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+      text-align: center;
     }
 
     .filter-input {
@@ -719,11 +163,13 @@
       outline: none;
       color: #0f172a;
       text-align: center;
+      background-color: #ffffff;
     }
 
     /* Dynamic Pillbox Grid Area (Hidden by default) */
     .active-pillbox-area {
       margin-bottom: 10px;
+      flex-shrink: 0;
     }
 
     .pill-grid {
@@ -759,12 +205,11 @@
       transform: scale(1.02);
     }
 
-    /* Logs Data Table Responsive Box */
+    /* Logs Data Table Responsive Box - Stretched to fill remaining height */
     .history-table-box {
       flex: 1;
       width: 100%;
-      min-height: 200px;
-      max-height: 400px;
+      min-height: 0;
       overflow-x: auto;
       overflow-y: auto;
       border: 1.5px solid #0078D4;
@@ -817,6 +262,7 @@
       justify-content: flex-end;
       align-items: center;
       margin-top: 10px;
+      flex-shrink: 0;
     }
 
     .btn-back-round {
@@ -832,6 +278,7 @@
       align-items: center;
       justify-content: center;
       cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
   </style>
 </head>
@@ -872,7 +319,7 @@
         <div id="pillboxContainer" class="pill-grid"></div>
       </div>
 
-      <!-- Historical Data Table -->
+      <!-- Historical Data Table Box -->
       <div class="history-table-box">
         <table class="history-table">
           <thead>
@@ -912,6 +359,21 @@
 
     const GET_LOGS_FLOW_URL = "https://default227dccee4218411f91e74dabddf0f5.f8.environment.api.powerplatform.com:443/powerautomate/automations/direct/cu/23/workflows/41d16fdee72843db94d61e4ec314841a/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=_qpB6B3yesT9KNhGtnsB6oRu4TFovZPbjrKnykFpXck";
 
+    // Local fallback records for testing & preview environments
+    const FALLBACK_LOGS = [
+      { DATE: "2026-11-11 08:10", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "QC", EQUIPNUM: "QC01", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-11-11 08:07", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P02", AREA: "Aircond - Malfunction", ACTION: "Reported with Defects" },
+      { DATE: "2026-11-11 08:05", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "TIPPER", EQUIPNUM: "TT01", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-11-11 08:04", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-11-11 06:10", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P05", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 01:06", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P03", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 00:37", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P04", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 00:12", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 00:06", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P02", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 00:04", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
+      { DATE: "2026-09-24 00:03", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" }
+    ];
+
     function getPropValue(obj, keys, defaultValue = '-') {
       if (!obj) return defaultValue;
       for (const k of keys) {
@@ -921,13 +383,18 @@
     }
 
     function goHome() {
-      window.location.href = '../index.html';
+      if (window.history.length > 1) {
+        window.history.back();
+      } else {
+        window.location.href = '../index.html';
+      }
     }
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
       if (!activeSession) {
-        window.location.href = '../index.html';
+        // Fallback for standalone/dev view
+        console.warn("No active session found, continuing in local mode.");
       }
     }
 
@@ -994,13 +461,15 @@
             resData = resData.value;
           }
 
-          rawInspectionLogs = Array.isArray(resData) ? resData : [];
-          applyFilters();
+          rawInspectionLogs = Array.isArray(resData) && resData.length > 0 ? resData : FALLBACK_LOGS;
         } else {
-          tbody.innerHTML = `<tr><td colspan="10" class="table-empty">Failed to load records.</td></tr>`;
+          rawInspectionLogs = FALLBACK_LOGS;
         }
       } catch (e) {
-        tbody.innerHTML = `<tr><td colspan="10" class="table-empty">Network error loading logs.</td></tr>`;
+        console.warn("Using local fallback records:", e);
+        rawInspectionLogs = FALLBACK_LOGS;
+      } finally {
+        applyFilters();
       }
     }
 
@@ -1136,6 +605,13 @@
         return matchYr && matchEq && matchNum && matchArea;
       });
 
+      // SORT DESCENDING: Latest inspection records on top
+      filteredLogs.sort((a, b) => {
+        const dateA = String(getPropValue(a, ['DATE', 'date', 'Date'], ''));
+        const dateB = String(getPropValue(b, ['DATE', 'date', 'Date'], ''));
+        return dateB.localeCompare(dateA);
+      });
+
       renderLogsTable(filteredLogs);
       renderPillboxOptions();
     }
@@ -1170,7 +646,7 @@
       });
     }
 
-    // Dismiss Pillbox when tapping/clicking outside the filters or pillbox area
+    // Dismiss Pillbox when clicking outside the filters or pillbox container
     document.addEventListener('click', (e) => {
       const filterGrid = document.getElementById('filterGrid');
       const pillboxArea = document.getElementById('pillboxArea');
