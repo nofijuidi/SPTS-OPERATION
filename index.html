@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Operation Portal</title>
   <meta name="theme-color" content="#0f172a">
   <link rel="manifest" href="manifest.json">
@@ -41,20 +41,20 @@
     html, body { 
       width: 100%; 
       height: 100%; 
+      height: 100dvh;
       overflow: hidden; 
       background-color: #0f172a; 
       display: flex; 
       justify-content: center; 
       align-items: center; 
       color: #334155; 
-
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
     }
 
     .app-viewport { 
       width: 100vw; 
-      height: 100vh; 
+      height: 100%;
+      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100);
       max-width: 412px; 
       max-height: 892px; 
       background-color: #ffffff; 
@@ -65,7 +65,7 @@
       position: relative;
     }
 
-    @media (min-width: 480px) { 
+    @media (min-width: 480px) and (orientation: portrait) { 
       .app-viewport { 
         border-radius: 28px; 
         height: 844px; 
@@ -76,8 +76,10 @@
       flex: 1; 
       display: flex; 
       flex-direction: column; 
-      padding: 20px 18px; 
+      padding: calc(env(safe-area-inset-top, 0px) + 16px) 18px calc(env(safe-area-inset-bottom, 0px) + 16px) 18px; 
       overflow-y: auto; 
+      -webkit-overflow-scrolling: touch;
+      overscroll-behavior-y: contain;
     }
 
     .hidden { 
@@ -163,7 +165,7 @@
     .user-header-card {
       text-align: center;
       margin-bottom: 24px;
-      padding-top: 8px;
+      padding-top: 4px;
     }
 
     .user-name-title {
@@ -315,7 +317,8 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: auto auto 12px auto;
+      margin: 12px auto;
+      flex-shrink: 0;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
       transition: transform 0.15s ease;
     }
@@ -328,7 +331,7 @@
     /* iOS INSTALL PROMPT BANNER */
     .ios-install-banner {
       position: absolute;
-      bottom: 12px;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
       left: 12px;
       right: 12px;
       background: #1e293b;
@@ -483,7 +486,7 @@
     <div id="iosPrompt" class="ios-install-banner hidden">
       <div class="ios-banner-header">
         <span>Install App on iPhone</span>
-        <button class="ios-close-btn" onclick="dismissIosPrompt()">&times;</button>
+        <button class="ios-close-btn" onclick="dismissIosPrompt()">×</button>
       </div>
       <div>
         Tap the <strong>Share</strong> button below (⬆️) and select <strong>'Add to Home Screen'</strong> to install.
@@ -567,23 +570,17 @@
       const eqCard = document.getElementById('card-equipment-checklist');
       const histCard = document.getElementById('card-historical-record');
 
-      // Default: Ensure cards are visible first
       if (eqCard) eqCard.classList.remove('hidden');
       if (histCard) histCard.classList.remove('hidden');
 
       if (!currentUser) return;
 
-      // Safe extraction supporting String, Number, null, or undefined
       const rawAccess = getPropValue(currentUser, ['Access', 'access', 'ACCESS'], '');
       const accessLevel = String(rawAccess).trim();
 
-      console.log("Current User Access Level:", accessLevel);
-
       if (accessLevel === '1') {
-        // Access 1: Hide Equipment Checklist
         if (eqCard) eqCard.classList.add('hidden');
       } else if (accessLevel === '2') {
-        // Access 2: Hide Historical Record
         if (histCard) histCard.classList.add('hidden');
       }
     }
@@ -618,7 +615,6 @@
       errorBox.classList.remove('hidden');
     }
 
-    /* iOS PWA Helper Logic */
     function checkIosPrompt() {
       const isIos = /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream;
       const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
