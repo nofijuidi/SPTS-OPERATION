@@ -703,8 +703,8 @@
     let selectedSpillageBin = "Empty";
     let checklistItemStates = {};
 
-    // Common Sub-Schemas for Conveyors
-    const BELT_SCRAPER_ITEMS = [
+    // Common Sub-Schemas for Belt & Scraper
+    const BELT_SCRAPER_9_ITEMS = [
       "Condition of Belt",
       "Cuts",
       "Marks",
@@ -713,14 +713,18 @@
       "Belt joint Vulcanized joint weak / cuts",
       "Belt Scrapper",
       "Proper Contact",
-      "Effectiveness",
       "Rubber wear"
+    ];
+
+    const IDLER_ITEMS = [
+      "Carrying Idler",
+      "Return Idler",
+      "Impact Idler"
     ];
 
     const MOTOR_HEAD_ITEMS = [
       "Temperature Reading (Acceptable 75°)",
       "Abnormal noise",
-      "Loose bolt and nut at motor base",
       "Condition or motor casing crack / damage"
     ];
 
@@ -731,7 +735,7 @@
       "Loose bolt and nut at gearbox base"
     ];
 
-    const PULLEY_ITEMS = [
+    const PULLEY_FULL_ITEMS = [
       "Temperature Reading (Acceptable 70°)",
       "Lubrication",
       "Abnormal noise",
@@ -740,10 +744,19 @@
       "Rubber lagging had issues"
     ];
 
-    const IDLER_ITEMS = [
-      "Carrying Idler",
-      "Return Idler",
-      "Impact Idler"
+    const PULLEY_5_ITEMS = [
+      "Temperature Reading (Acceptable 70°)",
+      "Abnormal noise",
+      "Bearing housing fixing bolts",
+      "Condition of bearing housing & bearing",
+      "Rubber lagging had issues"
+    ];
+
+    const TRANSFER_POINT_BASE_ITEMS = [
+      "Body hole / bolt nut missing",
+      "Wear liner- missing worn out. broken",
+      "Rubber skirts had issues",
+      "Materials spillage"
     ];
 
     // Master Inspection Sections
@@ -896,65 +909,199 @@
             "CCTV"
           ]
         }
+      ],
+      "STACKER": [
+        {
+          sectionTitle: "OPERATOR CABIN",
+          items: [
+            "Air-condition",
+            "Control Panel - Pushbuttons and Switch key",
+            "Cabin glass / window",
+            "Touch Panel (Desk Control)",
+            "Flood Light",
+            "Cabin cleanliness"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Beacon Light",
+            "Fire Extinguisher",
+            "Operator cabin access door",
+            "Walking platform / Walkaway",
+            "Hand railing",
+            "Emergency Stop Button (Operator Cabin)"
+          ]
+        },
+        {
+          sectionTitle: "BOOM STACKER SYSTEM",
+          items: [
+            "Hydraulic Cylinder",
+            "Belt Conveyor Boom (Visual only)",
+            "Boom Spotlight",
+            "Conveyor Motor",
+            "Counter Weight"
+          ]
+        },
+        {
+          sectionTitle: "TRAVELLING SYSTEM",
+          items: [
+            "Emergency stop button (Release mode)",
+            "Travelling Motor (Visual only)",
+            "Travelling Gearbox (Visual only)",
+            "Tripper (Belt Drift)",
+            "Storm lock - Released condition",
+            "Cable Reel Motor (Visual only)",
+            "Power Cable (Visual only)",
+            "Warning siren"
+          ]
+        }
+      ],
+      "RECLAIMER": [
+        {
+          sectionTitle: "OPERATOR CABIN",
+          items: [
+            "Air-condition",
+            "Control Panel - Pushbuttons and Switch key",
+            "Cabin glass / window",
+            "Touch Panel (Desk Control)",
+            "Flood Light",
+            "Operator seat",
+            "Cabin cleanliness"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Beacon Light",
+            "Fire Extinguisher",
+            "Operator cabin access door",
+            "Walking platform",
+            "Hand railing",
+            "Emergency Stop Button (Operator Cabin)"
+          ]
+        },
+        {
+          sectionTitle: "BOOM SYSTEM",
+          items: [
+            "Main Boom Scraper Chains and Blades",
+            "Auxiliary Boom Scraper Chains and Blades",
+            "Main Boom - Winch",
+            "Auxiliary Boom - Winch"
+          ]
+        },
+        {
+          sectionTitle: "TRAVELLING SYSTEM",
+          items: [
+            "Travelling Motor",
+            "Travelling Gearbox",
+            "Tripper",
+            "Storm lock - Released condition",
+            "Cable Reel Motor",
+            "Power Cable",
+            "Warning Beacon Light",
+            "Warning Siren"
+          ]
+        }
+      ],
+      "SHIPLOADER": [
+        {
+          sectionTitle: "OPERATOR CABIN / ELECTRICAL CABIN",
+          items: [
+            "Air-condition",
+            "Control Panel - Pushbuttons and Switch key",
+            "Cabin glass / window",
+            "Touch Panel",
+            "Flood Light",
+            "Operator seat",
+            "Cabin cleanliness",
+            "CCTV Monitor"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Fire Extinguisher",
+            "Operator cabin access door",
+            "Emergency Stop Button (Operator Cabin)",
+            "Beacon Light",
+            "Siren"
+          ]
+        },
+        {
+          sectionTitle: "TRAVELLING SYSTEM",
+          items: [
+            "Travelling Motor",
+            "Travelling Gearbox",
+            "Tripper",
+            "Storm lock - Released condition",
+            "Cable Reel Motor",
+            "Power Cable",
+            "Warning Beacon Light",
+            "Warning Siren",
+            "Air Compressor"
+          ]
+        },
+        {
+          sectionTitle: "BOOM SYSTEM",
+          items: [
+            "Boom Conveyor",
+            "Telescopic Chute",
+            "Chute with Skirts",
+            "Slew lock - Released condition",
+            "Hydraulic System"
+          ]
+        },
+        {
+          sectionTitle: "RADIO REMOTE CONTROLLER (RRC)",
+          items: [
+            "Joystick and Switch key",
+            "Rechargeable Battery"
+          ]
+        }
       ]
     };
 
-    // Specific Conveyor Schemas based on Equipment Number
+    // Specific Conveyor & Transfer Point Schemas
     const CONVEYOR_SCHEMAS = {
       "BC01": [
-        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_ITEMS },
+        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_9_ITEMS },
         { sectionTitle: "METAL DETECTION / SEPARATOR", items: ["Magnetic Separator"] },
-        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
-        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
-        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_ITEMS },
+        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_5_ITEMS },
         { sectionTitle: "IDLER", items: IDLER_ITEMS }
       ],
       "BC02": [
-        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_ITEMS },
+        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_9_ITEMS },
         { sectionTitle: "METAL DETECTION / SEPARATOR", items: ["Metal detector"] },
-        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
-        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
-        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_ITEMS },
         { sectionTitle: "IDLER", items: IDLER_ITEMS }
       ],
       "BC03": [
-        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_ITEMS },
-        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
-        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
-        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_ITEMS },
+        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_9_ITEMS },
         { sectionTitle: "IDLER", items: IDLER_ITEMS }
       ],
       "BC04": [
-        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_ITEMS },
-        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
-        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
-        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_ITEMS },
+        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_9_ITEMS },
         { sectionTitle: "IDLER", items: IDLER_ITEMS }
       ],
       "PC01": [
-        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_ITEMS },
-        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
-        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
-        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_ITEMS },
+        { sectionTitle: "CONVEYOR BELT AND SCRAPER", items: BELT_SCRAPER_9_ITEMS },
         { sectionTitle: "IDLER", items: IDLER_ITEMS }
       ],
-      "TP_GENERIC": [
-        {
-          sectionTitle: "TRANSFER POINT AND SIDE SKIRTING",
-          items: [
-            "Body hole / bolt nut missing",
-            "Wear liner - missing worn out, broken",
-            "Rubber skirts had issues",
-            "Materials spillage"
-          ]
-        }
+      "TP01": [
+        { sectionTitle: "TRANSFER POINT AND SIDE SKIRTING", items: TRANSFER_POINT_BASE_ITEMS }
+      ],
+      "TP_HEAVY": [
+        { sectionTitle: "TRANSFER POINT AND SIDE SKIRTING", items: TRANSFER_POINT_BASE_ITEMS },
+        { sectionTitle: "MOTOR HEAD", items: MOTOR_HEAD_ITEMS },
+        { sectionTitle: "GEARBOX", items: GEARBOX_ITEMS },
+        { sectionTitle: "PULLEY (HEAD / SNUB / TAIL)", items: PULLEY_FULL_ITEMS }
       ],
       "DUH": [
         {
           sectionTitle: "DUMPER UNLOADING HOPPER",
           items: [
             "Body hole / bolt nut missing",
-            "Wear liner - missing worn out, broken",
+            "Wear liner- missing worn out. broken",
             "Rubber skirts had issues",
             "Materials spillage",
             "Rod gate condition",
@@ -963,9 +1110,7 @@
             "Tyre stopper",
             "Water dust suppression",
             "Piping system condition",
-            "Motor blower",
-            "Water submersible pump",
-            "Area Cleanliness"
+            "Motor blower"
           ]
         }
       ]
@@ -1113,7 +1258,7 @@
         odoGroup.style.gridColumn = "span 1";
         hourGroup.style.gridColumn = "span 1";
       } else if (isHourOnlyEquip) {
-        // Hour Meter Only Equipments (RTG, Forklift, ECH, QC, etc.)
+        // Hour Meter Only Equipments (RTG, Forklift, ECH, QC, Stacker, Reclaimer, Shiploader, etc.)
         chockRow.classList.add('hidden');
         meterRow.classList.remove('hidden');
         odoGroup.classList.add('hidden');
@@ -1194,13 +1339,17 @@
         else if (uppercaseNum === "BC03") sections = CONVEYOR_SCHEMAS["BC03"];
         else if (uppercaseNum === "BC04") sections = CONVEYOR_SCHEMAS["BC04"];
         else if (uppercaseNum === "PC01") sections = CONVEYOR_SCHEMAS["PC01"];
-        else if (uppercaseNum.startsWith("TP")) sections = CONVEYOR_SCHEMAS["TP_GENERIC"];
+        else if (uppercaseNum === "TP01" || uppercaseNum === "TP1") sections = CONVEYOR_SCHEMAS["TP01"];
+        else if (uppercaseNum === "TP02" || uppercaseNum === "TP2" || uppercaseNum === "TP03" || uppercaseNum === "TP3") sections = CONVEYOR_SCHEMAS["TP_HEAVY"];
         else if (uppercaseNum === "DUH") sections = CONVEYOR_SCHEMAS["DUH"];
         else sections = CONVEYOR_SCHEMAS["BC01"];
       } else {
         if (uppercaseType.includes("PM")) sections = EQUIPMENT_SECTIONS_DATA["PM"];
         else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
         else if (uppercaseType === "QC" || uppercaseType.includes("QUAY") || uppercaseType.includes("CRANE")) sections = EQUIPMENT_SECTIONS_DATA["QC"];
+        else if (uppercaseType.includes("STACKER")) sections = EQUIPMENT_SECTIONS_DATA["STACKER"];
+        else if (uppercaseType.includes("RECLAIMER")) sections = EQUIPMENT_SECTIONS_DATA["RECLAIMER"];
+        else if (uppercaseType.includes("SHIPLOADER")) sections = EQUIPMENT_SECTIONS_DATA["SHIPLOADER"];
         else sections = EQUIPMENT_SECTIONS_DATA[type] || EQUIPMENT_SECTIONS_DATA[uppercaseType];
       }
 
