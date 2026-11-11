@@ -686,7 +686,7 @@
       </div>
     </div>
 
-    <!-- Success Pop-Up Modal (Custom Option A) -->
+    <!-- Success Pop-Up Modal -->
     <div id="successModal" class="modal-overlay hidden">
       <div class="modal-card">
         <div class="modal-icon">✅</div>
@@ -1271,6 +1271,7 @@
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
       const isConveyor = uppercaseType.includes("CONVEYOR");
+      const isTrailer = uppercaseType.includes("TRAILER");
 
       if (isFullTireEquip) {
         chockRow.classList.remove('hidden');
@@ -1285,7 +1286,7 @@
         odoGroup.classList.add('hidden');
         hourGroup.classList.remove('hidden');
         hourGroup.style.gridColumn = "span 2";
-      } else if (isConveyor) {
+      } else if (isConveyor || isTrailer) {
         chockRow.classList.add('hidden');
         meterRow.classList.add('hidden');
       } else {
@@ -1334,6 +1335,16 @@
       return false;
     }
 
+    function isTrailerT19ToT48(eqNum) {
+      if (!eqNum) return false;
+      const match = String(eqNum).trim().toUpperCase().match(/^T0*(\d+)$/);
+      if (match) {
+        const val = parseInt(match[1], 10);
+        return val >= 19 && val <= 48;
+      }
+      return false;
+    }
+
     function toggleSection(headerElem) {
       const card = headerElem.closest('.section-card');
       if (card) {
@@ -1350,6 +1361,7 @@
       let sections = null;
 
       const isConveyor = uppercaseType.includes("CONVEYOR");
+      const isTrailer = uppercaseType.includes("TRAILER");
 
       if (isConveyor) {
         if (uppercaseNum === "BC01") sections = CONVEYOR_SCHEMAS["BC01"];
@@ -1361,6 +1373,22 @@
         else if (uppercaseNum === "TP02" || uppercaseNum === "TP2" || uppercaseNum === "TP03" || uppercaseNum === "TP3") sections = CONVEYOR_SCHEMAS["TP_HEAVY"];
         else if (uppercaseNum === "DUH") sections = CONVEYOR_SCHEMAS["DUH"];
         else sections = CONVEYOR_SCHEMAS["BC01"];
+      } else if (isTrailer) {
+        const trailerItems = [
+          "Landing Legs",
+          "Mud Flap / Penghadang lumpur",
+          "Lampu Belakang Trailer",
+          "Tyre / Tayar"
+        ];
+        if (isTrailerT19ToT48(uppercaseNum)) {
+          trailerItems.push("Twist Lock");
+        }
+        sections = [
+          {
+            sectionTitle: "TRAILER CHECKLIST",
+            items: trailerItems
+          }
+        ];
       } else {
         if (uppercaseType.includes("PM")) sections = EQUIPMENT_SECTIONS_DATA["PM"];
         else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
@@ -1395,7 +1423,7 @@
 
       let html = '';
 
-      if (!isConveyor) {
+      if (!isConveyor && !isTrailer) {
         html += `
           <!-- Diesel Level Section -->
           <div class="diesel-box">
@@ -1580,6 +1608,7 @@
       const uppercaseType = String(type).trim().toUpperCase();
       const uppercaseNum = String(num).trim().toUpperCase();
       const isConveyor = uppercaseType.includes("CONVEYOR");
+      const isTrailer = uppercaseType.includes("TRAILER");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
@@ -1630,7 +1659,7 @@
         chock: isFullTireEquip ? chockVal : "N/A",
         odometer: isFullTireEquip ? odoVal : "N/A",
         hourmeter: (isFullTireEquip || isHourOnlyEquip) ? hourVal : "N/A",
-        fuel: isConveyor ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
+        fuel: (isConveyor || isTrailer) ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
         area: areaString,
         declaration: defectResults.length > 0 ? "Reported with Defects" : "Declared All OK"
       };
