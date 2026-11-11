@@ -362,16 +362,10 @@
     // Local fallback records for testing & preview environments
     const FALLBACK_LOGS = [
       { DATE: "2026-11-11 08:10", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "QC", EQUIPNUM: "QC01", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-11-11 08:07", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P02", AREA: "Aircond - Malfunction", ACTION: "Reported with Defects" },
+      { DATE: "2026-11-11 08:07", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "CONVEYOR", EQUIPNUM: "TP01", AREA: "Wear liner- missing / worn out / broken - Missing | Rubber skirts had issues - Missing", ACTION: "Reported with Defects" },
       { DATE: "2026-11-11 08:05", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "TIPPER", EQUIPNUM: "TT01", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-11-11 08:04", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-11-11 06:10", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P05", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 01:06", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P03", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 00:37", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P04", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 00:12", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 00:06", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P02", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 00:04", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" },
-      { DATE: "2026-09-24 00:03", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "All is Good", ACTION: "Declared All OK" }
+      { DATE: "2026-11-11 08:04", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P01", AREA: "Aircond - Malfunction", ACTION: "Reported with Defects" },
+      { DATE: "2026-11-11 06:10", COMPANY: "SPTS", ID: "T5218", GROUP: "OFFICE", NAME: "NOFIJUIDI BIN JUMRI", EQUIPMENT: "PM", EQUIPNUM: "P05", AREA: "All is Good", ACTION: "Declared All OK" }
     ];
 
     function getPropValue(obj, keys, defaultValue = '-') {
@@ -477,10 +471,28 @@
       renderPillboxOptions();
     }
 
-    function cleanAreaName(areaStr) {
-      if (!areaStr) return '';
-      const parts = String(areaStr).split('-');
-      return parts[0].trim();
+    // Helper to extract individual clean issue titles from pipe-separated (|) combined strings
+    function extractIndividualIssues(areaStr) {
+      if (!areaStr || areaStr === '-' || areaStr.trim().toLowerCase() === 'all is good') return [];
+      
+      return String(areaStr)
+        .split('|')
+        .map(segment => {
+          let clean = segment.trim();
+          if (clean.includes('-')) {
+            const dashParts = clean.split('-');
+            // Exclude status tags like "Missing", "Malfunction", "Damage", etc.
+            const statusKeywords = ["good", "missing", "malfunction", "damage", "leaking"];
+            const lastPart = dashParts[dashParts.length - 1].trim().toLowerCase();
+            
+            if (statusKeywords.includes(lastPart)) {
+              dashParts.pop();
+              clean = dashParts.join('-').trim();
+            }
+          }
+          return clean;
+        })
+        .filter(Boolean);
     }
 
     function renderPillboxOptions() {
@@ -547,17 +559,22 @@
           );
         }
 
-        const uniqueAreas = Array.from(new Set(
-          poolLogs.map(item => cleanAreaName(getPropValue(item, ['AREA', 'area'], ''))).filter(Boolean)
-        )).sort();
+        // Aggregate individual issues across pipe-separated AREA strings
+        let allIssues = [];
+        poolLogs.forEach(item => {
+          const areaRaw = getPropValue(item, ['AREA', 'area'], '');
+          const extracted = extractIndividualIssues(areaRaw);
+          allIssues.push(...extracted);
+        });
 
+        const uniqueAreas = Array.from(new Set(allIssues)).sort();
         const selectedArea = document.getElementById('filterArea').value.trim().toUpperCase();
 
         if (uniqueAreas.length === 0) {
           container.innerHTML = `<div style="font-size: 11px; color: #64748b; font-style: italic;">No area issues found</div>`;
         } else {
           container.innerHTML = uniqueAreas.map(area => 
-            `<div class="pill-box ${area.toUpperCase() === selectedArea ? 'selected' : ''}" onclick="selectPill('area', '${area}')">${area}</div>`
+            `<div class="pill-box ${area.toUpperCase() === selectedArea ? 'selected' : ''}" onclick="selectPill('area', '${area.replace(/'/g, "\\'")}')">${area}</div>`
           ).join('');
         }
       }
@@ -599,6 +616,8 @@
         const matchYr = !yrVal || dateStr.toLowerCase().includes(yrVal);
         const matchEq = !eqVal || eqStr === eqVal;
         const matchNum = !numVal || numStr.includes(numVal);
+        
+        // Multi-issue match: Checks if typed or selected issue is found within pipe-separated AREA string
         const matchArea = !areaVal || areaStr.includes(areaVal);
 
         return matchYr && matchEq && matchNum && matchArea;
