@@ -1318,9 +1318,7 @@
       }
 
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
-      const isConveyor = uppercaseType.includes("CONVEYOR");
-      const isTrailer = uppercaseType.includes("TRAILER");
+      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
 
       if (isFullTireEquip) {
         chockRow.classList.remove('hidden');
@@ -1335,9 +1333,6 @@
         odoGroup.classList.add('hidden');
         hourGroup.classList.remove('hidden');
         hourGroup.style.gridColumn = "span 2";
-      } else if (isConveyor || isTrailer) {
-        chockRow.classList.add('hidden');
-        meterRow.classList.add('hidden');
       } else {
         chockRow.classList.add('hidden');
         meterRow.classList.add('hidden');
@@ -1411,6 +1406,7 @@
 
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
+      const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
 
       if (isConveyor) {
         if (uppercaseNum === "BC01") sections = CONVEYOR_SCHEMAS["BC01"];
@@ -1472,7 +1468,7 @@
 
       let html = '';
 
-      if (!isConveyor && !isTrailer) {
+      if (!isConveyor && !isTrailer && !isBulkEquip) {
         html += `
           <!-- Diesel Level Section -->
           <div class="diesel-box">
@@ -1610,8 +1606,9 @@
       const uppercaseType = String(type).trim().toUpperCase();
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
+      const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
+      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
 
       if (!type || !num) {
         showFeedbackModal('Unsuccessful', 'Please select both Equipment Type and Equipment Number before submitting.', 'warning', '⚠️');
@@ -1634,7 +1631,7 @@
         }
       }
 
-      if (!isConveyor && !isTrailer && !selectedDiesel) {
+      if (!isConveyor && !isTrailer && !isBulkEquip && !selectedDiesel) {
         showFeedbackModal('Unsuccessful', 'Please select the Diesel Level (1/4, 1/2, 3/4, or FULL).', 'warning', '⚠️');
         return;
       }
@@ -1665,8 +1662,9 @@
       const uppercaseNum = String(num).trim().toUpperCase();
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
+      const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
+      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
 
       btnConfirm.disabled = true;
@@ -1715,7 +1713,7 @@
         chock: isFullTireEquip ? chockVal : "N/A",
         odometer: isFullTireEquip ? odoVal : "N/A",
         hourmeter: (isFullTireEquip || isHourOnlyEquip) ? hourVal : "N/A",
-        fuel: (isConveyor || isTrailer) ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
+        fuel: (isConveyor || isTrailer || isBulkEquip) ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
         area: areaString,
         declaration: defectResults.length > 0 ? "Reported with Defects" : "Declared All OK"
       };
