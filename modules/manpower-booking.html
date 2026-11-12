@@ -26,9 +26,15 @@
       margin: 0;
       padding: 0;
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      -webkit-touch-callout: none !important;
-      -webkit-user-select: none !important;
-      user-select: none !important;
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+    }
+
+    /* Allow typing and selection inside search input */
+    input {
+      -webkit-user-select: text !important;
+      user-select: text !important;
     }
 
     html, body {
@@ -67,7 +73,7 @@
       flex: 1;
       display: flex;
       flex-direction: column;
-      padding: 16px;
+      padding: 14px;
       overflow: hidden;
     }
 
@@ -75,19 +81,19 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
     }
 
     .btn-home-icon {
-      width: 40px;
-      height: 40px;
+      width: 38px;
+      height: 38px;
       background-color: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 20px;
+      font-size: 18px;
       cursor: pointer;
       color: #002060;
     }
@@ -96,7 +102,7 @@
       flex: 1;
       text-align: center;
       color: #002060;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 800;
     }
 
@@ -104,36 +110,100 @@
       background-color: #eff6ff;
       border: 1px solid #bfdbfe;
       border-radius: 8px;
-      padding: 8px 12px;
-      font-size: 13px;
+      padding: 6px 10px;
+      font-size: 12px;
       font-weight: 700;
       color: #1e40af;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
       display: flex;
       align-items: center;
       justify-content: space-between;
     }
 
     .file-list-container {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 8px;
     }
 
     .file-card {
       background-color: #f8fafc;
       border: 1.5px solid #0078D4;
       border-radius: 8px;
-      padding: 10px 12px;
-      font-size: 13px;
+      padding: 7px 10px;
+      font-size: 12px;
       font-weight: 700;
       color: #0078D4;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
+    /* OPTION C: NAME / ID SEARCH BAR */
+    .search-bar-container {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background-color: #f8fafc;
+      border: 1.5px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 5px 8px;
+      margin-bottom: 10px;
+      transition: border-color 0.15s;
+    }
+
+    .search-bar-container:focus-within {
+      border-color: #0078D4;
+      background-color: #ffffff;
+    }
+
+    .search-input {
+      flex: 1;
+      min-width: 0;
+      border: none;
+      background: transparent;
+      font-size: 13px;
+      font-weight: 600;
+      color: #0f172a;
+      outline: none;
+    }
+
+    .search-input::placeholder {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .search-count {
+      font-size: 11px;
+      font-weight: 800;
+      color: #475569;
+      background: #e2e8f0;
+      padding: 2px 6px;
+      border-radius: 6px;
+      white-space: nowrap;
+    }
+
+    .search-nav-btn {
+      width: 28px;
+      height: 28px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 800;
+      color: #0f172a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .search-nav-btn:active {
+      background: #e2e8f0;
+    }
+
+    /* PDF VIEWPORT */
     .pdf-card-container {
       flex: 1;
       width: 100%;
@@ -146,6 +216,23 @@
       justify-content: center;
       position: relative;
       touch-action: none;
+    }
+
+    /* OPTION A: FLOATING PAGE COUNTER BADGE */
+    .page-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 50;
+      background: rgba(15, 23, 42, 0.82);
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 20px;
+      letter-spacing: 0.4px;
+      backdrop-filter: blur(4px);
+      pointer-events: none;
     }
 
     .zoom-toolbar {
@@ -165,7 +252,7 @@
     }
 
     .zoom-btn {
-      height: 40px;
+      height: 38px;
       background: #ffffff;
       border: 1px solid #0f172a;
       border-radius: 8px;
@@ -209,7 +296,6 @@
       transform: scale(0.95);
     }
 
-    /* Native Full-Resolution Wrapper (No CSS width compression) */
     .panzoom-wrapper {
       cursor: grab;
       display: flex;
@@ -225,14 +311,47 @@
       cursor: grabbing;
     }
 
-    /* Keep true HD pixel size—never squish to phone width */
-    canvas.pdf-page-canvas {
-      display: block;
+    /* Page wrapper holds both the PDF canvas and search highlight overlays */
+    .pdf-page-wrapper {
+      position: relative;
       margin: 12px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       border-radius: 4px;
       background-color: #ffffff;
       touch-action: none;
+    }
+
+    canvas.pdf-page-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      border-radius: 4px;
+      touch-action: none;
+    }
+
+    /* Highlight layer for Name / Staff ID matches */
+    .highlight-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+    }
+
+    .search-highlight-box {
+      position: absolute;
+      background-color: rgba(250, 204, 21, 0.45);
+      border: 3px solid #eab308;
+      border-radius: 4px;
+      transition: all 0.2s ease;
+    }
+
+    .search-highlight-box.active-match {
+      background-color: rgba(249, 115, 22, 0.5);
+      border: 4px solid #ea580c;
+      box-shadow: 0 0 18px rgba(234, 88, 12, 0.85);
     }
 
     .pdf-placeholder {
@@ -270,17 +389,17 @@
       display: flex;
       justify-content: flex-end;
       align-items: center;
-      margin-top: 12px;
+      margin-top: 10px;
     }
 
     .btn-back-round {
-      width: 46px;
-      height: 46px;
+      width: 42px;
+      height: 42px;
       border: 2px solid #0078D4;
       border-radius: 50%;
       background: white;
       color: #0078D4;
-      font-size: 20px;
+      font-size: 18px;
       font-weight: bold;
       display: flex;
       align-items: center;
@@ -297,12 +416,11 @@
         border-radius: 0 !important;
         box-shadow: none !important;
       }
-      .view-screen { padding: 8px 12px !important; }
-      .booking-top-nav { margin-bottom: 6px; }
-      .filter-info-bar, .file-list-container {
-        margin-bottom: 6px;
+      .view-screen { padding: 6px 12px !important; }
+      .booking-top-nav { margin-bottom: 4px; }
+      .filter-info-bar, .file-list-container, .search-bar-container {
+        margin-bottom: 5px;
         padding: 4px 10px;
-        font-size: 12px;
       }
       .pdf-card-container { border-radius: 8px; }
       .action-row { display: none !important; }
@@ -332,9 +450,29 @@
         <div class="file-card" id="fileNameCard"><span>📄 Loading document...</span> <span>➔</span></div>
       </div>
 
+      <!-- OPTION C: Search Name or Staff ID -->
+      <div class="search-bar-container">
+        <span>🔍</span>
+        <input
+          type="text"
+          id="searchInput"
+          class="search-input"
+          placeholder="Search Name or Staff ID..."
+          oninput="handleSearchInput()"
+          onkeydown="if(event.key==='Enter'){ event.preventDefault(); nextSearchMatch(); }"
+        />
+        <span id="searchCount" class="search-count hidden">0 / 0</span>
+        <button id="prevMatchBtn" class="search-nav-btn hidden" onclick="prevSearchMatch()" title="Previous Match">▲</button>
+        <button id="nextMatchBtn" class="search-nav-btn hidden" onclick="nextSearchMatch()" title="Next Match">▼</button>
+        <button id="clearSearchBtn" class="search-nav-btn hidden" onclick="clearSearch()" title="Clear Search">✕</button>
+      </div>
+
       <!-- PDF Canvas Viewport -->
       <div class="pdf-card-container" id="pdfCardBox">
         
+        <!-- OPTION A: Floating Page Counter Badge -->
+        <div id="pageBadge" class="page-badge hidden">Page 1 / 1</div>
+
         <div id="zoomControls" class="zoom-toolbar">
           <button class="zoom-btn zoom-btn-icon" onclick="toggleLandscape()" title="Rotate 90°">↻</button>
           <button class="zoom-btn zoom-btn-icon" onclick="zoomIn()" title="Zoom In">＋</button>
@@ -363,10 +501,22 @@
 
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxP5hpOLd4u9PdCTyaOvKaM6zrqdJFuuwRFpoIAa-oULv50SFGDnFc6zsr4Qqsu6jmP/exec";
 
+    let pdfDoc = null;
     let panzoomInstance = null;
     let isLandscape = false;
     let currentRenderedBase64 = null;
-    let fitScale = 1; // Scale that fits full HD page neatly inside phone screen
+    let fitScale = 1;
+
+    // Option A: Dynamic sharp re-rendering state
+    const BASE_RENDER_SCALE = 2.5;
+    let currentRenderScale = BASE_RENDER_SCALE;
+    let sharpRenderTimer = null;
+    let pageRecords = []; // { pageNum, page, wrapper, canvas, highlightLayer, baseWidth, baseHeight }
+
+    // Option C: Text search index & matches
+    let indexedTextItems = []; // { pageNum, str, normStr, x, y, width, height }
+    let searchMatches = [];
+    let currentMatchIdx = -1;
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
@@ -469,9 +619,12 @@
     }
 
     function forceRefresh() {
+      clearSearch();
       const placeholder = document.getElementById('pdfPlaceholder');
       const target = document.getElementById('panzoomTarget');
+      const badge = document.getElementById('pageBadge');
       target.classList.add('hidden');
+      badge.classList.add('hidden');
       placeholder.classList.remove('hidden');
       placeholder.innerHTML = `<div class="spinner"></div><span>Refreshing latest booking...</span>`;
       fetchTodayBookings(true);
@@ -487,8 +640,12 @@
       const target = document.getElementById('panzoomTarget');
       const placeholder = document.getElementById('pdfPlaceholder');
       const containerBox = document.getElementById('pdfCardBox');
+      const pageBadge = document.getElementById('pageBadge');
 
       isLandscape = false;
+      pageRecords = [];
+      indexedTextItems = [];
+      currentRenderScale = BASE_RENDER_SCALE;
 
       if (panzoomInstance) {
         panzoomInstance.destroy();
@@ -500,44 +657,68 @@
         const binaryRes = await fetch(`data:application/pdf;base64,${cleanBase64}`);
         const pdfBuffer = await binaryRes.arrayBuffer();
 
-        const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
+        pdfDoc = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
 
         target.innerHTML = '';
         placeholder.classList.add('hidden');
         target.classList.remove('hidden');
+        pageBadge.classList.remove('hidden');
+        pageBadge.innerText = `Page 1 / ${pdfDoc.numPages}`;
 
-        // Render true high-resolution bitmap (~2100px+ wide) so text is crystal clear when zoomed
-        const renderScale = 3.5;
-        let firstCanvasWidth = 0;
+        let firstPageWidth = 0;
 
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: renderScale });
+        for (let pageNum = 1; pageNum <= pdfDoc.numPages; pageNum++) {
+          const page = await pdfDoc.getPage(pageNum);
+          const baseViewport = page.getViewport({ scale: BASE_RENDER_SCALE });
+
+          const wrapper = document.createElement('div');
+          wrapper.className = 'pdf-page-wrapper';
+          wrapper.style.width = `${baseViewport.width}px`;
+          wrapper.style.height = `${baseViewport.height}px`;
 
           const canvas = document.createElement('canvas');
           canvas.className = 'pdf-page-canvas';
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
+          canvas.width = baseViewport.width;
+          canvas.height = baseViewport.height;
+
+          const highlightLayer = document.createElement('div');
+          highlightLayer.className = 'highlight-layer';
+
+          wrapper.appendChild(canvas);
+          wrapper.appendChild(highlightLayer);
+          target.appendChild(wrapper);
 
           if (pageNum === 1) {
-            firstCanvasWidth = viewport.width;
+            firstPageWidth = baseViewport.width;
           }
 
-          target.appendChild(canvas);
+          const record = {
+            pageNum,
+            page,
+            wrapper,
+            canvas,
+            highlightLayer,
+            baseWidth: baseViewport.width,
+            baseHeight: baseViewport.height
+          };
+          pageRecords.push(record);
 
+          // Render initial page canvas
           await page.render({
             canvasContext: canvas.getContext('2d', { alpha: false }),
-            viewport: viewport
+            viewport: baseViewport
           }).promise;
+
+          // Index text positions in background for instant Name / Staff ID search
+          indexPageText(page, pageNum, baseViewport);
         }
 
-        // Calculate scale needed to fit full HD canvas inside phone container initially
+        // Fit full HD page width neatly inside mobile container initially
         const boxWidth = containerBox.clientWidth - 16;
-        fitScale = firstCanvasWidth > 0 ? Math.min(boxWidth / firstCanvasWidth, 1) : 0.25;
+        fitScale = firstPageWidth > 0 ? Math.min(boxWidth / firstPageWidth, 1) : 0.3;
 
-        // Initialize Panzoom starting at fitScale, allowing zoom up to 2.5x native HD (10x screen size)
         panzoomInstance = Panzoom(target, {
-          maxScale: 2.5,
+          maxScale: 3.0,
           minScale: fitScale * 0.8,
           step: 0.25,
           contain: false,
@@ -550,16 +731,33 @@
           }
         });
 
-        // Position top of Page 1 cleanly inside the viewport
+        // Position top of Page 1 cleanly inside viewport
         setTimeout(() => {
           panzoomInstance.zoom(fitScale, { animate: false });
           panzoomInstance.pan(0, 0, { animate: false });
+          updateVisiblePageBadge();
         }, 30);
+
+        // OPTION A: Update page counter on pan/zoom & trigger crisp HD re-render when zoomed in deep
+        target.addEventListener('panzoomchange', () => {
+          updateVisiblePageBadge();
+        });
+
+        target.addEventListener('panzoomzoom', (e) => {
+          const zScale = e.detail.scale;
+          clearTimeout(sharpRenderTimer);
+          sharpRenderTimer = setTimeout(() => {
+            upgradeCanvasSharpness(zScale);
+          }, 260);
+        });
 
         containerBox.addEventListener('wheel', (e) => {
           e.preventDefault();
           panzoomInstance.zoomWithWheel(e);
         }, { passive: false });
+
+        // OPTION A: Double-Tap Smart Zoom centered on finger tap
+        setupDoubleTapZoom(containerBox);
 
       } catch (err) {
         console.error('PDF Render Error:', err);
@@ -567,10 +765,214 @@
       }
     }
 
-    // Jump directly to crisp 100% original HD resolution
+    // Re-renders canvas backing store at higher resolution when zoomed deeply into small cells
+    async function upgradeCanvasSharpness(zoomLevel) {
+      if (!pageRecords.length) return;
+      // Target effective pixel density up to 4.2x original PDF points
+      const desiredRenderScale = zoomLevel > 0.75 ? 4.2 : BASE_RENDER_SCALE;
+      if (Math.abs(desiredRenderScale - currentRenderScale) < 0.5) return;
+
+      currentRenderScale = desiredRenderScale;
+      for (const rec of pageRecords) {
+        const hdViewport = rec.page.getViewport({ scale: desiredRenderScale });
+        rec.canvas.width = hdViewport.width;
+        rec.canvas.height = hdViewport.height;
+        await rec.page.render({
+          canvasContext: rec.canvas.getContext('2d', { alpha: false }),
+          viewport: hdViewport
+        }).promise;
+      }
+    }
+
+    // Detects which page is centered in the viewport and updates "Page X / Y"
+    function updateVisiblePageBadge() {
+      if (!pageRecords.length) return;
+      const boxRect = document.getElementById('pdfCardBox').getBoundingClientRect();
+      const boxCenterY = boxRect.top + boxRect.height / 2;
+
+      let closestPage = 1;
+      let minDistance = Infinity;
+
+      for (const rec of pageRecords) {
+        const rect = rec.wrapper.getBoundingClientRect();
+        const pageCenterY = rect.top + rect.height / 2;
+        const dist = Math.abs(pageCenterY - boxCenterY);
+        if (dist < minDistance) {
+          minDistance = dist;
+          closestPage = rec.pageNum;
+        }
+      }
+
+      document.getElementById('pageBadge').innerText = `Page ${closestPage} / ${pageRecords.length}`;
+    }
+
+    // Double-Tap gesture: toggles between FIT and 100% HD zoom right where user tapped
+    function setupDoubleTapZoom(containerBox) {
+      let lastTapTime = 0;
+      let lastTapX = 0;
+      let lastTapY = 0;
+
+      containerBox.addEventListener('touchend', (e) => {
+        if (e.target.closest('.zoom-toolbar')) return;
+        if (e.changedTouches.length !== 1) return;
+
+        const now = Date.now();
+        const touch = e.changedTouches[0];
+        const dx = Math.abs(touch.clientX - lastTapX);
+        const dy = Math.abs(touch.clientY - lastTapY);
+
+        if (now - lastTapTime < 300 && dx < 28 && dy < 28 && panzoomInstance) {
+          e.preventDefault();
+          const currentScale = panzoomInstance.getScale();
+          if (currentScale > fitScale * 1.35) {
+            resetZoom();
+          } else {
+            panzoomInstance.zoomToPoint(0.85, {
+              clientX: touch.clientX,
+              clientY: touch.clientY
+            }, { animate: true });
+          }
+          lastTapTime = 0;
+        } else {
+          lastTapTime = now;
+          lastTapX = touch.clientX;
+          lastTapY = touch.clientY;
+        }
+      }, { passive: false });
+    }
+
+    /* =====================================================================
+       OPTION C: TEXT EXTRACTION & NAME / STAFF ID SEARCH
+       ===================================================================== */
+    async function indexPageText(page, pageNum, viewport) {
+      try {
+        const textContent = await page.getTextContent();
+        for (const item of textContent.items) {
+          const str = (item.str || '').trim();
+          if (!str) continue;
+
+          // Transform PDF text coordinates into viewport pixel coordinates
+          const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
+          const fontHeight = Math.hypot(tx[2], tx[3]) || (item.height * viewport.scale);
+          const itemWidth = (item.width * viewport.scale) || (str.length * fontHeight * 0.55);
+
+          indexedTextItems.push({
+            pageNum,
+            str,
+            normStr: str.toLowerCase(),
+            x: tx[4],
+            y: tx[5] - fontHeight,
+            width: Math.max(itemWidth, 24),
+            height: Math.max(fontHeight * 1.25, 16)
+          });
+        }
+      } catch (e) {
+        console.warn("Text index error on page", pageNum, e);
+      }
+    }
+
+    function handleSearchInput() {
+      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      const countEl = document.getElementById('searchCount');
+      const prevBtn = document.getElementById('prevMatchBtn');
+      const nextBtn = document.getElementById('nextMatchBtn');
+      const clearBtn = document.getElementById('clearSearchBtn');
+
+      // Clear previous highlights
+      pageRecords.forEach(r => r.highlightLayer.innerHTML = '');
+      searchMatches = [];
+      currentMatchIdx = -1;
+
+      if (!query) {
+        countEl.classList.add('hidden');
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+        clearBtn.classList.add('hidden');
+        return;
+      }
+
+      clearBtn.classList.remove('hidden');
+
+      // Find all matching items
+      for (const item of indexedTextItems) {
+        if (item.normStr.includes(query)) {
+          const rec = pageRecords[item.pageNum - 1];
+          if (!rec) continue;
+
+          const box = document.createElement('div');
+          box.className = 'search-highlight-box';
+          box.style.left = `${item.x - 4}px`;
+          box.style.top = `${item.y - 2}px`;
+          box.style.width = `${item.width + 8}px`;
+          box.style.height = `${item.height + 4}px`;
+
+          rec.highlightLayer.appendChild(box);
+          searchMatches.push({ item, box, rec });
+        }
+      }
+
+      countEl.classList.remove('hidden');
+      if (searchMatches.length === 0) {
+        countEl.innerText = '0 / 0';
+        prevBtn.classList.add('hidden');
+        nextBtn.classList.add('hidden');
+      } else {
+        prevBtn.classList.remove('hidden');
+        nextBtn.classList.remove('hidden');
+        focusSearchMatch(0);
+      }
+    }
+
+    function focusSearchMatch(index) {
+      if (!searchMatches.length || !panzoomInstance) return;
+
+      searchMatches.forEach(m => m.box.classList.remove('active-match'));
+      currentMatchIdx = (index + searchMatches.length) % searchMatches.length;
+
+      const match = searchMatches[currentMatchIdx];
+      match.box.classList.add('active-match');
+      document.getElementById('searchCount').innerText = `${currentMatchIdx + 1} / ${searchMatches.length}`;
+
+      // Zoom in to readable HD scale and center the matched Name / Staff ID on screen
+      const targetScale = Math.max(0.85, fitScale * 2.2);
+      const targetEl = document.getElementById('panzoomTarget');
+      const totalWidth = targetEl.offsetWidth;
+      const totalHeight = targetEl.offsetHeight;
+
+      const matchCenterX = match.rec.wrapper.offsetLeft + match.item.x + (match.item.width / 2);
+      const matchCenterY = match.rec.wrapper.offsetTop + match.item.y + (match.item.height / 2);
+
+      // Offset from center of panzoomTarget
+      const panX = (totalWidth / 2) - matchCenterX;
+      const panY = (totalHeight / 2) - matchCenterY;
+
+      panzoomInstance.zoom(targetScale, { animate: true });
+      setTimeout(() => {
+        panzoomInstance.pan(panX, panY, { animate: true });
+        updateVisiblePageBadge();
+      }, 60);
+    }
+
+    function nextSearchMatch() {
+      if (searchMatches.length) focusSearchMatch(currentMatchIdx + 1);
+    }
+
+    function prevSearchMatch() {
+      if (searchMatches.length) focusSearchMatch(currentMatchIdx - 1);
+    }
+
+    function clearSearch() {
+      const input = document.getElementById('searchInput');
+      input.value = '';
+      handleSearchInput();
+    }
+
+    /* =====================================================================
+       TOOLBAR CONTROLS
+       ===================================================================== */
     function zoomOriginalSize() {
       if (!panzoomInstance) return;
-      panzoomInstance.zoom(0.75, { animate: true });
+      panzoomInstance.zoom(0.85, { animate: true });
     }
 
     function toggleLandscape() {
@@ -598,13 +1000,10 @@
 
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        if (!panzoomInstance) return;
+        if (!panzoomInstance || !pageRecords.length) return;
         const containerBox = document.getElementById('pdfCardBox');
-        const firstCanvas = document.querySelector('canvas.pdf-page-canvas');
-        if (firstCanvas && containerBox) {
-          fitScale = Math.min((containerBox.clientWidth - 16) / firstCanvas.width, 1);
-          resetZoom();
-        }
+        fitScale = Math.min((containerBox.clientWidth - 16) / pageRecords[0].baseWidth, 1);
+        resetZoom();
       }, 250);
     });
 
