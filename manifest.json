@@ -1,7 +1,7 @@
 {
   "id": "/",
   "name": "Operation Portal",
-  "short_name": "Op Portal",
+  "short_name": "OPS Portal",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#0f172a",
