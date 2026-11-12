@@ -471,7 +471,7 @@
       renderPillboxOptions();
     }
 
-    // Helper to extract individual clean issue titles from pipe-separated (|) combined strings
+    // Extract concise, standardized item names without statuses, remarks, or trailing descriptions
     function extractIndividualIssues(areaStr) {
       if (!areaStr || areaStr === '-' || areaStr.trim().toLowerCase() === 'all is good') return [];
       
@@ -479,17 +479,27 @@
         .split('|')
         .map(segment => {
           let clean = segment.trim();
-          if (clean.includes('-')) {
-            const dashParts = clean.split('-');
-            // Exclude status tags like "Missing", "Malfunction", "Damage", etc.
-            const statusKeywords = ["good", "missing", "malfunction", "damage", "leaking"];
-            const lastPart = dashParts[dashParts.length - 1].trim().toLowerCase();
-            
-            if (statusKeywords.includes(lastPart)) {
-              dashParts.pop();
-              clean = dashParts.join('-').trim();
-            }
+
+          // 1. Cut off everything from the first hyphen (-) onward to strip status + operator remarks
+          //    e.g., "Wear liner- missing / worn out / broken - Missing" -> "Wear liner"
+          //    e.g., "Aircond - Missing, Forklift memang tiada penghawa dingin" -> "Aircond"
+          //    e.g., "Hand railing - Malfunction, Lampu dekat hand railing banyak rosak" -> "Hand railing"
+          const firstDashIdx = clean.indexOf('-');
+          if (firstDashIdx !== -1) {
+            clean = clean.substring(0, firstDashIdx).trim();
           }
+
+          // 2. Strip any comma-separated remark if no hyphen was present
+          const firstCommaIdx = clean.indexOf(',');
+          if (firstCommaIdx !== -1) {
+            clean = clean.substring(0, firstCommaIdx).trim();
+          }
+
+          // 3. Strip trailing bilingual slash descriptions (e.g., "Driver's seat / Kerusi Pemandu" -> "Driver's seat")
+          if (clean.includes(' / ')) {
+            clean = clean.split(' / ')[0].trim();
+          }
+
           return clean;
         })
         .filter(Boolean);
@@ -559,15 +569,20 @@
           );
         }
 
-        // Aggregate individual issues across pipe-separated AREA strings
-        let allIssues = [];
+        // Aggregate and deduplicate short issue names case-insensitively
+        const uniqueMap = new Map();
         poolLogs.forEach(item => {
           const areaRaw = getPropValue(item, ['AREA', 'area'], '');
           const extracted = extractIndividualIssues(areaRaw);
-          allIssues.push(...extracted);
+          extracted.forEach(issue => {
+            const key = issue.toUpperCase();
+            if (!uniqueMap.has(key)) {
+              uniqueMap.set(key, issue);
+            }
+          });
         });
 
-        const uniqueAreas = Array.from(new Set(allIssues)).sort();
+        const uniqueAreas = Array.from(uniqueMap.values()).sort((a, b) => a.localeCompare(b));
         const selectedArea = document.getElementById('filterArea').value.trim().toUpperCase();
 
         if (uniqueAreas.length === 0) {
@@ -617,7 +632,7 @@
         const matchEq = !eqVal || eqStr === eqVal;
         const matchNum = !numVal || numStr.includes(numVal);
         
-        // Multi-issue match: Checks if typed or selected issue is found within pipe-separated AREA string
+        // Multi-issue match: Checks if typed or selected short issue is found within pipe-separated AREA string
         const matchArea = !areaVal || areaStr.includes(areaVal);
 
         return matchYr && matchEq && matchNum && matchArea;
