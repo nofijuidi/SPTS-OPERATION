@@ -939,6 +939,86 @@
           ]
         }
       ],
+      "RTG": [
+        {
+          sectionTitle: "GENERAL CHECK",
+          items: [
+            "Tyre condition",
+            "Tyre Guard / Chain Guard",
+            "Drive Chain",
+            "Flood Light",
+            "Hoisting Wire Rope Condition",
+            "Hoisting Drum / Reduction Gear Conditions",
+            "Festoon / Transmission / Grease",
+            "Anti-Sway",
+            "Walkway /Stair Way / Access Ladder"
+          ]
+        },
+        {
+          sectionTitle: "HOISTING / LOWERING",
+          items: [
+            "Upper/Lower Slow Down",
+            "Upper/Lower Extreme Stop",
+            "Stopping Effectiveness",
+            "Joy Stick",
+            "Hoisting / Lowering Motion"
+          ]
+        },
+        {
+          sectionTitle: "GANTRY DEVICE",
+          items: [
+            "Gantry Brake",
+            "Gantry Motion",
+            "Stopping Effectiveness"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Fire Extinguisher",
+            "Emergency Stop Conditions",
+            "Anti Collision - Container to RTG",
+            "Siren",
+            "Beacon Light",
+            "Intercom",
+            "First Aid Kits",
+            "Mobile Radio / Walkie Talkie"
+          ]
+        },
+        {
+          sectionTitle: "TROLLEY DEVICE",
+          items: [
+            "Forward / Backward Slow Down",
+            "Forward / Backward Extreme Stop",
+            "Stopping Effectiveness",
+            "Joy Stick",
+            "Trolley Motion"
+          ]
+        },
+        {
+          sectionTitle: "SPREADER DEVICE",
+          items: [
+            "Spreader Indicator",
+            "Extend 20 : 40",
+            "Flipper / Spreader Conditions"
+          ]
+        },
+        {
+          sectionTitle: "OPERATOR CABIN",
+          items: [
+            "VMT",
+            "Gauge / Meter",
+            "Indicator Panel Light",
+            "All Switches and Panel Buttons",
+            "Air Condition",
+            "Door / Window",
+            "Cabin Glass",
+            "Operator Seat",
+            "Cleanliness",
+            "TLS System"
+          ]
+        }
+      ],
       "QC": [
         {
           sectionTitle: "OPERATOR CABIN",
@@ -1461,7 +1541,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
-      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType === "RTG" || uppercaseType.includes("QUAY");
 
       if (isConveyor) {
         if (uppercaseNum === "BC01") sections = CONVEYOR_SCHEMAS["BC01"];
@@ -1493,6 +1573,7 @@
         if (uppercaseType.includes("PM")) sections = EQUIPMENT_SECTIONS_DATA["PM"];
         else if (uppercaseType.includes("FORKLIFT")) sections = EQUIPMENT_SECTIONS_DATA["FORKLIFT"];
         else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
+        else if (uppercaseType === "RTG") sections = EQUIPMENT_SECTIONS_DATA["RTG"];
         else if (uppercaseType === "QC" || uppercaseType.includes("QUAY") || uppercaseType.includes("CRANE")) sections = EQUIPMENT_SECTIONS_DATA["QC"];
         else if (uppercaseType.includes("STACKER")) sections = EQUIPMENT_SECTIONS_DATA["STACKER"];
         else if (uppercaseType.includes("RECLAIMER")) sections = EQUIPMENT_SECTIONS_DATA["RECLAIMER"];
@@ -1665,7 +1746,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
-      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType === "RTG" || uppercaseType.includes("QUAY");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
 
@@ -1722,7 +1803,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
-      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType === "RTG" || uppercaseType.includes("QUAY");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
