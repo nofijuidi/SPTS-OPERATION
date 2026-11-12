@@ -858,6 +858,50 @@
           ]
         }
       ],
+      "FORKLIFT": [
+        {
+          sectionTitle: "OPERATIONS CHECK",
+          items: [
+            "Coolant Level",
+            "Engine Oil Level",
+            "Transmission Oil Level",
+            "Power steering Oil Level",
+            "Hydraulic Oil Level",
+            "Brake Fluid Level",
+            "Bottom Equipment Check",
+            "Rubber Tyre, Bolts & Nuts Conditions",
+            "Damage, Leaking or Part Crack",
+            "Battery Conditions"
+          ]
+        },
+        {
+          sectionTitle: "EQUIPMENT TEST",
+          items: [
+            "Lifting Chain Tension",
+            "Forward and Backward Drive",
+            "Transmission Conditions",
+            "Exhaust"
+          ]
+        },
+        {
+          sectionTitle: "SAFETY FEATURES",
+          items: [
+            "Fire Extinguisher",
+            "Emergency Stop Conditions"
+          ]
+        },
+        {
+          sectionTitle: "ENGINE ON CHECK",
+          items: [
+            "Steering Check - Roaring Sound",
+            "Pedal - Brake, Clutch and Acceleration",
+            "Brake Functions",
+            "Operating System - Hydraulic, Lifting, Tilting and Steering",
+            "All Indicator Meter at Panel",
+            "All Lights, Headlamp, Brake, Signal, Spotlight, Reverse Sensor & Lights"
+          ]
+        }
+      ],
       "TIPPER": [
         {
           sectionTitle: "GENERAL CHECK (INSIDE TT)",
@@ -1441,6 +1485,7 @@
         ];
       } else {
         if (uppercaseType.includes("PM")) sections = EQUIPMENT_SECTIONS_DATA["PM"];
+        else if (uppercaseType.includes("FORKLIFT")) sections = EQUIPMENT_SECTIONS_DATA["FORKLIFT"];
         else if (uppercaseType.includes("TIPPER") || uppercaseType.includes("TT")) sections = EQUIPMENT_SECTIONS_DATA["TIPPER"];
         else if (uppercaseType === "QC" || uppercaseType.includes("QUAY") || uppercaseType.includes("CRANE")) sections = EQUIPMENT_SECTIONS_DATA["QC"];
         else if (uppercaseType.includes("STACKER")) sections = EQUIPMENT_SECTIONS_DATA["STACKER"];
