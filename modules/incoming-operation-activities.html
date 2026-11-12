@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>SPTS - Incoming Operation Activities</title>
   <meta name="theme-color" content="#0f172a">
 
@@ -34,6 +34,7 @@
       justify-content: center;
       align-items: center;
       color: #334155;
+      touch-action: none;
     }
 
     .app-viewport {
@@ -74,6 +75,9 @@
       padding-top: calc(env(safe-area-inset-top, 0px) + 20px);
       padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px);
       overflow-y: auto;
+      transform-origin: 0 0;
+      will-change: transform;
+      touch-action: pan-y;
     }
 
     /* Top Header */
@@ -223,12 +227,36 @@
       justify-content: center;
       cursor: pointer;
     }
+
+    /* Floating Reset Zoom Badge */
+    .zoom-reset-pill {
+      position: absolute;
+      bottom: calc(env(safe-area-inset-bottom, 0px) + 16px);
+      left: 16px;
+      background-color: rgba(15, 23, 42, 0.88);
+      color: #ffffff;
+      border: 1.5px solid #38bdf8;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 800;
+      z-index: 50;
+      cursor: pointer;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+      display: none;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .zoom-reset-pill.visible {
+      display: flex;
+    }
   </style>
 </head>
 <body>
 
-  <div class="app-viewport">
-    <div class="view-screen">
+  <div class="app-viewport" id="appViewport">
+    <div class="view-screen" id="zoomStage">
       
       <!-- Top Nav Header -->
       <div class="module-header">
@@ -348,6 +376,11 @@
         <div class="btn-back-round" onclick="goHome()">➔</div>
       </div>
 
+    </div>
+
+    <!-- Reset Zoom Indicator -->
+    <div class="zoom-reset-pill" id="zoomResetPill" onclick="resetZoom()">
+      🔍 <span id="zoomLevelText">1.0x</span> · Reset
     </div>
   </div>
 
@@ -569,6 +602,160 @@
         if (tbody) tbody.innerHTML = `<tr><td colspan="6" class="table-empty">${msg}</td></tr>`;
       });
     }
+
+    /* =====================================================================
+       TWO-FINGER PINCH ZOOM & BOUNDED PAN ENGINE
+    ===================================================================== */
+    const viewportEl = document.getElementById('appViewport');
+    const stageEl = document.getElementById('zoomStage');
+    const resetPillEl = document.getElementById('zoomResetPill');
+    const zoomTextEl = document.getElementById('zoomLevelText');
+
+    let scale = 1;
+    let translateX = 0;
+    let translateY = 0;
+    const MIN_SCALE = 1;
+    const MAX_SCALE = 3.5;
+
+    let isPinching = false;
+    let isPanning = false;
+    let startDist = 0;
+    let startScale = 1;
+    let startMidX = 0;
+    let startMidY = 0;
+    let startTransX = 0;
+    let startTransY = 0;
+    let panStartX = 0;
+    let panStartY = 0;
+    let lastTapTime = 0;
+
+    function getTouchDistance(t1, t2) {
+      return Math.hypot(t2.clientX - t1.clientX, t2.clientY - t1.clientY);
+    }
+
+    function getTouchMidpoint(t1, t2, rect) {
+      return {
+        x: ((t1.clientX + t2.clientX) / 2) - rect.left,
+        y: ((t1.clientY + t2.clientY) / 2) - rect.top
+      };
+    }
+
+    function clampPosition() {
+      const vpW = viewportEl.clientWidth;
+      const vpH = viewportEl.clientHeight;
+      const contentH = Math.max(stageEl.scrollHeight, vpH);
+
+      const minX = vpW - (vpW * scale);
+      const maxX = 0;
+      const minY = vpH - (contentH * scale);
+      const maxY = 0;
+
+      translateX = Math.min(maxX, Math.max(minX, translateX));
+      translateY = Math.min(maxY, Math.max(minY, translateY));
+    }
+
+    function applyTransform() {
+      if (scale <= 1.01) {
+        scale = 1;
+        translateX = 0;
+        translateY = 0;
+        stageEl.style.transform = 'none';
+        stageEl.style.overflowY = 'auto';
+        stageEl.style.touchAction = 'pan-y';
+        resetPillEl.classList.remove('visible');
+      } else {
+        clampPosition();
+        stageEl.style.overflowY = 'visible';
+        stageEl.style.touchAction = 'none';
+        stageEl.style.transform = `translate3d(${translateX}px, ${translateY}px, 0) scale(${scale})`;
+        zoomTextEl.textContent = `${scale.toFixed(1)}x`;
+        resetPillEl.classList.add('visible');
+      }
+    }
+
+    function resetZoom() {
+      scale = 1;
+      translateX = 0;
+      translateY = 0;
+      stageEl.scrollTop = 0;
+      applyTransform();
+    }
+
+    viewportEl.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 2) {
+        e.preventDefault();
+        isPinching = true;
+        isPanning = false;
+
+        // Account for existing scrollTop if zooming in from 1x
+        if (scale === 1 && stageEl.scrollTop > 0) {
+          translateY = -stageEl.scrollTop;
+          stageEl.scrollTop = 0;
+        }
+
+        const rect = viewportEl.getBoundingClientRect();
+        startDist = getTouchDistance(e.touches[0], e.touches[1]);
+        startScale = scale;
+        const mid = getTouchMidpoint(e.touches[0], e.touches[1], rect);
+        startMidX = mid.x;
+        startMidY = mid.y;
+        startTransX = translateX;
+        startTransY = translateY;
+      } else if (e.touches.length === 1) {
+        // Double-tap to reset when zoomed in
+        const now = Date.now();
+        if (now - lastTapTime < 280 && scale > 1) {
+          e.preventDefault();
+          resetZoom();
+          lastTapTime = 0;
+          return;
+        }
+        lastTapTime = now;
+
+        if (scale > 1) {
+          isPanning = true;
+          panStartX = e.touches[0].clientX - translateX;
+          panStartY = e.touches[0].clientY - translateY;
+        }
+      }
+    }, { passive: false });
+
+    viewportEl.addEventListener('touchmove', (e) => {
+      if (isPinching && e.touches.length === 2) {
+        e.preventDefault();
+        const rect = viewportEl.getBoundingClientRect();
+        const currentDist = getTouchDistance(e.touches[0], e.touches[1]);
+        const currentMid = getTouchMidpoint(e.touches[0], e.touches[1], rect);
+
+        const nextScale = Math.min(MAX_SCALE, Math.max(MIN_SCALE, startScale * (currentDist / startDist)));
+        const ratio = nextScale / startScale;
+
+        // Anchor focal point stationary between fingers
+        translateX = currentMid.x - (startMidX - startTransX) * ratio;
+        translateY = currentMid.y - (startMidY - startTransY) * ratio;
+        scale = nextScale;
+
+        applyTransform();
+      } else if (isPanning && e.touches.length === 1 && scale > 1) {
+        e.preventDefault();
+        translateX = e.touches[0].clientX - panStartX;
+        translateY = e.touches[0].clientY - panStartY;
+        applyTransform();
+      }
+    }, { passive: false });
+
+    viewportEl.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        isPinching = false;
+      }
+      if (e.touches.length === 0) {
+        isPanning = false;
+      } else if (e.touches.length === 1 && scale > 1) {
+        isPanning = true;
+        panStartX = e.touches[0].clientX - translateX;
+        panStartY = e.touches[0].clientY - translateY;
+      }
+    });
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
 
