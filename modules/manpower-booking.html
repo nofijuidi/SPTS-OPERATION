@@ -11,6 +11,11 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
 
+  <!-- Preconnect to CDNs & Google Script for faster handshake -->
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+  <link rel="preconnect" href="https://script.google.com" crossorigin>
+
   <!-- High Definition PDF Engine & Touch Panzoom -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
@@ -35,13 +40,9 @@
       justify-content: center;
       align-items: center;
       color: #334155;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      padding-left: env(safe-area-inset-left);
-      padding-right: env(safe-area-inset-right);
+      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
-    /* DEFAULT PORTRAIT VIEWPORT */
     .app-viewport {
       width: 100vw;
       height: 100vh;
@@ -53,7 +54,6 @@
       position: relative;
       overflow: hidden;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-      transition: all 0.2s ease-in-out;
     }
 
     @media (min-width: 480px) and (orientation: portrait) {
@@ -71,7 +71,6 @@
       overflow: hidden;
     }
 
-    /* TOP NAVIGATION HEADER */
     .booking-top-nav {
       display: flex;
       align-items: center;
@@ -101,7 +100,6 @@
       font-weight: 800;
     }
 
-    /* DATE STATUS BAR */
     .filter-info-bar {
       background-color: #eff6ff;
       border: 1px solid #bfdbfe;
@@ -116,7 +114,6 @@
       justify-content: space-between;
     }
 
-    /* FILE NAME BANNER */
     .file-list-container {
       display: flex;
       flex-direction: column;
@@ -137,7 +134,6 @@
       justify-content: space-between;
     }
 
-    /* PDF INTERACTIVE CONTAINER */
     .pdf-card-container {
       flex: 1;
       width: 100%;
@@ -151,7 +147,6 @@
       touch-action: none;
     }
 
-    /* PERMANENT ZOOM TOOLBAR */
     .zoom-toolbar {
       position: absolute;
       bottom: 8px;
@@ -204,7 +199,6 @@
       transform: scale(0.95);
     }
 
-    /* PANZOOM TARGET CONTAINER */
     .panzoom-wrapper {
       width: 100%;
       height: 100%;
@@ -212,7 +206,9 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      justify-content: center;
+      justify-content: flex-start;
+      overflow-y: auto;
+      padding: 8px 0 60px 0;
       touch-action: none;
     }
 
@@ -221,24 +217,40 @@
     }
 
     canvas.pdf-page-canvas {
-      width: 98% !important;
+      width: 96% !important;
       height: auto !important;
-      margin: 8px 0;
+      margin: 6px 0;
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       border-radius: 4px;
       background-color: #ffffff;
-      touch-action: none;
     }
 
+    /* Fast Skeleton Loader */
     .pdf-placeholder {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 12px;
       height: 100%;
       color: #ffffff;
       font-size: 14px;
+      font-weight: 600;
       text-align: center;
       padding: 20px;
+    }
+
+    .spinner {
+      width: 34px;
+      height: 34px;
+      border: 3px solid rgba(255, 255, 255, 0.25);
+      border-top-color: #38bdf8;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
     }
 
     .hidden {
@@ -267,9 +279,6 @@
       cursor: pointer;
     }
 
-    /* ========================================================= */
-    /* LANDSCAPE MODE ADJUSTMENTS - UNLOCK FULL PHYSICAL SCREEN */
-    /* ========================================================= */
     @media (orientation: landscape) {
       .app-viewport {
         max-width: 100vw !important;
@@ -279,35 +288,16 @@
         border-radius: 0 !important;
         box-shadow: none !important;
       }
-
-      .view-screen {
-        padding: 8px 12px !important;
-      }
-
-      /* Compact Top Navigation and Cards in Landscape */
-      .booking-top-nav {
-        margin-bottom: 6px;
-      }
-
+      .view-screen { padding: 8px 12px !important; }
+      .booking-top-nav { margin-bottom: 6px; }
       .filter-info-bar, .file-list-container {
         margin-bottom: 6px;
         padding: 4px 10px;
         font-size: 12px;
       }
-
-      /* Maximize PDF Viewport Container */
-      .pdf-card-container {
-        border-radius: 8px;
-      }
-
-      /* Scale Canvas wider to utilize landscape aspect ratio */
-      canvas.pdf-page-canvas {
-        width: 100% !important;
-      }
-
-      .action-row {
-        display: none !important; /* Hide redundant bottom button in landscape to give space to PDF */
-      }
+      .pdf-card-container { border-radius: 8px; }
+      canvas.pdf-page-canvas { width: 100% !important; }
+      .action-row { display: none !important; }
     }
   </style>
 </head>
@@ -320,6 +310,7 @@
       <div class="booking-top-nav">
         <div class="btn-home-icon" onclick="goHome()">🏠</div>
         <div class="booking-header-title">MANPOWER BOOKING</div>
+        <div class="btn-home-icon" onclick="forceRefresh()" title="Refresh Document">🔄</div>
       </div>
 
       <!-- Date Banner -->
@@ -330,28 +321,27 @@
 
       <!-- File Name Card -->
       <div id="fileListContainer" class="file-list-container">
-        <div class="file-card" id="fileNameCard"><span>📄 Booking Document</span> <span>➔</span></div>
+        <div class="file-card" id="fileNameCard"><span>📄 Loading document...</span> <span>➔</span></div>
       </div>
 
       <!-- PDF Canvas Viewport -->
       <div class="pdf-card-container" id="pdfCardBox">
         
-        <!-- Permanent Controls Bar -->
         <div id="zoomControls" class="zoom-toolbar">
-          <button class="zoom-btn zoom-btn-icon" onclick="toggleLandscape()" title="Rotate 90° Landscape/Portrait">↻</button>
+          <button class="zoom-btn zoom-btn-icon" onclick="toggleLandscape()" title="Rotate 90°">↻</button>
           <button class="zoom-btn zoom-btn-icon" onclick="zoomIn()" title="Zoom In">＋</button>
           <button class="zoom-btn zoom-btn-icon" onclick="zoomOut()" title="Zoom Out">－</button>
           <button class="zoom-btn zoom-btn-text" onclick="resetZoom()" title="Reset View">RESET</button>
         </div>
 
         <div id="pdfPlaceholder" class="pdf-placeholder">
-          Fetching daily booking document...
+          <div class="spinner"></div>
+          <span id="statusText">Opening booking sheet...</span>
         </div>
 
         <div id="panzoomTarget" class="panzoom-wrapper hidden"></div>
       </div>
 
-      <!-- Footer Action -->
       <div class="action-row">
         <div class="btn-back-round" onclick="goHome()">➔</div>
       </div>
@@ -362,11 +352,11 @@
   <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
-    // DEPLOYED GOOGLE APPS SCRIPT WEB APP ENDPOINT
     const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxP5hpOLd4u9PdCTyaOvKaM6zrqdJFuuwRFpoIAa-oULv50SFGDnFc6zsr4Qqsu6jmP/exec";
 
     let panzoomInstance = null;
     let isLandscape = false;
+    let currentRenderedBase64 = null;
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
@@ -384,37 +374,104 @@
       const dd = String(now.getDate()).padStart(2, '0');
       const mm = String(now.getMonth() + 1).padStart(2, '0');
       const yyyy = now.getFullYear();
-      return { dayNum: dd, monthNum: mm, formattedDisplay: `${dd}/${mm}/${yyyy}` };
+      return {
+        cacheKey: `spts_booking_pdf_${yyyy}_${mm}_${dd}`,
+        formattedDisplay: `${dd}/${mm}/${yyyy}`
+      };
     }
 
-    async function fetchTodayBookings() {
+    async function fetchTodayBookings(skipCache = false) {
       const dateInfo = getDateParams();
       document.getElementById('currentDateDisplay').innerText = dateInfo.formattedDisplay;
 
+      // 1. INSTANT CACHE LOAD (0ms network wait if already opened today)
+      if (!skipCache) {
+        try {
+          const cachedRaw = localStorage.getItem(dateInfo.cacheKey);
+          if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw);
+            if (cached && cached.pdfBase64) {
+              document.getElementById('fileNameCard').innerHTML = `<span>📄 ${cached.fileName || 'Booking Document'}</span> <span>⚡</span>`;
+              currentRenderedBase64 = cached.pdfBase64;
+              await renderPdfWithPanzoom(cached.pdfBase64);
+              // Silently check in background if the file was updated in Drive
+              syncInBackground(dateInfo.cacheKey);
+              return;
+            }
+          }
+        } catch (e) {
+          console.warn("Cache read skipped:", e);
+        }
+      }
+
+      // 2. NETWORK FETCH
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
           method: 'GET',
-          redirect: 'follow',
-          cache: 'no-cache'
+          redirect: 'follow'
         });
 
-        if (response.ok) {
-          const result = await response.json();
-          if (result.pdfBase64) {
-            document.getElementById('fileNameCard').innerHTML = `<span>📄 ${result.fileName || 'Booking Document'}</span> <span>➔</span>`;
-            renderPdfWithPanzoom(result.pdfBase64);
-          } else if (result.error) {
-            showError(`Drive Error: ${result.error}`);
-          } else {
-            showError("No booking document found in Drive.");
-          }
-        } else {
+        if (!response.ok) {
           showError(`HTTP Error (${response.status}): Re-deploy Web App as 'Anyone'.`);
+          return;
+        }
+
+        const result = await response.json();
+        if (result.pdfBase64) {
+          document.getElementById('fileNameCard').innerHTML = `<span>📄 ${result.fileName || 'Booking Document'}</span> <span>➔</span>`;
+          currentRenderedBase64 = result.pdfBase64;
+          saveToDailyCache(dateInfo.cacheKey, result);
+          await renderPdfWithPanzoom(result.pdfBase64);
+        } else if (result.error) {
+          showError(`Drive Error: ${result.error}`);
+        } else {
+          showError("No booking document found in Drive.");
         }
       } catch (err) {
         console.error("Fetch Exception:", err);
-        showError("Network connection failed. Re-deploy Apps Script as Version 3 + 'Anyone'.");
+        showError("Network connection failed. Check internet or Apps Script permissions.");
       }
+    }
+
+    // Checks for newer versions silently without blocking UI
+    async function syncInBackground(cacheKey) {
+      try {
+        const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', redirect: 'follow' });
+        if (!response.ok) return;
+        const result = await response.json();
+        if (result.pdfBase64 && result.pdfBase64 !== currentRenderedBase64) {
+          currentRenderedBase64 = result.pdfBase64;
+          saveToDailyCache(cacheKey, result);
+          document.getElementById('fileNameCard').innerHTML = `<span>📄 ${result.fileName || 'Booking Document'} (Updated)</span> <span>➔</span>`;
+          await renderPdfWithPanzoom(result.pdfBase64);
+        }
+      } catch (_) {}
+    }
+
+    function saveToDailyCache(todayKey, data) {
+      try {
+        // Clear old days' cached PDFs so localStorage never fills up
+        Object.keys(localStorage).forEach(key => {
+          if (key.startsWith('spts_booking_pdf_') && key !== todayKey) {
+            localStorage.removeItem(key);
+          }
+        });
+        localStorage.setItem(todayKey, JSON.stringify({
+          fileName: data.fileName,
+          pdfBase64: data.pdfBase64
+        }));
+      } catch (e) {
+        // Ignore quota exceeded errors on very large PDFs
+      }
+    }
+
+    function forceRefresh() {
+      const placeholder = document.getElementById('pdfPlaceholder');
+      const target = document.getElementById('panzoomTarget');
+      target.classList.add('hidden');
+      placeholder.classList.remove('hidden');
+      placeholder.innerHTML = `<div class="spinner"></div><span>Refreshing latest booking...</span>`;
+      fetchTodayBookings(true);
     }
 
     function showError(msg) {
@@ -427,11 +484,6 @@
       const target = document.getElementById('panzoomTarget');
       const placeholder = document.getElementById('pdfPlaceholder');
 
-      placeholder.classList.add('hidden');
-      target.classList.remove('hidden');
-
-      target.innerHTML = '<div style="color: white; padding: 20px;">Rendering HD document...</div>';
-
       isLandscape = false;
 
       if (panzoomInstance) {
@@ -440,62 +492,57 @@
       }
 
       try {
+        // Non-blocking binary conversion (faster than atob loop)
         const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, "").replace(/\s/g, "");
-        const rawBinary = atob(cleanBase64);
-        
-        const loadingTask = pdfjsLib.getDocument({ data: rawBinary });
-        const pdf = await loadingTask.promise;
+        const binaryRes = await fetch(`data:application/pdf;base64,${cleanBase64}`);
+        const pdfBuffer = await binaryRes.arrayBuffer();
+
+        const pdf = await pdfjsLib.getDocument({ data: pdfBuffer }).promise;
 
         target.innerHTML = '';
+        placeholder.classList.add('hidden');
+        target.classList.remove('hidden');
 
-        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
-          const page = await pdf.getPage(pageNum);
-          const viewport = page.getViewport({ scale: 4.0 }); // HD 4.0 Scale Factor
+        // Optimal scale: crisp Retina clarity without 4.0x mobile GPU freeze
+        const renderScale = Math.min(Math.max(window.devicePixelRatio || 1.5, 2.0), 2.5);
 
-          const canvas = document.createElement('canvas');
-          canvas.className = 'pdf-page-canvas';
-
-          const context = canvas.getContext('2d');
-          
-          canvas.height = viewport.height;
-          canvas.width = viewport.width;
-
-          target.appendChild(canvas);
-
-          await page.render({
-            canvasContext: context,
-            viewport: viewport
-          }).promise;
-        }
-
-        // Tuned Panzoom instance for real-time 1:1 finger tracking
+        // Initialize Panzoom immediately so user can interact as soon as Page 1 paints
         panzoomInstance = Panzoom(target, {
-          maxScale: 20,
+          maxScale: 12,
           minScale: 0.5,
           step: 0.35,
           contain: false,
           startScale: 1,
           canvas: true,
           cursor: 'grab',
-          handleStartEvent: (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-          },
           setTransform: (elem, { scale, x, y }) => {
             const rot = isLandscape ? 90 : 0;
             elem.style.transform = `translate(${x}px, ${y}px) scale(${scale}) rotate(${rot}deg)`;
           }
         });
 
-        // Direct non-passive pointer bindings for immediate drag response
-        target.addEventListener('pointerdown', panzoomInstance.handleDown, { passive: false });
-        target.addEventListener('pointermove', panzoomInstance.handleMove, { passive: false });
-        target.addEventListener('pointerup', panzoomInstance.handleUp, { passive: false });
-
-        target.addEventListener('wheel', (e) => {
+        target.parentElement.addEventListener('wheel', (e) => {
           e.preventDefault();
           panzoomInstance.zoomWithWheel(e);
         }, { passive: false });
+
+        // Render pages sequentially so Page 1 appears immediately
+        for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
+          const page = await pdf.getPage(pageNum);
+          const viewport = page.getViewport({ scale: renderScale });
+
+          const canvas = document.createElement('canvas');
+          canvas.className = 'pdf-page-canvas';
+          canvas.height = viewport.height;
+          canvas.width = viewport.width;
+
+          target.appendChild(canvas);
+
+          await page.render({
+            canvasContext: canvas.getContext('2d', { alpha: false }),
+            viewport: viewport
+          }).promise;
+        }
 
       } catch (err) {
         console.error('PDF Render Error:', err);
@@ -526,7 +573,6 @@
       if (panzoomInstance) panzoomInstance.reset({ animate: true });
     }
 
-    // Auto-adjust Panzoom viewport reset on device orientation change
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
         if (panzoomInstance) panzoomInstance.reset({ animate: false });
@@ -541,7 +587,6 @@
     });
   </script>
 
-  <!-- Global Full-Screen Trigger -->
   <script src="../js/fullscreen-global.js"></script>
 </body>
 </html>
