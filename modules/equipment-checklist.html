@@ -752,7 +752,7 @@
     let currentUser = null;
     let selectedType = "";
     let selectedNum = "";
-    let selectedDiesel = "FULL";
+    let selectedDiesel = null;
     let selectedSpillageBin = "Empty";
     let checklistItemStates = {};
 
@@ -1481,7 +1481,7 @@
               <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
               <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
               <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
-              <div class="diesel-btn active" onclick="setDiesel(this, 'FULL')">FULL</div>
+              <div class="diesel-btn" onclick="setDiesel(this, 'FULL')">FULL</div>
             </div>
           </div>
         `;
@@ -1565,7 +1565,7 @@
 
     function checklistStateReset() {
       checklistItemStates = {};
-      selectedDiesel = "FULL";
+      selectedDiesel = null;
       selectedSpillageBin = "Empty";
     }
 
@@ -1608,6 +1608,8 @@
       const hourVal = document.getElementById('hourMeterInput').value.trim();
 
       const uppercaseType = String(type).trim().toUpperCase();
+      const isConveyor = uppercaseType.includes("CONVEYOR");
+      const isTrailer = uppercaseType.includes("TRAILER");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
 
@@ -1630,6 +1632,11 @@
           showFeedbackModal('Unsuccessful', 'Please enter the Hour Meter (HRS) value.', 'warning', '⚠️');
           return;
         }
+      }
+
+      if (!isConveyor && !isTrailer && !selectedDiesel) {
+        showFeedbackModal('Unsuccessful', 'Please select the Diesel Level (1/4, 1/2, 3/4, or FULL).', 'warning', '⚠️');
+        return;
       }
 
       const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
