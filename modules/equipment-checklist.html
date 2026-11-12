@@ -246,7 +246,7 @@
     .diesel-options {
       display: grid;
       grid-template-columns: repeat(4, 1fr);
-      gap: 8px;
+      gap: 6px;
     }
 
     .spillage-options {
@@ -256,7 +256,7 @@
     }
 
     .diesel-btn {
-      padding: 10px 0;
+      padding: 10px 2px;
       text-align: center;
       border: 1.5px solid #cbd5e1;
       border-radius: 8px;
@@ -265,6 +265,11 @@
       font-weight: 800;
       color: #0f172a;
       cursor: pointer;
+    }
+
+    .diesel-options .diesel-btn {
+      font-size: 10.5px;
+      letter-spacing: -0.2px;
     }
 
     .diesel-btn.active {
@@ -1474,9 +1479,9 @@
           <div class="diesel-box">
             <div class="diesel-title">⛽ DIESEL LEVEL / PARAS DIESEL</div>
             <div class="diesel-options">
-              <div class="diesel-btn" onclick="setDiesel(this, '1/4')">1/4</div>
-              <div class="diesel-btn" onclick="setDiesel(this, '1/2')">1/2</div>
-              <div class="diesel-btn" onclick="setDiesel(this, '3/4')">3/4</div>
+              <div class="diesel-btn" onclick="setDiesel(this, 'QUARTER')">QUARTER</div>
+              <div class="diesel-btn" onclick="setDiesel(this, 'HALF')">HALF</div>
+              <div class="diesel-btn" onclick="setDiesel(this, 'THREE-QUARTER')">THREE-QUARTER</div>
               <div class="diesel-btn" onclick="setDiesel(this, 'FULL')">FULL</div>
             </div>
           </div>
@@ -1632,7 +1637,7 @@
       }
 
       if (!isConveyor && !isTrailer && !isBulkEquip && !selectedDiesel) {
-        showFeedbackModal('Unsuccessful', 'Please select the Diesel Level (1/4, 1/2, 3/4, or FULL).', 'warning', '⚠️');
+        showFeedbackModal('Unsuccessful', 'Please select the Diesel Level (QUARTER, HALF, THREE-QUARTER, or FULL).', 'warning', '⚠️');
         return;
       }
 
