@@ -1461,6 +1461,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
 
       if (isConveyor) {
         if (uppercaseNum === "BC01") sections = CONVEYOR_SCHEMAS["BC01"];
@@ -1518,12 +1519,13 @@
       }
 
       const showRfid = (uppercaseType.includes("PM") && isP1ToP23(num));
+      const hideWarningTriangle = ["RTG", "CRS", "ECH"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
       let globalIndex = 0;
 
       let html = '';
 
-      if (!isConveyor && !isTrailer && !isBulkEquip) {
+      if (!isNoDieselEquip) {
         html += `
           <!-- Diesel Level Section -->
           <div class="diesel-box">
@@ -1571,6 +1573,7 @@
       sections.forEach((sec, secIdx) => {
         const filteredItems = (sec.items || []).filter(item => {
           if (item.includes("RFID")) return showRfid;
+          if (hideWarningTriangle && item.includes("Warning Triangle")) return false;
           return true;
         });
 
@@ -1662,6 +1665,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
 
@@ -1686,7 +1690,7 @@
         }
       }
 
-      if (!isConveyor && !isTrailer && !isBulkEquip && !selectedDiesel) {
+      if (!isNoDieselEquip && !selectedDiesel) {
         showFeedbackModal('Unsuccessful', 'Please select the Diesel Level (QUARTER, HALF, THREE-QUARTER, or FULL).', 'warning', '⚠️');
         return;
       }
@@ -1718,6 +1722,7 @@
       const isConveyor = uppercaseType.includes("CONVEYOR");
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
+      const isNoDieselEquip = isConveyor || isTrailer || isBulkEquip || uppercaseType === "QC" || uppercaseType.includes("QUAY");
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
       const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
@@ -1768,7 +1773,7 @@
         chock: isFullTireEquip ? chockVal : "N/A",
         odometer: isFullTireEquip ? odoVal : "N/A",
         hourmeter: (isFullTireEquip || isHourOnlyEquip) ? hourVal : "N/A",
-        fuel: (isConveyor || isTrailer || isBulkEquip) ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
+        fuel: isNoDieselEquip ? (hasSpillageBin ? `Bin: ${selectedSpillageBin}` : "N/A") : selectedDiesel,
         area: areaString,
         declaration: defectResults.length > 0 ? "Reported with Defects" : "Declared All OK"
       };
