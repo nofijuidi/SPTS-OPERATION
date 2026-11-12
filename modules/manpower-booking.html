@@ -11,7 +11,7 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="mobile-web-app-capable" content="yes">
 
-  <!-- Preconnect to CDNs & Google Script for faster handshake -->
+  <!-- Preconnect to CDNs & Google Script -->
   <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
   <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
   <link rel="preconnect" href="https://script.google.com" crossorigin>
@@ -142,7 +142,8 @@
       overflow: hidden;
       background-color: #525659;
       display: flex;
-      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       position: relative;
       touch-action: none;
     }
@@ -156,9 +157,9 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 8px;
+      gap: 6px;
       background: rgba(15, 23, 42, 0.85);
-      padding: 6px 10px;
+      padding: 6px 8px;
       border-radius: 10px;
       backdrop-filter: blur(4px);
     }
@@ -169,7 +170,7 @@
       border: 1px solid #0f172a;
       border-radius: 8px;
       font-weight: 800;
-      font-size: 18px;
+      font-size: 16px;
       color: #0f172a;
       cursor: pointer;
       display: flex;
@@ -180,18 +181,27 @@
     }
 
     .zoom-btn-icon {
-      min-width: 44px;
-      max-width: 50px;
+      min-width: 40px;
+      max-width: 46px;
+    }
+
+    .zoom-btn-100 {
+      font-size: 12px;
+      font-weight: 900;
+      background-color: #e0f2fe;
+      border-color: #0284c7;
+      color: #0369a1;
+      flex: 1.2;
     }
 
     .zoom-btn-text {
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 900;
       letter-spacing: 0.5px;
       background-color: #fef3c7;
       border-color: #d97706;
       color: #0f172a;
-      flex: 1.5;
+      flex: 1.2;
     }
 
     .zoom-btn:active {
@@ -199,16 +209,14 @@
       transform: scale(0.95);
     }
 
+    /* Native Full-Resolution Wrapper (No CSS width compression) */
     .panzoom-wrapper {
-      width: 100%;
-      height: 100%;
       cursor: grab;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      overflow: hidden;
-      padding: 8px 0 60px 0;
+      transform-origin: center center;
       touch-action: none;
       will-change: transform;
     }
@@ -217,17 +225,16 @@
       cursor: grabbing;
     }
 
+    /* Keep true HD pixel size—never squish to phone width */
     canvas.pdf-page-canvas {
-      width: 96% !important;
-      height: auto !important;
-      margin: 6px 0;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      display: block;
+      margin: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
       border-radius: 4px;
       background-color: #ffffff;
       touch-action: none;
     }
 
-    /* Fast Skeleton Loader */
     .pdf-placeholder {
       display: flex;
       flex-direction: column;
@@ -298,7 +305,6 @@
         font-size: 12px;
       }
       .pdf-card-container { border-radius: 8px; }
-      canvas.pdf-page-canvas { width: 100% !important; }
       .action-row { display: none !important; }
     }
   </style>
@@ -333,7 +339,8 @@
           <button class="zoom-btn zoom-btn-icon" onclick="toggleLandscape()" title="Rotate 90°">↻</button>
           <button class="zoom-btn zoom-btn-icon" onclick="zoomIn()" title="Zoom In">＋</button>
           <button class="zoom-btn zoom-btn-icon" onclick="zoomOut()" title="Zoom Out">－</button>
-          <button class="zoom-btn zoom-btn-text" onclick="resetZoom()" title="Reset View">RESET</button>
+          <button class="zoom-btn zoom-btn-100" onclick="zoomOriginalSize()" title="100% Original HD Size">100%</button>
+          <button class="zoom-btn zoom-btn-text" onclick="resetZoom()" title="Fit to Screen">FIT</button>
         </div>
 
         <div id="pdfPlaceholder" class="pdf-placeholder">
@@ -359,6 +366,7 @@
     let panzoomInstance = null;
     let isLandscape = false;
     let currentRenderedBase64 = null;
+    let fitScale = 1; // Scale that fits full HD page neatly inside phone screen
 
     function checkSession() {
       const activeSession = sessionStorage.getItem('userSession');
@@ -386,7 +394,6 @@
       const dateInfo = getDateParams();
       document.getElementById('currentDateDisplay').innerText = dateInfo.formattedDisplay;
 
-      // 1. INSTANT CACHE LOAD (0ms network wait if already opened today)
       if (!skipCache) {
         try {
           const cachedRaw = localStorage.getItem(dateInfo.cacheKey);
@@ -405,7 +412,6 @@
         }
       }
 
-      // 2. NETWORK FETCH
       try {
         const response = await fetch(APPS_SCRIPT_URL, {
           method: 'GET',
@@ -434,7 +440,6 @@
       }
     }
 
-    // Checks for newer versions silently without blocking UI
     async function syncInBackground(cacheKey) {
       try {
         const response = await fetch(APPS_SCRIPT_URL, { method: 'GET', redirect: 'follow' });
@@ -481,6 +486,7 @@
     async function renderPdfWithPanzoom(base64Data) {
       const target = document.getElementById('panzoomTarget');
       const placeholder = document.getElementById('pdfPlaceholder');
+      const containerBox = document.getElementById('pdfCardBox');
 
       isLandscape = false;
 
@@ -490,7 +496,6 @@
       }
 
       try {
-        // Non-blocking binary conversion
         const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, "").replace(/\s/g, "");
         const binaryRes = await fetch(`data:application/pdf;base64,${cleanBase64}`);
         const pdfBuffer = await binaryRes.arrayBuffer();
@@ -501,30 +506,10 @@
         placeholder.classList.add('hidden');
         target.classList.remove('hidden');
 
-        // Retina clarity without 4.0x mobile GPU freeze
-        const renderScale = Math.min(Math.max(window.devicePixelRatio || 1.5, 2.0), 2.5);
+        // Render true high-resolution bitmap (~2100px+ wide) so text is crystal clear when zoomed
+        const renderScale = 3.5;
+        let firstCanvasWidth = 0;
 
-        // Initialize Panzoom with 1:1 finger tracking across all zoom levels
-        panzoomInstance = Panzoom(target, {
-          maxScale: 12,
-          minScale: 0.5,
-          step: 0.35,
-          contain: false,
-          startScale: 1,
-          canvas: true,
-          cursor: 'grab',
-          setTransform: (elem, { scale, x, y }) => {
-            const rot = isLandscape ? 90 : 0;
-            elem.style.transform = `scale(${scale}) translate(${x}px, ${y}px) rotate(${rot}deg)`;
-          }
-        });
-
-        target.parentElement.addEventListener('wheel', (e) => {
-          e.preventDefault();
-          panzoomInstance.zoomWithWheel(e);
-        }, { passive: false });
-
-        // Render pages sequentially so Page 1 appears immediately
         for (let pageNum = 1; pageNum <= pdf.numPages; pageNum++) {
           const page = await pdf.getPage(pageNum);
           const viewport = page.getViewport({ scale: renderScale });
@@ -534,6 +519,10 @@
           canvas.height = viewport.height;
           canvas.width = viewport.width;
 
+          if (pageNum === 1) {
+            firstCanvasWidth = viewport.width;
+          }
+
           target.appendChild(canvas);
 
           await page.render({
@@ -542,20 +531,53 @@
           }).promise;
         }
 
+        // Calculate scale needed to fit full HD canvas inside phone container initially
+        const boxWidth = containerBox.clientWidth - 16;
+        fitScale = firstCanvasWidth > 0 ? Math.min(boxWidth / firstCanvasWidth, 1) : 0.25;
+
+        // Initialize Panzoom starting at fitScale, allowing zoom up to 2.5x native HD (10x screen size)
+        panzoomInstance = Panzoom(target, {
+          maxScale: 2.5,
+          minScale: fitScale * 0.8,
+          step: 0.25,
+          contain: false,
+          startScale: fitScale,
+          canvas: true,
+          cursor: 'grab',
+          setTransform: (elem, { scale, x, y }) => {
+            const rot = isLandscape ? 90 : 0;
+            elem.style.transform = `scale(${scale}) translate(${x}px, ${y}px) rotate(${rot}deg)`;
+          }
+        });
+
+        // Position top of Page 1 cleanly inside the viewport
+        setTimeout(() => {
+          panzoomInstance.zoom(fitScale, { animate: false });
+          panzoomInstance.pan(0, 0, { animate: false });
+        }, 30);
+
+        containerBox.addEventListener('wheel', (e) => {
+          e.preventDefault();
+          panzoomInstance.zoomWithWheel(e);
+        }, { passive: false });
+
       } catch (err) {
         console.error('PDF Render Error:', err);
         showError("Failed to render document.");
       }
     }
 
+    // Jump directly to crisp 100% original HD resolution
+    function zoomOriginalSize() {
+      if (!panzoomInstance) return;
+      panzoomInstance.zoom(0.75, { animate: true });
+    }
+
     function toggleLandscape() {
       if (!panzoomInstance) return;
       isLandscape = !isLandscape;
-      if (isLandscape) {
-        panzoomInstance.zoom(1.15, { animate: true });
-      } else {
-        panzoomInstance.reset({ animate: true });
-      }
+      const currentScale = panzoomInstance.getScale();
+      panzoomInstance.zoom(currentScale, { animate: true });
     }
 
     function zoomIn() {
@@ -568,13 +590,22 @@
 
     function resetZoom() {
       isLandscape = false;
-      if (panzoomInstance) panzoomInstance.reset({ animate: true });
+      if (panzoomInstance) {
+        panzoomInstance.zoom(fitScale, { animate: true });
+        panzoomInstance.pan(0, 0, { animate: true });
+      }
     }
 
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
-        if (panzoomInstance) panzoomInstance.reset({ animate: false });
-      }, 200);
+        if (!panzoomInstance) return;
+        const containerBox = document.getElementById('pdfCardBox');
+        const firstCanvas = document.querySelector('canvas.pdf-page-canvas');
+        if (firstCanvas && containerBox) {
+          fitScale = Math.min((containerBox.clientWidth - 16) / firstCanvas.width, 1);
+          resetZoom();
+        }
+      }, 250);
     });
 
     document.addEventListener('contextmenu', (e) => e.preventDefault());
