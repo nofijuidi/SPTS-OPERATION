@@ -532,6 +532,14 @@
       margin-bottom: 8px;
     }
 
+    .modal-title.warning {
+      color: #ea580c;
+    }
+
+    .modal-title.danger {
+      color: #dc2626;
+    }
+
     .modal-body-text {
       font-size: 14px;
       color: #334155;
@@ -579,6 +587,14 @@
       font-weight: 800;
       border-radius: 10px;
       cursor: pointer;
+    }
+
+    .btn-modal-confirm.warning {
+      background: #ea580c;
+    }
+
+    .btn-modal-confirm.danger {
+      background: #dc2626;
     }
 
     .hidden {
@@ -695,6 +711,18 @@
           Inspection checklist submitted successfully!
         </div>
         <button class="btn-modal-confirm" style="width: 100%;" onclick="goHome()">OK</button>
+      </div>
+    </div>
+
+    <!-- Dynamic Feedback Pop-Up Modal (Validation Warnings & Failure Alerts) -->
+    <div id="feedbackModal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <div class="modal-icon" id="feedbackIcon">⚠️</div>
+        <div class="modal-title warning" id="feedbackTitle">Unsuccessful</div>
+        <div class="modal-body-text" id="feedbackMessage">
+          Please complete all required fields before submitting.
+        </div>
+        <button class="btn-modal-confirm warning" id="feedbackBtn" style="width: 100%;" onclick="closeFeedbackModal()">OK</button>
       </div>
     </div>
 
@@ -1149,6 +1177,27 @@
       'L': 'Leaking'
     };
 
+    function showFeedbackModal(title, message, theme = 'warning', icon = '⚠️') {
+      const modal = document.getElementById('feedbackModal');
+      const titleElem = document.getElementById('feedbackTitle');
+      const msgElem = document.getElementById('feedbackMessage');
+      const btnElem = document.getElementById('feedbackBtn');
+      const iconElem = document.getElementById('feedbackIcon');
+
+      titleElem.innerText = title;
+      msgElem.innerText = message;
+      iconElem.innerText = icon;
+
+      titleElem.className = `modal-title ${theme}`;
+      btnElem.className = `btn-modal-confirm ${theme}`;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeFeedbackModal() {
+      document.getElementById('feedbackModal').classList.add('hidden');
+    }
+
     function getCleanItemTitle(rawTitle) {
       if (!rawTitle) return "";
       let clean = rawTitle.replace(/^\d+\.\s*/, '').trim();
@@ -1563,29 +1612,29 @@
       const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "SHIPLOADER", "RECLAIMER", "STACKER", "QC"].includes(uppercaseType);
 
       if (!type || !num) {
-        alert("Please select both Equipment Type and Equipment Number before submitting.");
+        showFeedbackModal('Unsuccessful', 'Please select both Equipment Type and Equipment Number before submitting.', 'warning', '⚠️');
         return;
       }
 
       if (isFullTireEquip) {
         if (chockVal === "") {
-          alert("Please select a Chock Quantity (0, 1, or 2).");
+          showFeedbackModal('Unsuccessful', 'Please select a Chock Quantity (0, 1, or 2).', 'warning', '⚠️');
           return;
         }
         if (!odoVal || !hourVal) {
-          alert("Please enter both ODO Meter (KM) and Hour Meter (HRS) values.");
+          showFeedbackModal('Unsuccessful', 'Please enter both ODO Meter (KM) and Hour Meter (HRS) values.', 'warning', '⚠️');
           return;
         }
       } else if (isHourOnlyEquip) {
         if (!hourVal) {
-          alert("Please enter the Hour Meter (HRS) value.");
+          showFeedbackModal('Unsuccessful', 'Please enter the Hour Meter (HRS) value.', 'warning', '⚠️');
           return;
         }
       }
 
       const unselectedCount = Object.values(checklistItemStates).filter(st => st.status === null).length;
       if (unselectedCount > 0) {
-        alert(`Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`);
+        showFeedbackModal('Unsuccessful', `Please select a status (✔, ✗, MF, D, or L) for all ${unselectedCount} remaining item(s).`, 'warning', '⚠️');
         return;
       }
 
@@ -1675,11 +1724,13 @@
           closeConfirmationModal();
           document.getElementById('successModal').classList.remove('hidden');
         } else {
-          alert("Failed to submit inspection checklist.");
+          closeConfirmationModal();
+          showFeedbackModal('Submission Failed', 'Failed to submit inspection checklist. Please try again.', 'danger', '❌');
         }
       } catch (err) {
         console.error("Submission Error:", err);
-        alert("Network error submitting checklist.");
+        closeConfirmationModal();
+        showFeedbackModal('Submission Failed', 'Network error submitting checklist. Please check your internet connection.', 'danger', '❌');
       } finally {
         btnConfirm.disabled = false;
         btnConfirm.innerText = "Confirm";
