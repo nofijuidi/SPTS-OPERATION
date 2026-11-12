@@ -1358,6 +1358,11 @@
       const odoGroup = document.getElementById('odoGroup');
       const hourGroup = document.getElementById('hourGroup');
 
+      // Reset inputs whenever equipment changes
+      document.getElementById('chockSelect').value = '';
+      document.getElementById('odoMeterInput').value = '';
+      document.getElementById('hourMeterInput').value = '';
+
       const uppercaseType = String(type).trim().toUpperCase();
 
       if (!type || !num) {
@@ -1367,7 +1372,7 @@
       }
 
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
+      const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
 
       if (isFullTireEquip) {
         chockRow.classList.remove('hidden');
@@ -1658,7 +1663,7 @@
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
+      const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
 
       if (!type || !num) {
         showFeedbackModal('Unsuccessful', 'Please select both Equipment Type and Equipment Number before submitting.', 'warning', '⚠️');
@@ -1714,7 +1719,7 @@
       const isTrailer = uppercaseType.includes("TRAILER");
       const isBulkEquip = ["SHIPLOADER", "RECLAIMER", "STACKER"].includes(uppercaseType);
       const isFullTireEquip = (uppercaseType === "PM" || uppercaseType === "TIPPER" || uppercaseType === "TT");
-      const isHourOnlyEquip = ["FORKLIFT", "RTG", "ECH", "CRS", "SHOVEL", "QC"].includes(uppercaseType);
+      const isHourOnlyEquip = ["FORKLIFT", "ECH", "CRS", "SHOVEL"].includes(uppercaseType);
       const hasSpillageBin = isConveyor && (uppercaseNum === "BC02" || uppercaseNum === "BC03");
 
       btnConfirm.disabled = true;
