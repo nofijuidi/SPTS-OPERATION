@@ -207,9 +207,10 @@
       flex-direction: column;
       align-items: center;
       justify-content: flex-start;
-      overflow-y: auto;
+      overflow: hidden;
       padding: 8px 0 60px 0;
       touch-action: none;
+      will-change: transform;
     }
 
     .panzoom-wrapper:active {
@@ -223,6 +224,7 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
       border-radius: 4px;
       background-color: #ffffff;
+      touch-action: none;
     }
 
     /* Fast Skeleton Loader */
@@ -394,7 +396,6 @@
               document.getElementById('fileNameCard').innerHTML = `<span>📄 ${cached.fileName || 'Booking Document'}</span> <span>⚡</span>`;
               currentRenderedBase64 = cached.pdfBase64;
               await renderPdfWithPanzoom(cached.pdfBase64);
-              // Silently check in background if the file was updated in Drive
               syncInBackground(dateInfo.cacheKey);
               return;
             }
@@ -450,7 +451,6 @@
 
     function saveToDailyCache(todayKey, data) {
       try {
-        // Clear old days' cached PDFs so localStorage never fills up
         Object.keys(localStorage).forEach(key => {
           if (key.startsWith('spts_booking_pdf_') && key !== todayKey) {
             localStorage.removeItem(key);
@@ -460,9 +460,7 @@
           fileName: data.fileName,
           pdfBase64: data.pdfBase64
         }));
-      } catch (e) {
-        // Ignore quota exceeded errors on very large PDFs
-      }
+      } catch (e) {}
     }
 
     function forceRefresh() {
@@ -492,7 +490,7 @@
       }
 
       try {
-        // Non-blocking binary conversion (faster than atob loop)
+        // Non-blocking binary conversion
         const cleanBase64 = base64Data.replace(/^data:application\/pdf;base64,/, "").replace(/\s/g, "");
         const binaryRes = await fetch(`data:application/pdf;base64,${cleanBase64}`);
         const pdfBuffer = await binaryRes.arrayBuffer();
@@ -503,10 +501,10 @@
         placeholder.classList.add('hidden');
         target.classList.remove('hidden');
 
-        // Optimal scale: crisp Retina clarity without 4.0x mobile GPU freeze
+        // Retina clarity without 4.0x mobile GPU freeze
         const renderScale = Math.min(Math.max(window.devicePixelRatio || 1.5, 2.0), 2.5);
 
-        // Initialize Panzoom immediately so user can interact as soon as Page 1 paints
+        // Initialize Panzoom with 1:1 finger tracking across all zoom levels
         panzoomInstance = Panzoom(target, {
           maxScale: 12,
           minScale: 0.5,
@@ -517,7 +515,7 @@
           cursor: 'grab',
           setTransform: (elem, { scale, x, y }) => {
             const rot = isLandscape ? 90 : 0;
-            elem.style.transform = `translate(${x}px, ${y}px) scale(${scale}) rotate(${rot}deg)`;
+            elem.style.transform = `scale(${scale}) translate(${x}px, ${y}px) rotate(${rot}deg)`;
           }
         });
 
