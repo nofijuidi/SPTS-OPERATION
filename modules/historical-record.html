@@ -396,45 +396,72 @@
       document.getElementById('filterYear').value = currentYear;
     }
 
+    // Direct String & UTC Serial Parsing prevents +8 hours browser timezone offset shift
     function formatHistoricalDate(rawDateStr) {
       if (!rawDateStr || rawDateStr === '-') return '-';
+
+      const numVal = parseFloat(rawDateStr);
+
+      // 1. Excel Serial Date Number (e.g. 46339.4006944444)
+      if (!isNaN(numVal) && isFinite(rawDateStr) && numVal > 30000 && numVal < 60000) {
+        const utcDays = Math.floor(numVal - 25569);
+        const dateInfo = new Date(utcDays * 86400 * 1000);
+
+        const fractionalDay = numVal - Math.floor(numVal);
+        let totalSeconds = Math.round(86400 * fractionalDay);
+
+        const hours = Math.floor(totalSeconds / 3600);
+        totalSeconds %= 3600;
+        const minutes = Math.floor(totalSeconds / 60);
+
+        const yyyy = dateInfo.getUTCFullYear();
+        const mm = String(dateInfo.getUTCMonth() + 1).padStart(2, '0');
+        const dd = String(dateInfo.getUTCDate()).padStart(2, '0');
+        const hh = String(hours).padStart(2, '0');
+        const min = String(minutes).padStart(2, '0');
+
+        return `${yyyy}-${mm}-${dd} ${hh}${min}`;
+      }
+
       const str = String(rawDateStr).trim();
 
-      try {
-        let d = new Date(str);
-        
-        if (isNaN(d.getTime())) {
-          const parts = str.split(' ');
-          if (parts.length >= 1) {
-            const dateParts = parts[0].split(/[\/-]/);
-            const timeParts = parts[1] ? parts[1].split(':') : [0, 0];
+      // 2. ISO / ISO-like strings (e.g. "2026-11-13T09:37:00.000Z" or "2026-11-13 09:37:00")
+      const isoMatches = str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})(?:[T\s](\d{1,2}):(\d{1,2}))?/);
+      if (isoMatches) {
+        const yyyy = isoMatches[1];
+        const mm = String(parseInt(isoMatches[2], 10)).padStart(2, '0');
+        const dd = String(parseInt(isoMatches[3], 10)).padStart(2, '0');
+        const hh = isoMatches[4] !== undefined ? String(parseInt(isoMatches[4], 10)).padStart(2, '0') : '00';
+        const min = isoMatches[5] !== undefined ? String(parseInt(isoMatches[5], 10)).padStart(2, '0') : '00';
 
-            if (dateParts.length === 3) {
-              let m = parseInt(dateParts[0], 10) - 1;
-              let day = parseInt(dateParts[1], 10);
-              let y = parseInt(dateParts[2], 10);
-              if (y < 100) y += 2000;
+        return `${yyyy}-${mm}-${dd} ${hh}${min}`;
+      }
 
-              let hh = parseInt(timeParts[0] || 0, 10);
-              let mm = parseInt(timeParts[1] || 0, 10);
+      // 3. Slash/Dash Date strings (e.g. "11/13/26 9:37" or "13/11/2026 09:37")
+      const slashMatches = str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{2,4})(?:\s+(\d{1,2}):(\d{1,2}))?/);
+      if (slashMatches) {
+        let p1 = parseInt(slashMatches[1], 10);
+        let p2 = parseInt(slashMatches[2], 10);
+        let y = parseInt(slashMatches[3], 10);
+        if (y < 100) y += 2000;
 
-              d = new Date(y, m, day, hh, mm);
-            }
-          }
+        // Excel US format (MM/DD/YY) vs UK/MY format (DD/MM/YY)
+        let m = p1;
+        let d = p2;
+        if (p1 > 12) {
+          d = p1;
+          m = p2;
         }
 
-        if (!isNaN(d.getTime())) {
-          const yyyy = d.getFullYear();
-          const mm = String(d.getMonth() + 1).padStart(2, '0');
-          const dd = String(d.getDate()).padStart(2, '0');
-          const hh = String(d.getHours()).padStart(2, '0');
-          const min = String(d.getMinutes()).padStart(2, '0');
+        const mm = String(m).padStart(2, '0');
+        const dd = String(d).padStart(2, '0');
+        const hh = slashMatches[4] !== undefined ? String(parseInt(slashMatches[4], 10)).padStart(2, '0') : '00';
+        const min = slashMatches[5] !== undefined ? String(parseInt(slashMatches[5], 10)).padStart(2, '0') : '00';
 
-          return `${yyyy}-${mm}-${dd} ${hh}${min}`;
-        }
-      } catch(e) {}
+        return `${y}-${mm}-${dd} ${hh}${min}`;
+      }
 
-      return rawDateStr;
+      return str;
     }
 
     async function fetchHistoricalLogs() {
@@ -480,22 +507,16 @@
         .map(segment => {
           let clean = segment.trim();
 
-          // 1. Cut off everything from the first hyphen (-) onward to strip status + operator remarks
-          //    e.g., "Wear liner- missing / worn out / broken - Missing" -> "Wear liner"
-          //    e.g., "Aircond - Missing, Forklift memang tiada penghawa dingin" -> "Aircond"
-          //    e.g., "Hand railing - Malfunction, Lampu dekat hand railing banyak rosak" -> "Hand railing"
           const firstDashIdx = clean.indexOf('-');
           if (firstDashIdx !== -1) {
             clean = clean.substring(0, firstDashIdx).trim();
           }
 
-          // 2. Strip any comma-separated remark if no hyphen was present
           const firstCommaIdx = clean.indexOf(',');
           if (firstCommaIdx !== -1) {
             clean = clean.substring(0, firstCommaIdx).trim();
           }
 
-          // 3. Strip trailing bilingual slash descriptions (e.g., "Driver's seat / Kerusi Pemandu" -> "Driver's seat")
           if (clean.includes(' / ')) {
             clean = clean.split(' / ')[0].trim();
           }
@@ -569,7 +590,6 @@
           );
         }
 
-        // Aggregate and deduplicate short issue names case-insensitively
         const uniqueMap = new Map();
         poolLogs.forEach(item => {
           const areaRaw = getPropValue(item, ['AREA', 'area'], '');
@@ -623,25 +643,23 @@
       const areaVal = document.getElementById('filterArea').value.trim().toLowerCase();
 
       filteredLogs = rawInspectionLogs.filter(row => {
-        const dateStr = String(getPropValue(row, ['DATE', 'date', 'Date'], ''));
+        const formattedDate = formatHistoricalDate(getPropValue(row, ['DATE', 'date', 'Date'], ''));
         const eqStr = String(getPropValue(row, ['EQUIPMENT', 'equipment'], '')).toLowerCase();
         const numStr = String(getPropValue(row, ['EQUIPNUM', 'equipnum'], '')).toLowerCase();
         const areaStr = String(getPropValue(row, ['AREA', 'area'], '')).toLowerCase();
 
-        const matchYr = !yrVal || dateStr.toLowerCase().includes(yrVal);
+        const matchYr = !yrVal || formattedDate.toLowerCase().includes(yrVal);
         const matchEq = !eqVal || eqStr === eqVal;
         const matchNum = !numVal || numStr.includes(numVal);
-        
-        // Multi-issue match: Checks if typed or selected short issue is found within pipe-separated AREA string
         const matchArea = !areaVal || areaStr.includes(areaVal);
 
         return matchYr && matchEq && matchNum && matchArea;
       });
 
-      // SORT DESCENDING: Latest inspection records on top
+      // SORT DESCENDING using standardized YYYY-MM-DD HHmm format
       filteredLogs.sort((a, b) => {
-        const dateA = String(getPropValue(a, ['DATE', 'date', 'Date'], ''));
-        const dateB = String(getPropValue(b, ['DATE', 'date', 'Date'], ''));
+        const dateA = formatHistoricalDate(getPropValue(a, ['DATE', 'date', 'Date'], ''));
+        const dateB = formatHistoricalDate(getPropValue(b, ['DATE', 'date', 'Date'], ''));
         return dateB.localeCompare(dateA);
       });
 
