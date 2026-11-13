@@ -1,1 +1,1089 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Contacts Directory - Operation Portal</title>
+    <meta name="theme-color" content="#0e4261">
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #0f2942 100%);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
 
+        /* Main App Frame */
+        .app-shell {
+            max-width: 1200px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: #f8fafc;
+            min-height: 100vh;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.55);
+            display: flex;
+            flex-direction: column;
+            padding-bottom: env(safe-area-inset-bottom, 0px);
+        }
+
+        /* Top Dark Teal Header Banner */
+        .top-banner {
+            background: linear-gradient(90deg, #0e4261 0%, #13547a 55%, #186a99 100%);
+            border-bottom: 3px solid #08283b;
+            color: #ffffff;
+            padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px 14px 18px;
+            user-select: none;
+        }
+
+        /* Back to Portal Button */
+        .btn-back-portal {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            color: #ffffff;
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 7px 12px;
+            border-radius: 10px;
+            text-decoration: none;
+            transition: background-color 0.15s ease, transform 0.15s ease;
+            flex-shrink: 0;
+        }
+        .btn-back-portal:hover {
+            background-color: rgba(255, 255, 255, 0.24);
+        }
+        .btn-back-portal:active {
+            transform: scale(0.96);
+        }
+
+        /* Left Ribbon Tabs matching signature blue ribbon design */
+        .ribbon-tab {
+            background: linear-gradient(90deg, #0f4666 0%, #13547a 75%, #186896 100%);
+            color: #ffffff;
+            border-top: 2px solid #08283b;
+            border-right: 2px solid #08283b;
+            border-bottom: 2px solid #08283b;
+            border-left: none;
+            border-radius: 0 42px 42px 0;
+            width: 152px;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-weight: 600;
+            font-size: 0.98rem;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: width 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
+            box-shadow: 2px 3px 8px rgba(15, 23, 42, 0.15);
+            padding: 0 16px;
+            user-select: none;
+        }
+
+        .ribbon-tab:hover {
+            background: linear-gradient(90deg, #13547a 0%, #196b9b 100%);
+            width: 168px;
+        }
+
+        /* Active Ribbon State sticks out wider */
+        .ribbon-tab.active {
+            width: 196px;
+            background: linear-gradient(90deg, #13547a 0%, #0ea5e9 140%);
+            box-shadow: 4px 6px 14px rgba(19, 84, 122, 0.38);
+            font-weight: 700;
+            border-color: #061824;
+        }
+
+        .ribbon-count {
+            background-color: rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 9999px;
+            min-width: 24px;
+            text-align: center;
+        }
+        .ribbon-tab.active .ribbon-count {
+            background-color: #ffffff;
+            color: #13547a;
+        }
+
+        /* Mobile horizontal pills fallback for small screens */
+        @media (max-width: 767px) {
+            .ribbon-sidebar {
+                flex-direction: row !important;
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding: 12px 12px 8px 12px !important;
+                gap: 8px !important;
+                width: 100% !important;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+            .ribbon-sidebar::-webkit-scrollbar {
+                display: none;
+            }
+            .ribbon-tab {
+                border-left: 2px solid #08283b;
+                border-radius: 9999px;
+                width: auto !important;
+                height: 40px;
+                padding: 0 14px;
+                font-size: 0.82rem;
+                gap: 6px;
+                flex-shrink: 0;
+            }
+            .ribbon-tab.active {
+                width: auto !important;
+                transform: translateY(-1px);
+            }
+        }
+
+        /* Modern Interactive Department Card */
+        .dept-card {
+            background-color: #ffffff;
+            border-radius: 14px;
+            border: 1px solid #cbd5e1;
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dept-card:hover {
+            box-shadow: 0 8px 22px rgba(15, 23, 42, 0.1);
+        }
+
+        .dept-card-header {
+            padding: 11px 16px;
+            font-weight: 800;
+            font-size: 0.88rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .sub-section-banner {
+            background-color: #b91c1c;
+            color: #ffffff;
+            font-weight: 700;
+            text-align: left;
+            font-size: 0.78rem;
+            letter-spacing: 0.04em;
+            padding: 6px 16px;
+            text-transform: uppercase;
+        }
+
+        .contact-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 9px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            transition: background-color 0.15s ease;
+        }
+        .contact-row:last-child {
+            border-bottom: none;
+        }
+        .contact-row:hover {
+            background-color: #f1f7fd;
+        }
+
+        .dial-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            background-color: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #13547a;
+            font-weight: 700;
+            font-size: 0.86rem;
+            text-decoration: none;
+            padding: 5px 11px;
+            border-radius: 9999px;
+            transition: all 0.15s ease;
+            white-space: nowrap;
+        }
+
+        .dial-pill:hover {
+            background-color: #13547a;
+            border-color: #13547a;
+            color: #ffffff;
+            transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(19, 84, 122, 0.25);
+        }
+        .dial-pill:hover svg {
+            color: #ffffff;
+        }
+
+        .dial-pill:active {
+            transform: scale(0.97);
+        }
+
+        .mobile-pill {
+            background-color: #ecfdf5;
+            border-color: #a7f3d0;
+            color: #065f46;
+        }
+        .mobile-pill:hover {
+            background-color: #059669;
+            border-color: #059669;
+            color: #ffffff;
+            box-shadow: 0 3px 8px rgba(5, 150, 105, 0.25);
+        }
+
+        /* Subtle fade-in animation when switching departments */
+        @keyframes fadeSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(6px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .table-animate {
+            animation: fadeSlideIn 0.22s ease-out forwards;
+        }
+
+        /* Modal entrance animation */
+        @keyframes modalPop {
+            from {
+                opacity: 0;
+                transform: scale(0.94) translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+        .modal-card {
+            animation: modalPop 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-shell">
+        <!-- Top Header Banner with Back to Portal Navigation -->
+        <header class="top-banner flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0">
+                <a href="../index.html" class="btn-back-portal" title="Back to Operation Portal">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                    <span>Home</span>
+                </a>
+                <div id="header-reset" class="cursor-pointer min-w-0" title="Click to show all contacts">
+                    <h1 class="text-base sm:text-2xl font-bold tracking-wider leading-tight truncate">CONTACTS DIRECTORY</h1>
+                    <p class="text-[11px] sm:text-xs text-sky-200 font-medium truncate">Main Line: +607-253 5888 &bull; Tap extension to dial</p>
+                </div>
+            </div>
+            <span class="hidden sm:inline-flex items-center gap-1.5 text-xs bg-white/15 border border-white/20 px-3 py-1.5 rounded-full font-semibold shrink-0">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Quick Dial Ready
+            </span>
+        </header>
+
+        <!-- Main Workspace: Left Ribbon Sidebar + Right Content Area -->
+        <div class="flex flex-col md:flex-row flex-1">
+            
+            <!-- Left Navigation Sidebar (Blue Ribbons) -->
+            <aside class="ribbon-sidebar flex flex-col gap-3 py-5 pr-3 shrink-0 md:w-[215px]" aria-label="Department Filter">
+                <button type="button" class="ribbon-tab" data-dept="HOTLINE">
+                    <span>HOTLINE</span>
+                    <span class="ribbon-count" data-count="HOTLINE">0</span>
+                </button>
+                <button type="button" class="ribbon-tab" data-dept="OPS">
+                    <span>OPS</span>
+                    <span class="ribbon-count" data-count="OPS">0</span>
+                </button>
+                <button type="button" class="ribbon-tab" data-dept="FEM">
+                    <span>FEM</span>
+                    <span class="ribbon-count" data-count="FEM">0</span>
+                </button>
+                <button type="button" class="ribbon-tab" data-dept="CSD">
+                    <span>CSD</span>
+                    <span class="ribbon-count" data-count="CSD">0</span>
+                </button>
+                <button type="button" class="ribbon-tab" data-dept="QHSSE">
+                    <span>QHSSE</span>
+                    <span class="ribbon-count" data-count="QHSSE">0</span>
+                </button>
+                <button type="button" id="btn-all-ribbon" class="ribbon-tab active" data-dept="ALL" style="height: 50px; font-size: 0.88rem;">
+                    <span>SHOW ALL</span>
+                    <span class="ribbon-count" data-count="ALL">0</span>
+                </button>
+            </aside>
+
+            <!-- Right Content Area -->
+            <main class="flex-1 p-4 sm:py-5 sm:pr-7 sm:pl-2">
+                
+                <!-- Top Utility Bar: Active Filter Indicator + Layout Toggle + Search + Reset -->
+                <div class="mb-5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 bg-white border border-slate-200 shadow-sm rounded-xl px-4 py-3">
+                    <div class="flex flex-wrap items-center gap-2 text-xs sm:text-sm text-slate-700">
+                        <span class="font-semibold text-[#13547a]">Department:</span>
+                        <span id="active-filter-badge" class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-[#13547a] text-white shadow-xs">
+                            ALL DEPARTMENTS
+                        </span>
+                        <span id="visible-count-label" class="text-xs text-slate-500 font-medium ml-1"></span>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <!-- Search Box -->
+                        <div class="relative flex-1 sm:w-60">
+                            <input 
+                                type="text" 
+                                id="search-input" 
+                                placeholder="Search name, role, or ext..." 
+                                class="w-full text-xs sm:text-sm pl-8 pr-7 py-2 bg-slate-50 border border-slate-300 rounded-lg focus:outline-none focus:bg-white focus:border-[#13547a] focus:ring-2 focus:ring-[#13547a]/20 transition"
+                            />
+                            <svg class="w-4 h-4 text-slate-400 absolute left-2.5 top-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                            </svg>
+                            <button id="clear-search" type="button" class="hidden absolute right-2 top-1.5 text-slate-400 hover:text-slate-600 text-sm font-bold px-1" title="Clear search">
+                                &times;
+                            </button>
+                        </div>
+
+                        <!-- Grid / Single Column Layout Switcher -->
+                        <div class="inline-flex rounded-lg border border-slate-300 bg-slate-50 p-0.5" role="group" aria-label="Layout View">
+                            <button type="button" id="view-grid-btn" class="px-2.5 py-1.5 text-xs font-semibold rounded-md bg-[#13547a] text-white transition flex items-center gap-1" title="2-Column Grid View">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                                </svg>
+                                <span class="hidden sm:inline">Grid</span>
+                            </button>
+                            <button type="button" id="view-list-btn" class="px-2.5 py-1.5 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900 transition flex items-center gap-1" title="Single Column View">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path>
+                                </svg>
+                                <span class="hidden sm:inline">List</span>
+                            </button>
+                        </div>
+
+                        <button 
+                            type="button" 
+                            id="btn-reset-top" 
+                            class="px-3 py-2 text-xs font-semibold bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg transition whitespace-nowrap"
+                            title="Show all departments"
+                        >
+                            Reset
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Dynamic Directory Cards Container -->
+                <div id="directory-container" class="grid grid-cols-1 lg:grid-cols-2 gap-5 items-start"></div>
+
+                <!-- Empty State (when search yields no matches) -->
+                <div id="empty-state" class="hidden text-center py-12 px-4 border-2 border-dashed border-slate-300 rounded-2xl bg-white">
+                    <p class="text-slate-600 font-semibold text-sm">No contacts found matching your search or filter.</p>
+                    <button type="button" id="btn-empty-reset" class="mt-3 px-4 py-2 bg-[#13547a] text-white text-xs font-semibold rounded-lg hover:bg-[#196b9b] transition">
+                        Reset Filters
+                    </button>
+                </div>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- Subtle Copy Toast Feedback -->
+    <div id="copy-toast" class="fixed bottom-5 right-5 z-50 hidden items-center gap-2 bg-slate-900 text-white text-xs font-semibold px-4 py-2.5 rounded-xl shadow-lg border border-slate-700">
+        <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        </svg>
+        <span id="copy-toast-text">Copied to clipboard</span>
+    </div>
+
+    <!-- Mobile Call / WhatsApp Action Popup Modal -->
+    <div id="mobile-action-modal" class="hidden fixed inset-0 z-50 bg-black/60 backdrop-blur-[1px] flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="modal-contact-name">
+        <div class="modal-card bg-white w-full max-w-sm rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+            <!-- Modal Header -->
+            <div class="bg-[#13547a] px-5 py-4 text-white flex items-start justify-between gap-3">
+                <div>
+                    <p class="text-[11px] uppercase tracking-wider text-sky-200 font-semibold">Hotline Mobile Contact</p>
+                    <h2 id="modal-contact-name" class="text-base sm:text-lg font-bold leading-snug mt-0.5">HSSE COMMAND CENTER</h2>
+                    <p id="modal-contact-number" class="text-sm font-mono text-sky-100 mt-1">+60197789727</p>
+                </div>
+                <button type="button" id="modal-close-x" class="text-white/80 hover:text-white p-1.5 rounded-lg hover:bg-white/10 transition" aria-label="Close popup">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Action Buttons -->
+            <div class="p-5 flex flex-col gap-3">
+                <a id="modal-call-btn" href="tel:+60197789727" class="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-[#13547a] hover:bg-[#196b9b] active:scale-[0.99] text-white font-semibold text-sm sm:text-base shadow-sm transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                    </svg>
+                    <span>Call Number</span>
+                </a>
+
+                <a id="modal-whatsapp-btn" href="https://wa.me/60197789727" target="_blank" rel="noopener noreferrer" class="w-full flex items-center justify-center gap-2.5 py-3 px-4 rounded-xl bg-[#25D366] hover:bg-[#20bd5a] active:scale-[0.99] text-white font-semibold text-sm sm:text-base shadow-sm transition">
+                    <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+                        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.274.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12s5.373 12 12 12 12-5.373 12-12-5.373-12-12-12zm.029 18.88c-1.161 0-2.305-.292-3.318-.844l-3.677.964.984-3.595c-.607-1.052-.927-2.246-.926-3.468.001-3.825 3.113-6.937 6.937-6.937 1.856.001 3.598.723 4.907 2.034 1.31 1.311 2.031 3.054 2.03 4.908-.001 3.825-3.113 6.938-6.937 6.938z"/>
+                    </svg>
+                    <span>WhatsApp</span>
+                </a>
+
+                <button type="button" id="modal-cancel-btn" class="w-full py-2.5 px-4 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold text-sm transition mt-0.5">
+                    Cancel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        /**
+         * Complete Contact Directory Data
+         * Grouped by department ribbon category: HOTLINE, OPS, FEM, CSD, QHSSE
+         */
+        const DIRECTORY_DATA = [
+            {
+                id: 'hotline-contacts',
+                category: 'HOTLINE',
+                title: 'HOTLINE CONTACTS',
+                headerBg: '#00b050',
+                headerText: '#ffffff',
+                secondColLabel: 'MOBILE',
+                isMobile: true,
+                rows: [
+                    { name: 'HSSE COMMAND CENTER', number: '+60197789727' },
+                    { name: 'OPERATION', number: '+60197760469' },
+                    { name: 'PLANNER', number: '+60197760273' },
+                    { name: 'ICT', number: '+60197760585' },
+                    { name: 'FEM', number: '+60197760652' }
+                ]
+            },
+            {
+                id: 'ops-execution',
+                category: 'OPS',
+                title: 'OPERATION DEPARTMENT',
+                headerBg: '#203764',
+                headerText: '#ffffff',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Mohd Fadzli Bin Samsudin', number: '1225' },
+                    { name: 'Fadzilul Khair Bin Omar', number: '1226' },
+                    { name: 'Shafie Bin Othman', number: '1227' },
+                    { name: 'Container Supervisor (S)', number: '1228' },
+                    { name: 'Supervisor (S)', number: '1231' },
+                    { name: 'Sulphur Supervisor (S)', number: '1229' }
+                ]
+            },
+            {
+                id: 'ops-planning',
+                category: 'OPS',
+                title: 'PLANNING',
+                headerBg: '#203764',
+                headerText: '#ffffff',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Operation Planning', number: '1232' },
+                    { name: 'Planning Executive / Ruzaini', number: '1233' },
+                    { name: 'Planning Supervisor (S)', number: '1234' },
+                    { name: 'Depot & Gate Supervisor (S)', number: '1235' },
+                    { name: 'Despatcher / Planner (S)', number: '1236' },
+                    { name: 'Yard Planner (S)', number: '1237' },
+                    { name: 'OA ITT Gate (S)', number: '1239' }
+                ]
+            },
+            {
+                id: 'fem-main',
+                category: 'FEM',
+                title: 'FACILITIES, EQUIPMENT & MAINTENANCE',
+                headerBg: '#f4b084',
+                headerText: '#833c0c',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Baharudin Bin Mohd Yassin', number: '1240' },
+                    { name: 'Abdul Jabbar Bin A Rahman', number: '1241' },
+                    { name: 'Mohd Sharil Bin Shabri', number: '1242' },
+                    { name: 'Mohd Firdaus Bin Zakaria', number: '1244' },
+                    { name: 'Ngadani bin Samyon', number: '1243' },
+                    { name: 'Aslin Bin Atan', number: '' },
+                    { name: 'Nur Humaira', number: '1249' },
+                    { name: 'Arfa', number: '1246' },
+                    { name: 'Workshop', number: '1265' }
+                ]
+            },
+            {
+                id: 'csd-gm',
+                category: 'CSD',
+                title: 'GENERAL MANAGER',
+                headerBg: '#d9e1f2',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Sujangi Bin Jaafar', number: '1201' }
+                ]
+            },
+            {
+                id: 'csd-procurement',
+                category: 'CSD',
+                title: 'PROCUREMENT DEPARTMENT',
+                headerBg: '#00b050',
+                headerText: '#ffffff',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Julieza Norziela Binti Jaafar', number: '1216' },
+                    { name: 'Mohamad Hanif Bin Tumin', number: '1251' },
+                    { name: 'Aiman Danial Bin Hissamudin', number: '1252' },
+                    { name: 'Nuraslinda Shamsuddin', number: '1253' },
+                    { name: 'Mohd Safik Bin Abdul Rahim', number: '1254' }
+                ]
+            },
+            {
+                id: 'csd-hr',
+                category: 'CSD',
+                title: 'HUMAN RESOURCE & ADMINISTRATION',
+                headerBg: '#ffc000',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Ebdul Jaylil Bin Sulong', number: '1214' },
+                    { name: 'Fatin Fasehah', number: '1269' },
+                    { name: 'Kamariah Mokhtar', number: '1213' },
+                    { name: 'Muhammad Taqiuddin Bin Ab Ghani', number: '1215' },
+                    { name: 'Balqis Afifah binti Razalee', number: '1250' },
+                    { name: 'Muhamad Sufian bin Daroies', number: '' }
+                ]
+            },
+            {
+                id: 'csd-corporate',
+                category: 'CSD',
+                title: 'CORPORATE SERVICES',
+                headerBg: '#ffc000',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Zulkifli Bin Jaapar', number: '1202' },
+                    { name: 'Receptionist', number: '1203' },
+                    { name: 'Muzaffar Bin Mohamed Azman', number: '1260' }
+                ]
+            },
+            {
+                id: 'csd-ict',
+                category: 'CSD',
+                title: 'ICT DEPARTMENT',
+                headerBg: '#ffc000',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: '', number: '1207' },
+                    { name: 'Ardian Syah Bin Abdullah', number: '1208' },
+                    { name: 'Aina Safiah', number: '1209' },
+                    { name: 'ICT Technician (S)', number: '1210' },
+                    { name: 'Fatin Syahirah Binti Anuar', number: '1262' },
+                    { name: "Mohamad Azruddin Bin Sa'don", number: '1263' },
+                    { name: 'ICT Technician (S)', number: '1210' }
+                ]
+            },
+            {
+                id: 'csd-finance',
+                category: 'CSD',
+                title: 'FINANCE DEPARTMENT',
+                headerBg: '#ffc000',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Mohd Najib Bin Saman', number: '1257' },
+                    { name: 'Nur Farawahida Binti Jamaluddin', number: '1211' },
+                    { name: 'Muhamad Fadzly Bin Ramli', number: '1212' },
+                    { name: '', number: '1256' },
+                    { name: 'Siti Zuraini binti Rabaie', number: '1267' },
+                    { name: 'Mohamad Fadly bin Aminuddin', number: '1258' }
+                ]
+            },
+            {
+                id: 'csd-meeting',
+                category: 'CSD',
+                title: 'MEETING ROOM',
+                headerBg: '#d9e1f2',
+                headerText: '#000000',
+                secondColLabel: 'EXT NO',
+                rows: [
+                    { name: 'Meeting Room 1 (Board Meeting Room)', number: '1204' },
+                    { name: 'Meeting Room 2 (Executive Meeting Room)', number: '1205' },
+                    { name: 'Training Room', number: '1206' }
+                ]
+            },
+            {
+                id: 'qhsse-main',
+                category: 'QHSSE',
+                title: 'QUALITY, SAFETY, SECURITY & ENVIRONMENT (QHSSE)',
+                headerBg: '#c00000',
+                headerText: '#ffffff',
+                secondColLabel: 'EXT NO',
+                topRows: [
+                    { name: 'Aidill Sapary Tamin', number: '1218' }
+                ],
+                subSections: [
+                    {
+                        banner: 'SECURITY',
+                        rows: [
+                            { name: 'Harun Bin Sarmi', number: '1220' },
+                            { name: 'Command Center', number: '1221' },
+                            { name: 'Security Gate House Building', number: '1223' },
+                            { name: 'Jetty Guard House', number: '1224' }
+                        ]
+                    },
+                    {
+                        banner: 'HEALTH, SAFETY & ENVIRONMENT',
+                        rows: [
+                            { name: 'Khairul Nazar Bin Samat', number: '1255' },
+                            { name: 'HSE', number: '1219' }
+                        ]
+                    },
+                    {
+                        banner: 'QUALITY',
+                        rows: [
+                            { name: 'Khairuna Shahirah', number: '1230' },
+                            { name: "Noor'azzah Binti Abd Aziz", number: '1245' }
+                        ]
+                    }
+                ]
+            }
+        ];
+
+        // Main PABX trunk prefix for extension dialing
+        const PABX_PREFIX = '+6072535888';
+
+        // State
+        let activeCategory = 'ALL';
+        let searchQuery = '';
+        let layoutMode = 'grid';
+
+        // DOM References
+        const directoryContainer = document.getElementById('directory-container');
+        const emptyState = document.getElementById('empty-state');
+        const ribbonButtons = document.querySelectorAll('.ribbon-tab');
+        const activeFilterBadge = document.getElementById('active-filter-badge');
+        const visibleCountLabel = document.getElementById('visible-count-label');
+        const searchInput = document.getElementById('search-input');
+        const clearSearchBtn = document.getElementById('clear-search');
+        const viewGridBtn = document.getElementById('view-grid-btn');
+        const viewListBtn = document.getElementById('view-list-btn');
+        const copyToast = document.getElementById('copy-toast');
+        const copyToastText = document.getElementById('copy-toast-text');
+        let toastTimer = null;
+
+        // Modal DOM References
+        const mobileActionModal = document.getElementById('mobile-action-modal');
+        const modalContactName = document.getElementById('modal-contact-name');
+        const modalContactNumber = document.getElementById('modal-contact-number');
+        const modalCallBtn = document.getElementById('modal-call-btn');
+        const modalWhatsappBtn = document.getElementById('modal-whatsapp-btn');
+        const modalCloseX = document.getElementById('modal-close-x');
+        const modalCancelBtn = document.getElementById('modal-cancel-btn');
+
+        /**
+         * Copy text helper using execCommand fallback for iframe/webview compatibility
+         */
+        function copyNumberToClipboard(text, label) {
+            const tempInput = document.createElement('input');
+            tempInput.value = text;
+            document.body.appendChild(tempInput);
+            tempInput.select();
+            try {
+                document.execCommand('copy');
+                copyToastText.textContent = `Copied ${label}: ${text}`;
+                copyToast.classList.remove('hidden');
+                copyToast.classList.add('flex');
+                clearTimeout(toastTimer);
+                toastTimer = setTimeout(() => {
+                    copyToast.classList.add('hidden');
+                    copyToast.classList.remove('flex');
+                }, 2200);
+            } catch (err) {
+                // Silent fallback if blocked
+            }
+            document.body.removeChild(tempInput);
+        }
+
+        /**
+         * Calculate and display contact counts inside the left ribbon badges
+         */
+        function updateRibbonCounts() {
+            const counts = { ALL: 0, HOTLINE: 0, OPS: 0, FEM: 0, CSD: 0, QHSSE: 0 };
+
+            DIRECTORY_DATA.forEach(section => {
+                let secCount = 0;
+                if (section.rows) secCount += section.rows.length;
+                if (section.topRows) secCount += section.topRows.length;
+                if (section.subSections) {
+                    section.subSections.forEach(sub => {
+                        secCount += sub.rows.length;
+                    });
+                }
+                counts[section.category] = (counts[section.category] || 0) + secCount;
+                counts.ALL += secCount;
+            });
+
+            document.querySelectorAll('.ribbon-count').forEach(badge => {
+                const key = badge.dataset.count;
+                badge.textContent = counts[key] ?? 0;
+            });
+        }
+
+        /**
+         * Open Call / WhatsApp choice popup for a mobile number
+         */
+        function openMobileActionModal(name, rawNumber) {
+            const cleanTel = rawNumber.replace(/[^\d+]/g, '');
+            const waDigits = rawNumber.replace(/\D/g, '');
+
+            modalContactName.textContent = name;
+            modalContactNumber.textContent = rawNumber;
+            modalCallBtn.href = `tel:${cleanTel}`;
+            modalWhatsappBtn.href = `https://wa.me/${waDigits}`;
+
+            mobileActionModal.classList.remove('hidden');
+        }
+
+        /**
+         * Close Call / WhatsApp popup
+         */
+        function closeMobileActionModal() {
+            mobileActionModal.classList.add('hidden');
+        }
+
+        // Modal dismissal handlers
+        modalCloseX.addEventListener('click', closeMobileActionModal);
+        modalCancelBtn.addEventListener('click', closeMobileActionModal);
+        mobileActionModal.addEventListener('click', (e) => {
+            if (e.target === mobileActionModal) {
+                closeMobileActionModal();
+            }
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && !mobileActionModal.classList.contains('hidden')) {
+                closeMobileActionModal();
+            }
+        });
+
+        /**
+         * Render action pill for mobile popup trigger or direct extension dial link (+6072535888,XXXX)
+         */
+        function renderActionControl(row, isMobile) {
+            const num = (row.number || '').trim();
+            if (!num || num === '-') {
+                return `<span class="text-xs font-semibold text-slate-400 px-3 py-1 bg-slate-100 rounded-full">No Ext</span>`;
+            }
+
+            const escapedName = (row.name || 'Contact').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+            const escapedNum = num.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+            if (isMobile) {
+                return `
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button
+                            type="button"
+                            onclick="openMobileActionModal('${escapedName}', '${escapedNum}')"
+                            class="dial-pill mobile-pill cursor-pointer"
+                            title="Call or WhatsApp ${row.name}"
+                        >
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                            </svg>
+                            <span>${num}</span>
+                        </button>
+                        <button
+                            type="button"
+                            onclick="copyNumberToClipboard('${escapedNum}', '${escapedName}')"
+                            class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition"
+                            title="Copy mobile number"
+                            aria-label="Copy mobile number"
+                        >
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+            }
+
+            // 4-digit extension: displays only 4 digits, dials tel:+6072535888,XXXX immediately on click
+            const dialHref = `tel:${PABX_PREFIX},${num}`;
+            return `
+                <div class="flex items-center gap-1.5 shrink-0">
+                    <a
+                        href="${dialHref}"
+                        class="dial-pill"
+                        title="Dial ${PABX_PREFIX},${num}"
+                    >
+                        <svg class="w-3.5 h-3.5 text-[#13547a] shrink-0 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+                        </svg>
+                        <span>${num}</span>
+                    </a>
+                    <button
+                        type="button"
+                        onclick="copyNumberToClipboard('${PABX_PREFIX},${escapedNum}', 'Ext ${escapedNum}')"
+                        class="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/70 transition"
+                        title="Copy full dial string (${PABX_PREFIX},${num})"
+                        aria-label="Copy extension"
+                    >
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                    </button>
+                </div>
+            `;
+        }
+
+        /**
+         * Render a single contact row inside a department card
+         */
+        function renderContactRow(row, isMobile) {
+            const displayName = row.name
+                ? `<span class="text-sm font-medium text-slate-800 leading-snug">${row.name}</span>`
+                : `<span class="text-xs italic text-slate-400">General Line / Unassigned</span>`;
+
+            return `
+                <div class="contact-row">
+                    <div class="min-w-0 pr-2">${displayName}</div>
+                    ${renderActionControl(row, isMobile)}
+                </div>
+            `;
+        }
+
+        /**
+         * Render all matching directory cards
+         */
+        function renderDirectory() {
+            const q = searchQuery.trim().toLowerCase();
+            directoryContainer.innerHTML = '';
+            let renderedCards = 0;
+            let totalVisibleContacts = 0;
+
+            DIRECTORY_DATA.forEach(section => {
+                // Department category filter
+                if (activeCategory !== 'ALL' && section.category !== activeCategory) {
+                    return;
+                }
+
+                // Handle sections with sub-banners (QHSSE)
+                if (section.subSections) {
+                    const matchedTopRows = (section.topRows || []).filter(r =>
+                        !q ||
+                        r.name.toLowerCase().includes(q) ||
+                        r.number.toLowerCase().includes(q) ||
+                        section.title.toLowerCase().includes(q)
+                    );
+
+                    const filteredSubSections = section.subSections.map(sub => {
+                        const matchedRows = sub.rows.filter(r =>
+                            !q ||
+                            r.name.toLowerCase().includes(q) ||
+                            r.number.toLowerCase().includes(q) ||
+                            sub.banner.toLowerCase().includes(q) ||
+                            section.title.toLowerCase().includes(q)
+                        );
+                        return { ...sub, rows: matchedRows };
+                    }).filter(sub => !q || sub.rows.length > 0);
+
+                    const totalSubRows = matchedTopRows.length + filteredSubSections.reduce((acc, s) => acc + s.rows.length, 0);
+                    if (q && totalSubRows === 0) return;
+
+                    totalVisibleContacts += totalSubRows;
+
+                    const card = document.createElement('section');
+                    card.className = 'dept-card table-animate';
+
+                    let html = `
+                        <div class="dept-card-header" style="background-color: ${section.headerBg}; color: ${section.headerText};">
+                            <span>${section.title}</span>
+                            <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/15">${totalSubRows}</span>
+                        </div>
+                        <div class="bg-slate-100 px-4 py-1.5 border-b border-slate-200 flex justify-between text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                            <span>Name / Unit</span>
+                            <span>${section.secondColLabel}</span>
+                        </div>
+                        <div>
+                    `;
+
+                    matchedTopRows.forEach(row => {
+                        html += renderContactRow(row, false);
+                    });
+
+                    filteredSubSections.forEach(sub => {
+                        html += `<div class="sub-section-banner">${sub.banner}</div>`;
+                        if (sub.rows.length === 0) {
+                            html += `<div class="contact-row text-xs text-slate-400 italic">No direct extension listed</div>`;
+                        } else {
+                            sub.rows.forEach(row => {
+                                html += renderContactRow(row, false);
+                            });
+                        }
+                    });
+
+                    html += `</div>`;
+                    card.innerHTML = html;
+                    directoryContainer.appendChild(card);
+                    renderedCards++;
+                    return;
+                }
+
+                // Standard flat department card
+                const filteredRows = section.rows.filter(r =>
+                    !q ||
+                    r.name.toLowerCase().includes(q) ||
+                    r.number.toLowerCase().includes(q) ||
+                    section.title.toLowerCase().includes(q)
+                );
+
+                if (q && filteredRows.length === 0) return;
+
+                totalVisibleContacts += filteredRows.length;
+
+                const card = document.createElement('section');
+                card.className = 'dept-card table-animate';
+
+                let html = `
+                    <div class="dept-card-header" style="background-color: ${section.headerBg}; color: ${section.headerText};">
+                        <span>${section.title}</span>
+                        <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-black/15">${filteredRows.length}</span>
+                    </div>
+                    <div class="bg-slate-100 px-4 py-1.5 border-b border-slate-200 flex justify-between text-[11px] font-bold uppercase tracking-wider text-slate-600">
+                        <span>Name / Unit</span>
+                        <span>${section.secondColLabel}</span>
+                    </div>
+                    <div>
+                `;
+
+                filteredRows.forEach(row => {
+                    html += renderContactRow(row, Boolean(section.isMobile));
+                });
+
+                html += `</div>`;
+                card.innerHTML = html;
+                directoryContainer.appendChild(card);
+                renderedCards++;
+            });
+
+            visibleCountLabel.textContent = `(${totalVisibleContacts} contact${totalVisibleContacts === 1 ? '' : 's'})`;
+
+            // Toggle empty state
+            if (renderedCards === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+            }
+        }
+
+        /**
+         * Switch between 2-column Grid view and 1-column List view
+         */
+        function setLayoutMode(mode) {
+            layoutMode = mode;
+            if (mode === 'grid') {
+                directoryContainer.className = 'grid grid-cols-1 lg:grid-cols-2 gap-5 items-start';
+                viewGridBtn.className = 'px-2.5 py-1.5 text-xs font-semibold rounded-md bg-[#13547a] text-white transition flex items-center gap-1';
+                viewListBtn.className = 'px-2.5 py-1.5 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900 transition flex items-center gap-1';
+            } else {
+                directoryContainer.className = 'flex flex-col gap-5 max-w-2xl';
+                viewListBtn.className = 'px-2.5 py-1.5 text-xs font-semibold rounded-md bg-[#13547a] text-white transition flex items-center gap-1';
+                viewGridBtn.className = 'px-2.5 py-1.5 text-xs font-semibold rounded-md text-slate-600 hover:text-slate-900 transition flex items-center gap-1';
+            }
+        }
+
+        viewGridBtn.addEventListener('click', () => setLayoutMode('grid'));
+        viewListBtn.addEventListener('click', () => setLayoutMode('list'));
+
+        /**
+         * Update active ribbon state & filter label
+         */
+        function setCategoryFilter(category) {
+            activeCategory = category;
+
+            ribbonButtons.forEach(btn => {
+                if (btn.dataset.dept === category) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            const labels = {
+                ALL: 'ALL DEPARTMENTS',
+                HOTLINE: 'HOTLINE CONTACTS',
+                OPS: 'OPS (EXECUTION & PLANNING)',
+                FEM: 'FEM (FACILITIES, EQUIPMENT & MAINTENANCE)',
+                CSD: 'CSD (CORPORATE SERVICES & SUPPORT)',
+                QHSSE: 'QHSSE (QUALITY, SAFETY, SECURITY & ENVIRONMENT)'
+            };
+
+            activeFilterBadge.textContent = labels[category] || category;
+            renderDirectory();
+        }
+
+        // Ribbon click events (clicking active ribbon again toggles back to ALL)
+        ribbonButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const selected = btn.dataset.dept;
+                if (selected === activeCategory && selected !== 'ALL') {
+                    setCategoryFilter('ALL');
+                } else {
+                    setCategoryFilter(selected);
+                }
+            });
+        });
+
+        // Search input events
+        searchInput.addEventListener('input', (e) => {
+            searchQuery = e.target.value;
+            clearSearchBtn.classList.toggle('hidden', !searchQuery);
+            renderDirectory();
+        });
+
+        clearSearchBtn.addEventListener('click', () => {
+            searchQuery = '';
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            renderDirectory();
+        });
+
+        // Reset triggers
+        function resetAllFilters() {
+            searchQuery = '';
+            searchInput.value = '';
+            clearSearchBtn.classList.add('hidden');
+            setCategoryFilter('ALL');
+        }
+
+        document.getElementById('btn-reset-top').addEventListener('click', resetAllFilters);
+        document.getElementById('btn-empty-reset').addEventListener('click', resetAllFilters);
+        document.getElementById('header-reset').addEventListener('click', resetAllFilters);
+
+        // Initial render on window load
+        window.addEventListener('DOMContentLoaded', () => {
+            updateRibbonCounts();
+            renderDirectory();
+        });
+    </script>
+
+    <!-- Global Full-Screen Trigger -->
+    <script src="../js/fullscreen-global.js"></script>
+</body>
+</html>
