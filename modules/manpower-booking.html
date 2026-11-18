@@ -416,6 +416,7 @@
           class="search-input"
           placeholder="Search Name or Staff ID..."
           oninput="handleSearchInput()"
+          onkeyup="handleSearchInput()"
           onkeydown="if(event.key==='Enter'){ event.preventDefault(); nextSearchMatch(); }"
         />
         <span id="searchCount" class="search-count hidden">0/0</span>
@@ -508,7 +509,6 @@
       }, 260);
     }
 
-    // Ensures the PDF ALWAYS stays inside the visible box and never flies off-screen
     function clampToViewport() {
       const box = document.getElementById('pdfCardBox');
       if (!box || !viewState.contentW || !viewState.contentH) return;
@@ -875,6 +875,10 @@
 
         applyTransform(false);
 
+        if (document.getElementById('searchInput').value.trim()) {
+          handleSearchInput();
+        }
+
       } catch (err) {
         console.error('PDF Render Error:', err);
         showError("Failed to render document.");
@@ -968,36 +972,91 @@
     }
 
     // =========================================================================
-    // NAME / STAFF ID SEARCH & 4X DEEP AUTO-ZOOM
+    // NAME / STAFF ID SEARCH (INDIVIDUAL TOKENS + ROW GROUPING) & 4.5X AUTO-ZOOM
     // =========================================================================
     async function indexPageText(page, pageNum, viewport) {
       try {
         const textContent = await page.getTextContent();
+        const rawItems = [];
+
         for (const item of textContent.items) {
           const str = (item.str || '').trim();
           if (!str) continue;
 
           const tx = pdfjsLib.Util.transform(viewport.transform, item.transform);
-          const fontHeight = Math.hypot(tx[2], tx[3]) || (item.height * viewport.scale);
-          const itemWidth = (item.width * viewport.scale) || (str.length * fontHeight * 0.55);
+          const fontHeight = Math.hypot(tx[2], tx[3]) || Math.abs(item.height * viewport.scale) || 16;
+          const itemWidth = Math.abs(item.width * viewport.scale) || (str.length * fontHeight * 0.55);
 
-          indexedTextItems.push({
+          const entry = {
             pageNum,
             str,
-            normStr: str.toLowerCase(),
+            normStr: str.toLowerCase().replace(/\s+/g, ' '),
             x: tx[4],
             y: tx[5] - fontHeight,
             width: Math.max(itemWidth, 24),
             height: Math.max(fontHeight * 1.25, 16)
-          });
+          };
+
+          rawItems.push(entry);
+          indexedTextItems.push(entry);
+        }
+
+        // Group adjacent text fragments on the same horizontal row so split names/IDs also match
+        rawItems.sort((a, b) => (a.y - b.y) || (a.x - b.x));
+        const rows = [];
+        for (const item of rawItems) {
+          const existingRow = rows.find(r => Math.abs(r.y - item.y) <= Math.max(item.height * 0.45, 8));
+          if (existingRow) {
+            existingRow.items.push(item);
+          } else {
+            rows.push({ y: item.y, items: [item] });
+          }
+        }
+
+        for (const row of rows) {
+          row.items.sort((a, b) => a.x - b.x);
+          // Merge adjacent tokens within close horizontal proximity (e.g., inside the same cell)
+          let cluster = [row.items[0]];
+          for (let i = 1; i < row.items.length; i++) {
+            const prev = cluster[cluster.length - 1];
+            const curr = row.items[i];
+            const gap = curr.x - (prev.x + prev.width);
+            if (gap < prev.height * 2.5) {
+              cluster.push(curr);
+            } else {
+              pushCluster(cluster, pageNum);
+              cluster = [curr];
+            }
+          }
+          pushCluster(cluster, pageNum);
         }
       } catch (e) {
         console.warn("Text index error on page", pageNum, e);
       }
     }
 
+    function pushCluster(cluster, pageNum) {
+      if (!cluster || cluster.length <= 1) return;
+      const combinedStr = cluster.map(c => c.str).join(' ').replace(/\s+/g, ' ').trim();
+      const minX = Math.min(...cluster.map(c => c.x));
+      const minY = Math.min(...cluster.map(c => c.y));
+      const maxX = Math.max(...cluster.map(c => c.x + c.width));
+      const maxY = Math.max(...cluster.map(c => c.y + c.height));
+
+      indexedTextItems.push({
+        pageNum,
+        str: combinedStr,
+        normStr: combinedStr.toLowerCase(),
+        x: minX,
+        y: minY,
+        width: maxX - minX,
+        height: maxY - minY,
+        isMerged: true
+      });
+    }
+
     function handleSearchInput() {
-      const query = document.getElementById('searchInput').value.trim().toLowerCase();
+      const query = document.getElementById('searchInput').value.trim().toLowerCase().replace(/\s+/g, ' ');
       const countEl = document.getElementById('searchCount');
       const prevBtn = document.getElementById('prevMatchBtn');
       const nextBtn = document.getElementById('nextMatchBtn');
@@ -1017,21 +1076,25 @@
 
       clearBtn.classList.remove('hidden');
 
-      for (const item of indexedTextItems) {
-        if (item.normStr.includes(query)) {
-          const rec = pageRecords[item.pageNum - 1];
-          if (!rec) continue;
+      // Prefer exact single-token matches first; use merged cell clusters when query spans split tokens
+      const singleMatches = indexedTextItems.filter(item => !item.isMerged && item.normStr.includes(query));
+      const candidateItems = singleMatches.length > 0
+        ? singleMatches
+        : indexedTextItems.filter(item => item.isMerged && item.normStr.includes(query));
 
-          const box = document.createElement('div');
-          box.className = 'search-highlight-box';
-          box.style.left = `${item.x - 4}px`;
-          box.style.top = `${item.y - 2}px`;
-          box.style.width = `${item.width + 8}px`;
-          box.style.height = `${item.height + 4}px`;
+      for (const item of candidateItems) {
+        const rec = pageRecords[item.pageNum - 1];
+        if (!rec) continue;
 
-          rec.highlightLayer.appendChild(box);
-          searchMatches.push({ item, box, rec });
-        }
+        const box = document.createElement('div');
+        box.className = 'search-highlight-box';
+        box.style.left = `${item.x - 4}px`;
+        box.style.top = `${item.y - 2}px`;
+        box.style.width = `${item.width + 8}px`;
+        box.style.height = `${item.height + 4}px`;
+
+        rec.highlightLayer.appendChild(box);
+        searchMatches.push({ item, box, rec });
       }
 
       countEl.classList.remove('hidden');
