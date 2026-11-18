@@ -279,7 +279,7 @@
       font-weight: 900; 
       color: #0078D4; 
       text-transform: uppercase; 
-      margin-bottom: 12px; 
+      margin-bottom: 10px; 
       letter-spacing: 0.5px; 
       text-align: center; 
     }
@@ -303,13 +303,14 @@
       background-color: #3b62b0; 
       color: #ffffff; 
       font-weight: 900; 
-      padding: 8px 10px; 
+      padding: 6px 8px; 
       text-transform: uppercase; 
       font-size: 11px; 
     }
 
     .birthday-table td { 
-      padding: 8px 10px; 
+      padding: 4px 8px; 
+      line-height: 1.25;
       border-bottom: 1px solid #e2e8f0; 
       color: #0f172a; 
     }
@@ -547,7 +548,7 @@
             </thead>
             <tbody id="birthdayContainer">
               <tr>
-                <td colspan="3" style="text-align: center; padding: 12px; color: #94a3b8; font-style: italic;">Loading birthdays...</td>
+                <td colspan="3" style="text-align: center; padding: 10px; color: #94a3b8; font-style: italic;">Loading birthdays...</td>
               </tr>
             </tbody>
           </table>
@@ -640,31 +641,39 @@
       }
 
       if (!staffList || staffList.length === 0) {
-        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthday records available.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 10px; font-style: italic; color: #64748b;">No birthday records available.</td></tr>`;
         return;
+      }
+
+      function parseMonthDay(dobStr) {
+        if (!dobStr) return null;
+        const parts = String(dobStr).trim().split('-');
+        if (parts.length === 2) {
+          return { month: parseInt(parts[0], 10), day: parseInt(parts[1], 10) };
+        } else if (parts.length === 3) {
+          return { month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) };
+        }
+        return null;
       }
 
       // Filter staff born in current month
       const monthlyBirthdays = staffList.filter(item => {
-        if (!item.dob) return false;
-        const month = parseInt(item.dob.split('-')[1], 10);
-        return month === currentMonth;
+        const parsed = parseMonthDay(item.dob);
+        return parsed && parsed.month === currentMonth;
       });
 
       // Sort ascending by Day
       monthlyBirthdays.sort((a, b) => {
-        const dayA = parseInt(a.dob.split('-')[2], 10);
-        const dayB = parseInt(b.dob.split('-')[2], 10);
-        return dayA - dayB;
+        return parseMonthDay(a.dob).day - parseMonthDay(b.dob).day;
       });
 
       if (monthlyBirthdays.length === 0) {
-        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 14px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
+        container.innerHTML = `<tr><td colspan="3" style="text-align:center; padding: 10px; font-style: italic; color: #64748b;">No birthdays recorded for this month.</td></tr>`;
         return;
       }
 
       container.innerHTML = monthlyBirthdays.map(item => {
-        const dayNum = parseInt(item.dob.split('-')[2], 10);
+        const dayNum = String(parseMonthDay(item.dob).day).padStart(2, '0');
         return `
           <tr>
             <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
