@@ -37,20 +37,21 @@
     html, body {
       width: 100%;
       height: 100%;
+      height: 100dvh;
       overflow: hidden;
       background-color: #0f172a;
       display: flex;
       justify-content: center;
       align-items: center;
       color: #334155;
-      padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
     }
 
     .app-viewport {
       width: 100vw;
-      height: 100vh;
+      height: 100%;
+      height: 100dvh;
+      height: calc(var(--vh, 1vh) * 100);
       max-width: 412px;
-      max-height: 892px;
       background-color: #ffffff;
       display: flex;
       flex-direction: column;
@@ -63,14 +64,16 @@
       .app-viewport {
         border-radius: 28px;
         height: 844px;
+        max-height: 92dvh;
       }
     }
 
     .view-screen {
       flex: 1;
+      height: 100%;
       display: flex;
       flex-direction: column;
-      padding: 12px;
+      padding: calc(env(safe-area-inset-top, 0px) + 14px) 12px calc(env(safe-area-inset-bottom, 0px) + 12px) 12px;
       overflow: hidden;
       gap: 8px;
     }
@@ -80,11 +83,12 @@
       align-items: center;
       justify-content: space-between;
       flex-shrink: 0;
+      padding-top: 2px;
     }
 
     .btn-home-icon {
-      width: 36px;
-      height: 36px;
+      width: 38px;
+      height: 38px;
       background-color: #f1f5f9;
       border: 1px solid #cbd5e1;
       border-radius: 10px;
@@ -185,9 +189,10 @@
       background: #cbd5e1;
     }
 
-    /* STATIC VIEWPORT BOX */
+    /* DYNAMIC FLEX VIEWPORT BOX */
     .pdf-card-container {
       flex: 1;
+      min-height: 0;
       width: 100%;
       border: 1.5px solid #0078D4;
       border-radius: 12px;
@@ -368,14 +373,14 @@
     @media (orientation: landscape) {
       .app-viewport {
         max-width: 100vw !important;
-        max-height: 100vh !important;
+        max-height: 100dvh !important;
         width: 100vw !important;
-        height: 100vh !important;
+        height: 100dvh !important;
         border-radius: 0 !important;
         box-shadow: none !important;
       }
       .view-screen {
-        padding: 6px 10px !important;
+        padding: calc(env(safe-area-inset-top, 0px) + 6px) 10px calc(env(safe-area-inset-bottom, 0px) + 6px) 10px !important;
         gap: 5px;
       }
       .status-strip, .search-bar-container {
@@ -461,6 +466,14 @@
     let searchMatches = [];
     let currentMatchIdx = -1;
 
+    // Sync exact dynamic viewport height on mobile browsers
+    function updateViewportHeight() {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    }
+    updateViewportHeight();
+    window.addEventListener('resize', updateViewportHeight);
+
     // =========================================================================
     // PRECISION VIEWPORT MATRIX STATE (0,0 Top-Left Origin)
     // =========================================================================
@@ -502,13 +515,12 @@
 
       const boxW = box.clientWidth;
       const boxH = box.clientHeight;
-      const toolbarReserve = 52; // keep bottom readable above toolbar
+      const toolbarReserve = 52;
       const usableH = Math.max(boxH - toolbarReserve, 120);
 
       const scaledW = viewState.contentW * viewState.scale;
       const scaledH = viewState.contentH * viewState.scale;
 
-      // Horizontal clamping: center if narrower than viewport, otherwise keep edges locked to viewport bounds
       if (scaledW <= boxW) {
         viewState.tx = (boxW - scaledW) / 2;
       } else {
@@ -517,7 +529,6 @@
         viewState.tx = Math.min(Math.max(viewState.tx, minTx), maxTx);
       }
 
-      // Vertical clamping: start near top if shorter than viewport, otherwise keep top/bottom inside viewport
       if (scaledH <= usableH) {
         viewState.ty = 8;
       } else {
@@ -527,7 +538,6 @@
       }
     }
 
-    // Zooms around an exact screen coordinate (clientX, clientY) so that point never moves under your finger(s)
     function zoomAtClientPoint(newScale, clientX, clientY, animate = false) {
       const box = document.getElementById('pdfCardBox');
       if (!box) return;
@@ -535,15 +545,12 @@
       const clampedScale = Math.min(Math.max(newScale, viewState.minScale), viewState.maxScale);
       const rect = box.getBoundingClientRect();
 
-      // Screen point relative to viewport box
       const sx = clientX - rect.left;
       const sy = clientY - rect.top;
 
-      // Convert screen point to unscaled PDF content coordinate BEFORE zoom
       const pdfX = (sx - viewState.tx) / viewState.scale;
       const pdfY = (sy - viewState.ty) / viewState.scale;
 
-      // Update scale and solve for new tx, ty so (pdfX, pdfY) stays at exact (sx, sy)
       viewState.scale = clampedScale;
       viewState.tx = sx - pdfX * clampedScale;
       viewState.ty = sy - pdfY * clampedScale;
@@ -556,19 +563,17 @@
     // =========================================================================
     function initTouchAndMouseGestures() {
       const box = document.getElementById('pdfCardBox');
-      let mode = 'none'; // 'pan' | 'pinch'
+      let mode = 'none';
       let startPanX = 0;
       let startPanY = 0;
       let startTx = 0;
       let startTy = 0;
 
-      // Pinch anchor state
       let initialPinchDist = 0;
       let initialPinchScale = 1;
       let anchorPdfX = 0;
       let anchorPdfY = 0;
 
-      // Double-tap state
       let lastTapTime = 0;
       let lastTapX = 0;
       let lastTapY = 0;
@@ -601,9 +606,6 @@
           initialPinchDist = Math.max(getDistance(t1, t2), 1);
           initialPinchScale = viewState.scale;
 
-          // Record exact PDF coordinate under the midpoint of Finger A & Finger B
-          // When one finger stays still and the other moves, the midpoint shifts by half
-          // the moving finger's delta—locking the stationary finger's PDF spot in place!
           const mid = getMidpoint(t1, t2);
           const rect = box.getBoundingClientRect();
           const sx = mid.x - rect.left;
@@ -647,7 +649,6 @@
       box.addEventListener('touchend', (e) => {
         if (e.target.closest('.zoom-toolbar')) return;
 
-        // Smooth handoff if 1 finger remains after lifting 2nd finger
         if (e.touches.length === 1) {
           mode = 'pan';
           startPanX = e.touches[0].clientX;
@@ -658,7 +659,6 @@
         }
 
         if (e.touches.length === 0) {
-          // Check double-tap only when ending a single-finger tap
           if (mode === 'pan' && e.changedTouches.length === 1) {
             const touch = e.changedTouches[0];
             const moveDist = Math.hypot(touch.clientX - startPanX, touch.clientY - startPanY);
@@ -686,7 +686,6 @@
         }
       }, { passive: false });
 
-      // Desktop / Mouse drag & wheel support
       let isMouseDown = false;
       box.addEventListener('mousedown', (e) => {
         if (e.target.closest('.zoom-toolbar')) return;
@@ -861,7 +860,6 @@
         target.classList.remove('hidden');
         pageBadge.classList.remove('hidden');
 
-        // Measure full content dimensions
         viewState.contentW = target.scrollWidth;
         viewState.contentH = target.scrollHeight;
 
@@ -1062,14 +1060,11 @@
       const boxW = box.clientWidth;
       const usableH = box.clientHeight - 52;
 
-      // Zoom 4x deeper than fitScale so the matched row is large and readable immediately
       const targetScale = Math.min(Math.max(fitScale * 4.5, 1.35), viewState.maxScale);
 
-      // Exact center of the highlighted Name / ID in unscaled PDF coordinates
       const matchPdfX = match.rec.wrapper.offsetLeft + match.item.x + (match.item.width / 2);
       const matchPdfY = match.rec.wrapper.offsetTop + match.item.y + (match.item.height / 2);
 
-      // Place the matched coordinate right in the center of the visible viewport
       viewState.scale = targetScale;
       viewState.tx = (boxW / 2) - (matchPdfX * targetScale);
       viewState.ty = (usableH / 2) - (matchPdfY * targetScale);
@@ -1146,6 +1141,7 @@
 
     window.addEventListener('orientationchange', () => {
       setTimeout(() => {
+        updateViewportHeight();
         if (!pageRecords.length) return;
         const containerBox = document.getElementById('pdfCardBox');
         fitScale = Math.min((containerBox.clientWidth - 20) / pageRecords[0].baseWidth, 1);
