@@ -622,16 +622,16 @@
       let staffList = [];
 
       try {
-        const res = await fetch(`data/birthday.json?v=${Date.now()}`);
+        const res = await fetch(`data/bd.json?v=${Date.now()}`);
         if (res.ok) {
           staffList = await res.json();
         } else {
           throw new Error("HTTP " + res.status);
         }
       } catch (e) {
-        console.warn("Could not fetch data/birthday.json directly, trying root birthday.json:", e);
+        console.warn("Could not fetch data/bd.json directly, trying root bd.json:", e);
         try {
-          const resFallback = await fetch(`birthday.json?v=${Date.now()}`);
+          const resFallback = await fetch(`bd.json?v=${Date.now()}`);
           if (resFallback.ok) {
             staffList = await resFallback.json();
           }
@@ -645,26 +645,26 @@
         return;
       }
 
-      function parseMonthDay(dobStr) {
-        if (!dobStr) return null;
-        const parts = String(dobStr).trim().split('-');
-        if (parts.length === 2) {
-          return { month: parseInt(parts[0], 10), day: parseInt(parts[1], 10) };
-        } else if (parts.length === 3) {
-          return { month: parseInt(parts[1], 10), day: parseInt(parts[2], 10) };
+      function parseCol2Code(codeStr) {
+        if (!codeStr) return null;
+        const clean = String(codeStr).trim().replace(/-/g, '');
+        if (clean.length === 4) {
+          return { month: parseInt(clean.slice(0, 2), 10), day: parseInt(clean.slice(2, 4), 10) };
+        } else if (clean.length === 8) {
+          return { month: parseInt(clean.slice(4, 6), 10), day: parseInt(clean.slice(6, 8), 10) };
         }
         return null;
       }
 
-      // Filter staff born in current month
+      // Filter staff matching current month
       const monthlyBirthdays = staffList.filter(item => {
-        const parsed = parseMonthDay(item.dob);
+        const parsed = parseCol2Code(item.col2 || item.dob);
         return parsed && parsed.month === currentMonth;
       });
 
       // Sort ascending by Day
       monthlyBirthdays.sort((a, b) => {
-        return parseMonthDay(a.dob).day - parseMonthDay(b.dob).day;
+        return parseCol2Code(a.col2 || a.dob).day - parseCol2Code(b.col2 || b.dob).day;
       });
 
       if (monthlyBirthdays.length === 0) {
@@ -673,12 +673,15 @@
       }
 
       container.innerHTML = monthlyBirthdays.map(item => {
-        const dayNum = String(parseMonthDay(item.dob).day).padStart(2, '0');
+        const parsed = parseCol2Code(item.col2 || item.dob);
+        const dayNum = String(parsed.day).padStart(2, '0');
+        const staffName = item.col1 || item.name || '-';
+        const shiftGroup = item.col3 || item.group || '-';
         return `
           <tr>
             <td style="text-align: center; font-weight: 800; color: #0b2545;">${dayNum}</td>
-            <td style="font-weight: 700; color: #0f172a;">${item.name}</td>
-            <td style="text-align: center; font-weight: 800; color: #0b2545;">${item.group}</td>
+            <td style="font-weight: 700; color: #0f172a;">${staffName}</td>
+            <td style="text-align: center; font-weight: 800; color: #0b2545;">${shiftGroup}</td>
           </tr>
         `;
       }).join('');
